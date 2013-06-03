@@ -1,0 +1,586 @@
+#include "CImageLibI.h"
+#include <cmath>
+
+using std::map;
+using std::vector;
+
+void
+CImage::
+removeSinglePixels()
+{
+  uint data[9];
+
+  int width  = getWidth ();
+  int height = getHeight();
+
+  for (int y = 1; y < height - 1; ++y) {
+    for (int x = 1; x < width - 1; ++x) {
+      data[0] = getData(x - 1, y - 1);
+      data[1] = getData(x    , y - 1);
+      data[2] = getData(x + 1, y - 1);
+      data[3] = getData(x - 1, y    );
+      data[4] = getData(x    , y    );
+      data[5] = getData(x + 1, y    );
+      data[6] = getData(x - 1, y + 1);
+      data[7] = getData(x    , y + 1);
+      data[8] = getData(x + 1, y + 1);
+
+      if (data[0] == data[1] && data[0] == data[2] &&
+          data[0] == data[3] && data[0] != data[4] &&
+          data[0] == data[5] && data[0] == data[6] &&
+          data[0] == data[7] && data[0] == data[8])
+        setData(x, y, data[0]);
+    }
+  }
+}
+
+CImage::ImagePtrList
+CImage::
+colorSplit()
+{
+  map<uint, bool> used;
+
+  int width  = getWidth ();
+  int height = getHeight();
+
+  int size = width*height;
+
+  for (int i = 0; i < size; ++i) {
+    uint data = getData(i);
+
+    if (used.find(data) == used.end())
+      used[data] = true;
+  }
+
+  ImagePtrList images;
+
+  map<uint, bool>::iterator pused;
+
+  for (pused = used.begin(); pused != used.end(); ++pused)
+    images.push_back(colorSplitByData((*pused).first));
+
+  return images;
+}
+
+CImagePtr
+CImage::
+colorSplit(int color_num)
+{
+  map<uint, bool> used;
+
+  int width  = getWidth ();
+  int height = getHeight();
+
+  int size = width*height;
+
+  for (int i = 0; i < size; ++i) {
+    uint data = getData(i);
+
+    if (used.find(data) == used.end())
+      used[data] = true;
+  }
+
+  int num_colors = used.size();
+
+  if (color_num < 0 || color_num >= num_colors)
+    CTHROW("Bad Color Number");
+
+  ImagePtrList images;
+
+  map<uint, bool>::iterator pused = used.begin();
+
+  for (int i = 0; i < color_num; ++i)
+    ++pused;
+
+  CImagePtr image = colorSplitByData((*pused).first);
+
+  return image;
+}
+
+CImagePtr
+CImage::
+colorSplitByData(uint data)
+{
+  CRGBA rgba;
+
+  if (hasColormap())
+    getColorRGBA(data, rgba);
+  else
+    pixelToRGBA(data, rgba);
+
+  CRGBA rgba1(0, 0, 0);
+
+  if (rgba.getGray() <= 0.5)
+    rgba1 = CRGBA(1, 1, 1);
+
+  int width  = getWidth ();
+  int height = getHeight();
+
+  CImagePtr image = CImageMgrInst->createImage();
+
+  image->setDataSize(width, height);
+
+  image->addColor(rgba);
+  image->addColor(rgba1);
+
+  image->setTransparentColor(1);
+
+  int size = width*height;
+
+  for (int i = 0; i < size; ++i) {
+    uint data2 = getData(i);
+
+    if (data2 == data)
+      image->setData(i, 0);
+    else
+      image->setData(i, 1);
+  }
+
+  return image;
+}
+
+void
+CImage::
+setNumColors(int num_colors)
+{
+  convertToColorIndex();
+
+  int num_colors1 = colors_.size();
+
+  while (num_colors1 > num_colors) {
+    int i1, i2;
+
+    getClosestColors(i1, i2);
+
+    replaceColor(i1, i2);
+
+    num_colors1 = colors_.size();
+  }
+}
+
+void
+CImage::
+getClosestColors(int &i1, int &i2)
+{
+  double min_d = 1E50;
+
+  int num_colors = colors_.size();
+
+  for (int i = 0; i < num_colors; ++i) {
+    double min_d1 = 1E50;
+    int    min_i1 = 0;
+
+    double r1 = colors_[i].getRed  ();
+    double g1 = colors_[i].getGreen();
+    double b1 = colors_[i].getBlue ();
+
+    for (int j = 0; j < num_colors; ++j) {
+      if (i == j) continue;
+
+      double r2 = colors_[j].getRed  ();
+      double g2 = colors_[j].getGreen();
+      double b2 = colors_[j].getBlue ();
+
+      double d = fabs(r2 - r1) + fabs(g2 - g1) + fabs(b2 - b1);
+
+      if (d < min_d1) {
+        min_d1 = d;
+        min_i1 = j;
+      }
+    }
+
+    if (min_d1 < min_d) {
+      min_d = min_d1;
+      i1    = i;
+      i2    = min_i1;
+    }
+  }
+}
+
+void
+CImage::
+replaceColor(int i1, int i2)
+{
+  double r = (colors_[i1].getRed  () + colors_[i2].getRed  ())/2.0;
+  double g = (colors_[i1].getGreen() + colors_[i2].getGreen())/2.0;
+  double b = (colors_[i1].getBlue () + colors_[i2].getBlue ())/2.0;
+
+  colors_[i1].setRed  (r);
+  colors_[i1].setGreen(g);
+  colors_[i1].setBlue (b);
+
+  int num_colors = colors_.size();
+
+  for (int i = i2 + 1; i < num_colors; ++i)
+    colors_[i - 1] = colors_[i];
+
+  colors_.resize(num_colors - 1);
+
+  int size = size_.area();
+
+  for (int i = 0; i < size; ++i) {
+    int pixel = getData(i);
+
+    if      (pixel == i2)
+      setData(i, i1);
+    else if (pixel > i2)
+      setData(i, pixel - 1);
+  }
+}
+
+void
+CImage::
+sepia()
+{
+  CRGBA rgba;
+
+  if (hasColormap()) {
+    int num_colors = colors_.size();
+
+    for (int i = 0; i < num_colors; ++i)
+      colors_[i].toSepia();
+  }
+  else {
+    CRGBA rgba;
+
+    int x1, y1, x2, y2;
+
+    getWindow(&x1, &y1, &x2, &y2);
+
+    for (int y = y1; y <= y2; ++y) {
+      for (int x = x1; x <= x2; ++x) {
+        getRGBAPixel(x, y, rgba);
+
+        rgba.toSepia();
+
+        setRGBAPixel(x, y, rgba);
+      }
+    }
+  }
+}
+
+void
+CImage::
+monochrome()
+{
+  twoColor(CRGBA(1,1,1), CRGBA(0,0,0));
+}
+
+void
+CImage::
+twoColor(const CRGBA &bg, const CRGBA &fg)
+{
+  CRGBA rgba;
+
+  if (hasColormap()) {
+    CRGBA rgba;
+
+    int x1, y1, x2, y2;
+
+    getWindow(&x1, &y1, &x2, &y2);
+
+    for (int y = y1; y <= y2; ++y) {
+      for (int x = x1; x <= x2; ++x) {
+        int ind = getColorIndexPixel(x, y);
+
+        if (colors_[ind].getAlpha() < 0.5 ||
+            colors_[ind].getGray () > 0.5)
+          setColorIndexPixel(x, y, 0);
+        else
+          setColorIndexPixel(x, y, 1);
+      }
+    }
+
+    deleteColors();
+
+    addColor(bg);
+    addColor(fg);
+  }
+  else {
+    CRGBA rgba;
+
+    int x1, y1, x2, y2;
+
+    getWindow(&x1, &y1, &x2, &y2);
+
+    for (int y = y1; y <= y2; ++y) {
+      for (int x = x1; x <= x2; ++x) {
+        getRGBAPixel(x, y, rgba);
+
+        if (rgba.getAlpha() < 0.5 ||
+            rgba.getGray () > 0.5)
+          setRGBAPixel(x, y, bg);
+        else
+          setRGBAPixel(x, y, fg);
+      }
+    }
+  }
+}
+
+void
+CImage::
+applyColorMatrix(double *m)
+{
+  convertToRGB();
+
+  CRGBA rgba;
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    for (int x = x1; x <= x2; ++x) {
+      getRGBAPixel(x, y, rgba);
+
+      double r, g, b, a;
+
+      rgba.getRGBA(&r, &g, &b, &a);
+
+      double r1 = m[ 0]*r + m[ 1]*g + m[ 2]*b + m[ 3]*a + m[ 4];
+      double g1 = m[ 5]*r + m[ 6]*g + m[ 7]*b + m[ 8]*a + m[ 9];
+      double b1 = m[10]*r + m[11]*g + m[12]*b + m[13]*a + m[14];
+      double a1 = m[15]*r + m[16]*g + m[17]*b + m[18]*a + m[19];
+
+      setRGBAPixel(x, y, CRGBA(r1, g1, b1, a1));
+    }
+  }
+}
+
+#if 0
+void
+CImage::
+rotateHue(double dh)
+{
+  convertToRGB();
+
+  CRGBA rgba;
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    for (int x = x1; x <= x2; ++x) {
+      getRGBAPixel(x, y, rgba);
+
+      CHSV hsv = rgba.toHSV();
+
+      double h = hsv.getHue();
+
+      h += dh;
+
+      while (h <  0    ) h += 360.0;
+      while (h >= 360.0) h -= 360.0;
+
+      hsv.setHue(h);
+
+      CRGB rgb = hsv.toRGB();
+
+      setRGBAPixel(x, y, CRGBA(rgb, rgba.getAlpha()));
+    }
+  }
+}
+
+void
+CImage::
+saturate(double ds)
+{
+  convertToRGB();
+
+  CRGBA rgba;
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    for (int x = x1; x <= x2; ++x) {
+      getRGBAPixel(x, y, rgba);
+
+      CHSV hsv = rgba.toHSV();
+
+      double s = hsv.getSaturation();
+
+      s *= ds;
+
+      hsv.setSaturation(s);
+
+      CRGB rgb = hsv.toRGB();
+
+      setRGBAPixel(x, y, CRGBA(rgb, rgba.getAlpha()));
+    }
+  }
+}
+
+void
+CImage::
+luminanceToAlpha()
+{
+  convertToRGB();
+
+  CRGBA rgba;
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    for (int x = x1; x <= x2; ++x) {
+      getRGBAPixel(x, y, rgba);
+
+      CHSV hsv = rgba.toHSV();
+
+      double l = hsv.getValue();
+
+      rgba.setAlpha(l);
+
+      setRGBAPixel(x, y, rgba);
+    }
+  }
+}
+
+void
+CImage::
+linearFunc(CColorComponent component, double scale, double offset)
+{
+  convertToRGB();
+
+  CRGBA rgba;
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    for (int x = x1; x <= x2; ++x) {
+      getRGBAPixel(x, y, rgba);
+
+      double value = rgba.getComponent(component);
+
+      value = value*scale + offset;
+
+      rgba.setComponent(component, value);
+
+      setRGBAPixel(x, y, rgba.clamp());
+    }
+  }
+}
+
+void
+CImage::
+gammaFunc(CColorComponent component, double amplitude, double exponent, double offset)
+{
+  convertToRGB();
+
+  CRGBA rgba;
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    for (int x = x1; x <= x2; ++x) {
+      getRGBAPixel(x, y, rgba);
+
+      double value = rgba.getComponent(component);
+
+      value = amplitude*pow(value, exponent) + offset,
+
+      rgba.setComponent(component, value);
+
+      setRGBAPixel(x, y, rgba.clamp());
+    }
+  }
+}
+
+void
+CImage::
+tableFunc(CColorComponent component, const vector<double> &values)
+{
+  int num_ranges = values.size() - 1;
+
+  if (num_ranges < 1) return;
+
+  double delta = 1.0/num_ranges;
+
+  convertToRGB();
+
+  CRGBA rgba;
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    for (int x = x1; x <= x2; ++x) {
+      getRGBAPixel(x, y, rgba);
+
+      double value = rgba.getComponent(component);
+
+      double value1, value2;
+
+      int i = 0;
+
+      for ( ; i < num_ranges; ++i) {
+        value1 = i*delta;
+        value2 = value1 + delta;
+
+        if (value >= value1 && value < value2) break;
+      }
+
+      if (i >= num_ranges) continue;
+
+      double m = (values[i + 1] - values[i])/(value2 - value1);
+
+      value = (value - value1)*m + values[i];
+
+      rgba.setComponent(component, value);
+
+      setRGBAPixel(x, y, rgba.clamp());
+    }
+  }
+}
+
+void
+CImage::
+discreteFunc(CColorComponent component, const vector<double> &values)
+{
+  uint num_ranges = values.size();
+
+  if (num_ranges < 1) return;
+
+  double delta = 1.0/num_ranges;
+
+  convertToRGB();
+
+  CRGBA rgba;
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    for (int x = x1; x <= x2; ++x) {
+      getRGBAPixel(x, y, rgba);
+
+      double value = rgba.getComponent(component);
+
+      uint i = 0;
+
+      for ( ; i < num_ranges; ++i) {
+        double value1 = i*delta;
+        double value2 = value1 + delta;
+
+        if (value >= value1 && value < value2) break;
+      }
+
+      if (i >= num_ranges) continue;
+
+      rgba.setComponent(component, values[i]);
+
+      setRGBAPixel(x, y, rgba.clamp());
+    }
+  }
+}
+#endif
