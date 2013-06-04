@@ -57,7 +57,14 @@ CImageXWD.cpp \
 
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
-CPPFLAGS = -I$(INC_DIR) -I. -DIMAGE_PNG
+CPPFLAGS = \
+-DIMAGE_PNG \
+-I$(INC_DIR) \
+-I../../CFile/include \
+-I../../CStrUtil/include \
+-I../../CMath/include \
+-I../../CUtil/include \
+-I. \
 
 LFLAGS = -L$(LIB_DIR)
 

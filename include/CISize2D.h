@@ -1,1 +1,0 @@
-/home/colinw/git/CMath/include/CISize2D.h

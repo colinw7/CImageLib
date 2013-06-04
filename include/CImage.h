@@ -12,6 +12,7 @@
 #include <CImagePtr.h>
 
 #include <cstddef>
+#include <vector>
 
 typedef unsigned char uchar;
 
