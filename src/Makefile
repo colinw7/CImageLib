@@ -62,6 +62,7 @@ CPPFLAGS = \
 -I$(INC_DIR) \
 -I../../CFile/include \
 -I../../CStrUtil/include \
+-I../../COS/include \
 -I../../CMath/include \
 -I../../CUtil/include \
 -I. \

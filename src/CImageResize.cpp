@@ -1,23 +1,7 @@
 #include "CImageLibI.h"
+#include <CMathGen.h>
 
 #include <cstring>
-
-namespace {
-  int Round(double x) {
-    if (x >= 0.0) return int(x + 0.5);
-    else          return int(x - 0.5);
-  }
-
-  int RoundDown(double x) {
-    if (x >= 0.0) return int(x);
-                  return int(x);
-  }
-
-  int RoundUp(double x) {
-    if (x >= 0.0) return int(x + 0.999999);
-                  return int(x - 0.999999);
-  }
-}
 
 using std::min;
 using std::max;
@@ -394,15 +378,15 @@ reshapeAverage(CImagePtr &new_image) const
   double y2 = dy;
 
   for (int y = 0; y < height2; ++y, y1 = y2, y2 += dy) {
-    yy1 = min(max(Round(y1), 0), height1 - 1);
-    yy2 = min(max(Round(y2), 0), height1 - 1);
+    yy1 = min(max(CMathGen::Round(y1), 0), height1 - 1);
+    yy2 = min(max(CMathGen::Round(y2), 0), height1 - 1);
 
     double x1 = 0.0;
     double x2 = dx;
 
     for (int x = 0; x < width2; ++x, x1 = x2, x2 += dx) {
-      xx1 = min(max(Round(x1), 0), width1 - 1);
-      xx2 = min(max(Round(x2), 0), width1 - 1);
+      xx1 = min(max(CMathGen::Round(x1), 0), width1 - 1);
+      xx2 = min(max(CMathGen::Round(x2), 0), width1 - 1);
 
       r = 0.0;
       g = 0.0;
@@ -464,14 +448,14 @@ reshapeBilinear(CImagePtr &new_image) const
   for (int y = 0; y < height2; ++y, yy += iy) {
     double xx = 0.0;
 
-    int y1 = RoundDown(yy);
-    int y2 = RoundUp  (yy);
+    int y1 = CMathGen::RoundDown(yy);
+    int y2 = CMathGen::RoundUp  (yy);
 
     if (y2 >= height1) y2 = height1 - 1;
 
     for (int x = 0; x < width2; ++x, xx += ix) {
-      int x1 = RoundDown(xx);
-      int x2 = RoundUp  (xx);
+      int x1 = CMathGen::RoundDown(xx);
+      int x2 = CMathGen::RoundUp  (xx);
 
       if (x2 >= width1) x2 = width1 - 1;
 
@@ -530,8 +514,8 @@ void
 CImage::
 sampleNearest(double x, double y, CRGBA &rgba) const
 {
-  int px = Round(x*(getWidth () - 1));
-  int py = Round(y*(getHeight() - 1));
+  int px = CMathGen::Round(x*(getWidth () - 1));
+  int py = CMathGen::Round(y*(getHeight() - 1));
 
   getRGBAPixel(px, py, rgba);
 }
@@ -543,10 +527,10 @@ sampleBilinear(double x, double y, CRGBA &rgba) const
   double x1 = x*(getWidth () - 1);
   double y1 = y*(getHeight() - 1);
 
-  int px1 = RoundDown(x1);
-  int py1 = RoundDown(y1);
-  int px2 = RoundUp  (x1);
-  int py2 = RoundUp  (y1);
+  int px1 = CMathGen::RoundDown(x1);
+  int py1 = CMathGen::RoundDown(y1);
+  int px2 = CMathGen::RoundUp  (x1);
+  int py2 = CMathGen::RoundUp  (y1);
 
   if (px1 != px2 || py1 != py2) {
     CRGBA rgba1, rgba2, rgba3, rgba4;

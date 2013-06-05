@@ -1,17 +1,9 @@
 #include "CImageLibI.h"
+#include <CMathGen.h>
 #include <cmath>
-
-#define DEG_TO_RAD(d) (M_PI*(d)/180.0)
 
 using std::min;
 using std::max;
-
-namespace {
-  int Round(double x) {
-    if (x >= 0) return int(x + 0.5);
-    else        return int(x - 0.5);
-  }
-}
 
 CImagePtr
 CImage::
@@ -80,8 +72,8 @@ rotate(double angle)
   if (hasColormap()) {
     for (int y = 0; y < height1; ++y) {
       for (int x = 0; x < width1; ++x) {
-        int x1 = Round((x - x_offset)*c - (y - y_offset)*s) + left;
-        int y1 = Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
+        int x1 = CMathGen::Round((x - x_offset)*c - (y - y_offset)*s) + left;
+        int y1 = CMathGen::Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
 
         x1 = min(max(x1, left  ), right);
         y1 = min(max(y1, bottom), top  );
@@ -97,8 +89,8 @@ rotate(double angle)
 
     for (int y = 0; y < height1; ++y) {
       for (int x = 0; x < width1; ++x) {
-        int x1 = Round((x - x_offset)*c - (y - y_offset)*s) + left;
-        int y1 = Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
+        int x1 = CMathGen::Round((x - x_offset)*c - (y - y_offset)*s) + left;
+        int y1 = CMathGen::Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
 
         x1 = min(max(x1, left  ), right);
         y1 = min(max(y1, bottom), top  );
