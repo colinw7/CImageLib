@@ -3,7 +3,6 @@ AR = ar
 RM = rm
 
 CDEBUG = -g
-LDEBUG = -g
 
 INC_DIR = ../include
 OBJ_DIR = ../obj
@@ -58,7 +57,9 @@ CImageXWD.cpp \
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPPFLAGS = \
+$(CDEBUG) \
 -DIMAGE_PNG \
+-DIMAGE_JPEG \
 -I$(INC_DIR) \
 -I../../CFile/include \
 -I../../CStrUtil/include \
@@ -79,7 +80,7 @@ $(OBJS): $(OBJ_DIR)/%.o: %.cpp
 .SUFFIXES: .cpp
 
 $(OBJ_DIR)/main.o: main.cpp
-	$(CC) $(CDEBUG) -o $(OBJ_DIR)/main.o -c main.cpp -I$(INC_DIR) -I.
+	$(CC) -c main.cpp -o $(OBJ_DIR)/main.o -c $(CPPFLAGS)
 
 $(LIB_DIR)/libCImageLib.a: $(OBJS)
 	$(AR) crv $(LIB_DIR)/libCImageLib.a $(OBJS)

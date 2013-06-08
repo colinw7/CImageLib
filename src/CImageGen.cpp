@@ -62,7 +62,7 @@ create(CFile *file)
 {
   CFileType type = CFileUtil::getImageType(file);
 
-  if (type == CFILE_TYPE_NONE)
+  if (type == CFILE_TYPE_NONE || type == CFILE_TYPE_INODE_REG)
     type = CFileUtil::getImageTypeFromName(file->getName());
 
   return create(file, type);
@@ -264,7 +264,7 @@ createHeader(CFile *file)
 {
   CFileType type = CFileUtil::getImageType(file);
 
-  if (type == CFILE_TYPE_NONE)
+  if (type == CFILE_TYPE_NONE || type == CFILE_TYPE_INODE_REG)
     type = CFileUtil::getImageTypeFromName(file->getName());
 
   return createHeader(file, type);
@@ -416,7 +416,7 @@ createHeader(CFile *file, CFileType type)
   if (! (type & CFILE_TYPE_IMAGE)) {
     type = CFileUtil::getImageType(file);
 
-    if (type == CFILE_TYPE_NONE)
+    if (type == CFILE_TYPE_NONE || type == CFILE_TYPE_INODE_REG)
       type = CFileUtil::getImageTypeFromName(file->getName());
   }
 
@@ -472,6 +472,9 @@ CImage::
 read(CFile *file)
 {
   CFileType type = CFileUtil::getType(file);
+
+  if (type == CFILE_TYPE_NONE || type == CFILE_TYPE_INODE_REG)
+    type = CFileUtil::getImageTypeFromName(file->getName());
 
   if (! (type & CFILE_TYPE_IMAGE))
     return false;
@@ -853,7 +856,7 @@ write(CFile *file)
 {
   CFileType type = getType();
 
-  if (type == CFILE_TYPE_NONE)
+  if (type == CFILE_TYPE_NONE || type == CFILE_TYPE_INODE_REG)
     type = CFileUtil::getImageTypeFromName(file->getName());
 
   return write(file, type);
