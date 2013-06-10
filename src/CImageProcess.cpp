@@ -1,5 +1,6 @@
 #include "CImageLibI.h"
 #include <cmath>
+#include <CHSV.h>
 
 using std::map;
 using std::vector;
@@ -347,7 +348,6 @@ applyColorMatrix(double *m)
   }
 }
 
-#if 0
 void
 CImage::
 rotateHue(double dh)
@@ -364,7 +364,7 @@ rotateHue(double dh)
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = rgba.toHSV();
+      CHSV hsv = CHSV::fromRGB(rgba);
 
       double h = hsv.getHue();
 
@@ -398,7 +398,7 @@ saturate(double ds)
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = rgba.toHSV();
+      CHSV hsv = CHSV::fromRGB(rgba);
 
       double s = hsv.getSaturation();
 
@@ -429,7 +429,7 @@ luminanceToAlpha()
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = rgba.toHSV();
+      CHSV hsv = CHSV::fromRGB(rgba);
 
       double l = hsv.getValue();
 
@@ -583,4 +583,3 @@ discreteFunc(CColorComponent component, const vector<double> &values)
     }
   }
 }
-#endif
