@@ -293,9 +293,9 @@ class CImage {
   // Read/Write
 
  public:
-  bool read(const std::string &filename);
+  bool read(const std::string &filename, CFileType type=CFILE_TYPE_NONE);
 
-  bool read(const uchar *data, size_t len);
+  bool read(const uchar *data, size_t len, CFileType type=CFILE_TYPE_NONE);
 
   bool read(CFile *file);
   bool read(CFile *file, CFileType type);

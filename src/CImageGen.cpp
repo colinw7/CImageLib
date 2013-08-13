@@ -445,7 +445,7 @@ createHeader(CFile *file, CFileType type)
 
 bool
 CImage::
-read(const uchar *data, size_t len)
+read(const uchar *data, size_t len, CFileType type)
 {
   CTempFile temp_file;
 
@@ -455,16 +455,22 @@ read(const uchar *data, size_t len)
 
   file->close();
 
-  return read(file);
+  if (type != CFILE_TYPE_NONE)
+    return read(file, type);
+  else
+    return read(file);
 }
 
 bool
 CImage::
-read(const string &filename)
+read(const string &filename, CFileType type)
 {
   CFile file(filename);
 
-  return read(&file);
+  if (type != CFILE_TYPE_NONE)
+    return read(&file, type);
+  else
+    return read(&file);
 }
 
 bool
@@ -481,7 +487,6 @@ read(CFile *file)
 
   return read(file, type);
 }
-
 
 bool
 CImage::
