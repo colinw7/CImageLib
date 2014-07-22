@@ -1,7 +1,8 @@
-#include "CThrow.h"
-#include "CStrUtil.h"
-#include "CImageLib.h"
-#include "CImageXWD.h"
+#include <CImageLib.h>
+#include <CImageXWD.h>
+#include <CThrow.h>
+#include <CStrUtil.h>
+
 #include "XWDFile.h"
 
 using std::string;

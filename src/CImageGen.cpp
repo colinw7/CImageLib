@@ -1,7 +1,7 @@
-#include "CImageLibI.h"
-#include "CImageGIF.h"
-#include "CImageXBM.h"
-#include "CImageXPM.h"
+#include <CImageLibI.h>
+#include <CImageGIF.h>
+#include <CImageXBM.h>
+#include <CImageXPM.h>
 
 using std::string;
 

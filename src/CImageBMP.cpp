@@ -1,6 +1,6 @@
-#include <CThrow.h>
 #include <CImageLib.h>
 #include <CImageBMP.h>
+#include <CThrow.h>
 
 using std::vector;
 using std::cerr;

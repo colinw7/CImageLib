@@ -1,6 +1,6 @@
-#include "CImageLibI.h"
-#include "CLinearGradient.h"
-#include "CRadialGradient.h"
+#include <CImageLibI.h>
+#include <CLinearGradient.h>
+#include <CRadialGradient.h>
 
 void
 CImage::

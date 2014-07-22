@@ -1,6 +1,6 @@
-#include "CThrow.h"
-#include "CImageLib.h"
-#include "CImageIFF.h"
+#include <CImageLib.h>
+#include <CImageIFF.h>
+#include <CThrow.h>
 
 #include <cstring>
 
@@ -1000,23 +1000,25 @@ CImageIFF::
 convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
             IFFColorRegister *cregs, CRGBA **colors, int *num_colors)
 {
-  int i;
+  if (CImageState::getDebug()) {
+    for (int i = 0; i < 64; ++i)
+      cerr << "  " << i <<
+              ") Red "   << cregs[i].r <<
+              ", Green " << cregs[i].g <<
+              ", Blue "  << cregs[i].b << endl;
+  }
 
-  for (i = 0; i < 64; ++i)
-    cerr << "  " << i <<
-            ") Red "   << cregs[i].r <<
-            ", Green " << cregs[i].g <<
-            ", Blue "  << cregs[i].b << endl;
-
-  for (i = 0; i < 64; ++i) {
+  for (int i = 0; i < 64; ++i) {
     cregs[i].r = (cregs[i].r >> 2) & 0x3F;
     cregs[i].g = (cregs[i].g >> 2) & 0x3F;
     cregs[i].b = (cregs[i].b >> 2) & 0x3F;
 
-    cerr << "  " << i <<
-            ") Red "   << cregs[i].r <<
-            ", Green " << cregs[i].g <<
-            ", Blue "  << cregs[i].b << endl;
+    if (CImageState::getDebug()) {
+      cerr << "  " << i <<
+              ") Red "   << cregs[i].r <<
+              ", Green " << cregs[i].g <<
+              ", Blue "  << cregs[i].b << endl;
+    }
   }
 
   IFF_ULONG size = width*height;
@@ -1026,7 +1028,7 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
   IFF_UBYTE *p  = screen_memory;
   IFF_UBYTE *p1 = screen_memory1;
 
-  for (i = 0; i < height; ++i) {
+  for (int i = 0; i < height; ++i) {
     IFF_UBYTE r = cregs[0].r;
     IFF_UBYTE g = cregs[0].g;
     IFF_UBYTE b = cregs[0].b;
@@ -1153,7 +1155,7 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
 
   memset(c_flags, '\0', max_c*sizeof(IFF_UBYTE));
 
-  for (i = 0; i < num_c; ++i) {
+  for (int i = 0; i < num_c; ++i) {
     IFF_UBYTE r = (c_flags1[i] >> 12) & 0x3F;
     IFF_UBYTE g = (c_flags1[i] >>  6) & 0x3F;
     IFF_UBYTE b = (c_flags1[i]      ) & 0x3F;

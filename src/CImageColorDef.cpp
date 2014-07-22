@@ -1,5 +1,5 @@
-#include "CImageLibI.h"
-#include "CImageColorDefP.h"
+#include <CImageLibI.h>
+#include <CImageColorDefP.h>
 
 #include <cstring>
 

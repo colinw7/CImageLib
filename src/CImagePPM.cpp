@@ -1,6 +1,6 @@
-#include "CStrUtil.h"
-#include "CImageLib.h"
-#include "CImagePPM.h"
+#include <CImageLib.h>
+#include <CImagePPM.h>
+#include <CStrUtil.h>
 
 using std::string;
 

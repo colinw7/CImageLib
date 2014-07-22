@@ -1,6 +1,6 @@
-#include <CThrow.h>
 #include <CImageLib.h>
 #include <CImageTIF.h>
+#include <CThrow.h>
 
 #include <cstring>
 

@@ -1,7 +1,7 @@
-#include <CThrow.h>
-#include <CStrUtil.h>
 #include <CImageLib.h>
 #include <CImageGIF.h>
+#include <CThrow.h>
+#include <CStrUtil.h>
 #include <cstring>
 
 using std::string;

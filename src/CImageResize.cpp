@@ -1,4 +1,4 @@
-#include "CImageLibI.h"
+#include <CImageLibI.h>
 #include <CMathGen.h>
 
 #include <cstring>

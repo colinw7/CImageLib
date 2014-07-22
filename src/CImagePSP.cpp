@@ -1,6 +1,6 @@
-#include "CThrow.h"
-#include "CImageLib.h"
-#include "CImagePSP.h"
+#include <CImageLib.h>
+#include <CImagePSP.h>
+#include <CThrow.h>
 
 #include <cstring>
 

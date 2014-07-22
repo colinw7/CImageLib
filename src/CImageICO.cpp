@@ -1,5 +1,5 @@
-#include "CImageLib.h"
-#include "CImageICO.h"
+#include <CImageLib.h>
+#include <CImageICO.h>
 
 using std::vector;
 using std::cerr;

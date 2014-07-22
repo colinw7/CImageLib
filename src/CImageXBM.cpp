@@ -1,7 +1,7 @@
-#include <CThrow.h>
-#include <CStrUtil.h>
 #include <CImageLib.h>
 #include <CImageXBM.h>
+#include <CThrow.h>
+#include <CStrUtil.h>
 
 #include <cstring>
 
