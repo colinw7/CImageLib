@@ -1,7 +1,7 @@
 // TODO: Two Pass Loading. Just Size and then Data using Thread
 //       Unload data. Default Image when no Data (Loading)
 
-#include "CImageLibI.h"
+#include <CImageLibI.h>
 #include <CImageBMP.h>
 #include <CImageGIF.h>
 #include <CImageICO.h>

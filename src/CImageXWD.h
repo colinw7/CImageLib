@@ -1,7 +1,7 @@
 #ifndef CIMAGE_XWD_H
 #define CIMAGE_XWD_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageXWDInst CImageXWD::getInstance()
 

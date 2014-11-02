@@ -1,4 +1,4 @@
-#include "CImageLibI.h"
+#include <CImageLibI.h>
 #include <cmath>
 
 using std::min;

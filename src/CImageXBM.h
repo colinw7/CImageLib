@@ -1,7 +1,7 @@
 #ifndef CIMAGE_XBM_H
 #define CIMAGE_XBM_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageXBMInst CImageXBM::getInstance()
 

@@ -1,7 +1,7 @@
 #ifndef CIMAGE_PPM_H
 #define CIMAGE_PPM_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImagePPMInst CImagePPM::getInstance()
 

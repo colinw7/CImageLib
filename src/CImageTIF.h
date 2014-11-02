@@ -1,7 +1,7 @@
 #ifndef CIMAGE_TIF_H
 #define CIMAGE_TIF_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageTIFInst CImageTIF::getInstance()
 

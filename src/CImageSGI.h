@@ -1,7 +1,7 @@
 #ifndef CIMAGE_SGI_H
 #define CIMAGE_SGI_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageSGIInst CImageSGI::getInstance()
 

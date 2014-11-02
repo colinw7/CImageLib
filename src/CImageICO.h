@@ -1,7 +1,7 @@
 #ifndef CIMAGE_ICO_H
 #define CIMAGE_ICO_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageICOInst CImageICO::getInstance()
 

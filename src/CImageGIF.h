@@ -1,7 +1,7 @@
 #ifndef CIMAGE_GIF_H
 #define CIMAGE_GIF_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageGIFInst CImageGIF::getInstance()
 

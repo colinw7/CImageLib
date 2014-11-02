@@ -100,6 +100,9 @@ read(CFile *file, CImagePtr &image)
 
     file_data = file->readAll();
 
+    if (! file_data)
+      return false;
+
     char *data = (char *) file_data->getData();
 
     //------

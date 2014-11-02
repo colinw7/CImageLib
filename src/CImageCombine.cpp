@@ -1,4 +1,4 @@
-#include "CImageLibI.h"
+#include <CImageLibI.h>
 
 using std::min;
 using std::max;

@@ -1,4 +1,4 @@
-#include "CImageLibI.h"
+#include <CImageLibI.h>
 
 #define CIMAGE_LINE_ART_TOLERANCE 0.5
 
