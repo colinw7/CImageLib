@@ -1,7 +1,7 @@
 #ifndef CIMAGE_PCX_H
 #define CIMAGE_PCX_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImagePCXInst CImagePCX::getInstance()
 

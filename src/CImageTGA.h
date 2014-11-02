@@ -1,7 +1,7 @@
 #ifndef CIMAGE_TGA_H
 #define CIMAGE_TGA_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageTGAInst CImageTGA::getInstance()
 

@@ -1,7 +1,7 @@
 #ifndef CIMAGE_PSP_H
 #define CIMAGE_PSP_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImagePSPInst CImagePSP::getInstance()
 

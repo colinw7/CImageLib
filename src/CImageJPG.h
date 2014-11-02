@@ -1,7 +1,7 @@
 #ifndef CIMAGE_JPG_H
 #define CIMAGE_JPG_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageJPGInst CImageJPG::getInstance()
 

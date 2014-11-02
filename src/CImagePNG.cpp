@@ -1,9 +1,9 @@
-#ifdef IMAGE_PNG
-# include "png.h"
-#endif
-
 #include <CImageLib.h>
 #include <CImagePNG.h>
+
+#ifdef IMAGE_PNG
+# include <png.h>
+#endif
 
 static void pngWriteErrorHandler(png_structp png_ptr, png_const_charp msg);
 

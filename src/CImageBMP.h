@@ -1,7 +1,7 @@
 #ifndef CIMAGE_BMP_H
 #define CIMAGE_BMP_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageBMPInst CImageBMP::getInstance()
 

@@ -1,7 +1,7 @@
 #ifndef CIMAGE_IFF_H
 #define CIMAGE_IFF_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImageIFFInst CImageIFF::getInstance()
 

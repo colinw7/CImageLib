@@ -3,7 +3,7 @@
 #include <CThrow.h>
 #include <CStrUtil.h>
 
-#include "XWDFile.h"
+#include <XWDFile.h>
 
 using std::string;
 

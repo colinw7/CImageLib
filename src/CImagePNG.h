@@ -1,7 +1,7 @@
 #ifndef CIMAGE_PNG_H
 #define CIMAGE_PNG_H
 
-#include "CImageFmt.h"
+#include <CImageFmt.h>
 
 #define CImagePNGInst CImagePNG::getInstance()
 

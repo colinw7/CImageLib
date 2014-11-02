@@ -7,7 +7,7 @@
 #include <CFileUtil.h>
 #include <CImageLib.h>
 #include <CImageFmt.h>
-#include "CImageColorDef.h"
+#include <CImageColorDef.h>
 
 class CAssert {
  public:
