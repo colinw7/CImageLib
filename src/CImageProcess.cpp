@@ -1,6 +1,4 @@
 #include <CImageLibI.h>
-#include <cmath>
-#include <CHSV.h>
 
 using std::map;
 using std::vector;
@@ -364,7 +362,7 @@ rotateHue(double dh)
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = CHSV::fromRGB(rgba);
+      CHSV hsv = rgba.toHSV();
 
       double h = hsv.getHue();
 
@@ -398,7 +396,7 @@ saturate(double ds)
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = CHSV::fromRGB(rgba);
+      CHSV hsv = rgba.toHSV();
 
       double s = hsv.getSaturation();
 
@@ -429,7 +427,7 @@ luminanceToAlpha()
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = CHSV::fromRGB(rgba);
+      CHSV hsv = rgba.toHSV();
 
       double l = hsv.getValue();
 

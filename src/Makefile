@@ -66,6 +66,7 @@ $(CDEBUG) \
 -I../../COS/include \
 -I../../CMath/include \
 -I../../CUtil/include \
+-I../../CUtil/include \
 -I. \
 
 LFLAGS = -L$(LIB_DIR)
