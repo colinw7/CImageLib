@@ -545,6 +545,9 @@ write(CFile *file, CImagePtr image)
     for (int i = 0; i < image->getNumColors(); ++i) {
       image->getColorRGBAI(i, &r, &g, &b, &a);
 
+      if (CImage::isConvertTransparent(a/255.0))
+        CImage::getConvertBg().getRGBAI(&r, &g, &b, &a);
+
       writeByte(file, b);
       writeByte(file, g);
       writeByte(file, r);

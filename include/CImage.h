@@ -113,7 +113,7 @@ class CImage {
       uint          width;
 
       current() :
-       image(NULL), pos1(0), pos2(0), width(0) {
+       image(0), pos1(0), pos2(0), width(0) {
       }
 
       void inc() {
@@ -631,12 +631,22 @@ class CImage {
     CONVERT_NEAREST_PHYSICAL  // replace with nearest pixel of new color
   };
 
+  static const CRGBA &getConvertBg() { return convertBg_; }
+
   static void setConvertBg(const CRGBA &bg) { convertBg_ = bg; }
 
   static void setConvertAlphaTol(double tol) {
     assert(tol >= 0.0 && tol <= 1.0);
 
     convertAlphaTol_ = tol;
+  }
+
+  static bool isConvertTransparent(const CRGBA &rgba) {
+    return rgba.getAlpha() <= convertAlphaTol_;
+  }
+
+  static bool isConvertTransparent(double a) {
+    return a <= convertAlphaTol_;
   }
 
   void convertToNColors(uint ncolors=256, ConvertMethod method=CONVERT_NEAREST_LOGICAL);
