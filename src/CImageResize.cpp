@@ -369,9 +369,6 @@ reshapeAverage(CImagePtr &new_image) const
   double dx = (1.0*width1 )/width2 ;
   double dy = (1.0*height1)/height2;
 
-  double r, g, b, a;
-  double r1, g1, b1, a1;
-
   int xx1, yy1, xx2, yy2;
 
   double y1 = 0.0;
@@ -388,13 +385,12 @@ reshapeAverage(CImagePtr &new_image) const
       xx1 = min(max(CMathGen::Round(x1), 0), width1 - 1);
       xx2 = min(max(CMathGen::Round(x2), 0), width1 - 1);
 
-      r = 0.0;
-      g = 0.0;
-      b = 0.0;
-      a = 0.0;
+      double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
 
       for (int yy = yy1; yy <= yy2; ++yy) {
         for (int xx = xx1; xx <= xx2; ++xx) {
+          double r1, g1, b1, a1;
+
           getRGBAPixel(xx, yy, &r1, &g1, &b1, &a1);
 
           r += r1;
@@ -404,15 +400,56 @@ reshapeAverage(CImagePtr &new_image) const
         }
       }
 
-      r /= (xx2 - xx1 + 1)*(yy2 - yy1 + 1);
-      g /= (xx2 - xx1 + 1)*(yy2 - yy1 + 1);
-      b /= (xx2 - xx1 + 1)*(yy2 - yy1 + 1);
-      a /= (xx2 - xx1 + 1)*(yy2 - yy1 + 1);
+      int n = (xx2 - xx1 + 1)*(yy2 - yy1 + 1);
+
+      r /= n;
+      g /= n;
+      b /= n;
+      a /= n;
 
       new_image->setRGBAPixel(x, y, r, g, b, a);
     }
   }
 }
+
+#if 0
+CRGBA
+CImage::
+getAverageRGBAPixel(double x1, double x2, double y1, double y1) const
+{
+  double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+
+  int width1  = getWidth ();
+  int height1 = getHeight();
+
+  int yy1 = min(max(CMathGen::Round(y1), 0), height1 - 1);
+  int yy2 = min(max(CMathGen::Round(y2), 0), height1 - 1);
+  int xx1 = min(max(CMathGen::Round(x1), 0), width1 - 1);
+  int xx2 = min(max(CMathGen::Round(x2), 0), width1 - 1);
+
+  for (int yy = yy1; yy <= yy2; ++yy) {
+    for (int xx = xx1; xx <= xx2; ++xx) {
+      double r1, g1, b1, a1;
+
+      getRGBAPixel(xx, yy, &r1, &g1, &b1, &a1);
+
+      r += r1;
+      g += g1;
+      b += b1;
+      a += a1;
+    }
+  }
+
+  int n = (xx2 - xx1 + 1)*(yy2 - yy1 + 1);
+
+  r /= n;
+  g /= n;
+  b /= n;
+  a /= n;
+
+  return CRGBA(r, g, b, a);
+}
+#endif
 
 void
 CImage::
@@ -459,52 +496,83 @@ reshapeBilinear(CImagePtr &new_image) const
 
       if (x2 >= width1) x2 = width1 - 1;
 
-      if (x1 != x2 || y1 != y2) {
-        double r1, g1, b1, a1;
-        double r2, g2, b2, a2;
-        double r3, g3, b3, a3;
-        double r4, g4, b4, a4;
+      CRGBA c = getBilinearRGBAPixel(xx, x1, x2, yy, y1, y2);
 
-        getRGBAPixel(x1, y2, &r1, &g1, &b1, &a1);
-        getRGBAPixel(x2, y2, &r2, &g2, &b2, &a2);
-        getRGBAPixel(x1, y1, &r3, &g3, &b3, &a3);
-        getRGBAPixel(x2, y1, &r4, &g4, &b4, &a4);
-
-        double dx  = x2 - xx;
-        double dx1 = 1.0 - dx;
-        double dy  = yy - y1;
-        double dy1 = 1.0 - dy;
-
-        double r12 = dx*r1 + dx1*r2;
-        double r34 = dx*r3 + dx1*r4;
-
-        double r = (dy*r12 + dy1*r34);
-
-        double g12 = dx*g1 + dx1*g2;
-        double g34 = dx*g3 + dx1*g4;
-
-        double g = (dy*g12 + dy1*g34);
-
-        double b12 = dx*b1 + dx1*b2;
-        double b34 = dx*b3 + dx1*b4;
-
-        double b = (dy*b12 + dy1*b34);
-
-        double a12 = dx*a1 + dx1*a2;
-        double a34 = dx*a3 + dx1*a4;
-
-        double a = (dy*a12 + dy1*a34);
-
-        new_image->setRGBAPixel(x, y, r, g, b, a);
-      }
-      else {
-        double r, g, b, a;
-
-        getRGBAPixel(x1, y1, &r, &g, &b, &a);
-
-        new_image->setRGBAPixel(x, y, r, g, b, a);
-      }
+      new_image->setRGBAPixel(x, y, c);
     }
+  }
+}
+
+CRGBA
+CImage::
+getBilinearRGBAPixel(double xx, double yy) const
+{
+  int width1  = getWidth ();
+  int height1 = getHeight();
+
+  int x1 = CMathGen::RoundDown(xx);
+  int x2 = CMathGen::RoundUp  (xx);
+
+  if (x1 <  0     ) x1 = 0;
+  if (x2 >= width1) x2 = width1 - 1;
+
+  int y1 = CMathGen::RoundDown(yy);
+  int y2 = CMathGen::RoundUp  (yy);
+
+  if (y1 <  0      ) y2 = 0;
+  if (y2 >= height1) y2 = height1 - 1;
+
+  return getBilinearRGBAPixel(xx, x1, x2, yy, y1, y2);
+}
+
+CRGBA
+CImage::
+getBilinearRGBAPixel(double xx, int x1, int x2, double yy, int y1, int y2) const
+{
+  if (x1 != x2 || y1 != y2) {
+    double r1, g1, b1, a1;
+    double r2, g2, b2, a2;
+    double r3, g3, b3, a3;
+    double r4, g4, b4, a4;
+
+    getRGBAPixel(x1, y2, &r1, &g1, &b1, &a1);
+    getRGBAPixel(x2, y2, &r2, &g2, &b2, &a2);
+    getRGBAPixel(x1, y1, &r3, &g3, &b3, &a3);
+    getRGBAPixel(x2, y1, &r4, &g4, &b4, &a4);
+
+    double dx  = x2 - xx;
+    double dx1 = 1.0 - dx;
+    double dy  = yy - y1;
+    double dy1 = 1.0 - dy;
+
+    double r12 = dx*r1 + dx1*r2;
+    double r34 = dx*r3 + dx1*r4;
+
+    double r = (dy*r12 + dy1*r34);
+
+    double g12 = dx*g1 + dx1*g2;
+    double g34 = dx*g3 + dx1*g4;
+
+    double g = (dy*g12 + dy1*g34);
+
+    double b12 = dx*b1 + dx1*b2;
+    double b34 = dx*b3 + dx1*b4;
+
+    double b = (dy*b12 + dy1*b34);
+
+    double a12 = dx*a1 + dx1*a2;
+    double a34 = dx*a3 + dx1*a4;
+
+    double a = (dy*a12 + dy1*a34);
+
+    return CRGBA(r, g, b, a);
+  }
+  else {
+    double r, g, b, a;
+
+    getRGBAPixel(x1, y1, &r, &g, &b, &a);
+
+    return CRGBA(r, g, b, a);
   }
 }
 

@@ -60,6 +60,7 @@ CPPFLAGS = \
 $(CDEBUG) \
 -DIMAGE_PNG \
 -DIMAGE_JPEG \
+-std=c++11 \
 -I$(INC_DIR) \
 -I../../CFile/include \
 -I../../CStrUtil/include \

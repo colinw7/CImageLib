@@ -2,8 +2,12 @@
 
 void
 CImage::
-fillRGBARectangle(int x1, int y1, int x2, int y2, CRGBA &rgba)
+fillRGBARectangle(int x1, int y1, int x2, int y2, const CRGBA &rgba)
 {
+  if ((x1 < 0 || x1 >= size_.width || y1 < 0 || y1 >= size_.height) ||
+      (x2 < 0 || x2 >= size_.width || y2 < 0 || y2 >= size_.height))
+    return;
+
   uint pixel = rgbaToPixel(rgba);
 
   uint *p1 = data_ + y1*size_.width;
@@ -56,6 +60,9 @@ void
 CImage::
 drawRGBAPoint(int x, int y, const CRGBA &rgba)
 {
+  if (x < 0 || x >= size_.width || y < 0 || y >= size_.height)
+    return;
+
   if (combine_enabled_) {
     CRGBA rgba1;
 

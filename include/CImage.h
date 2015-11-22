@@ -570,6 +570,8 @@ class CImage {
   void sampleNearest(double x, double y, CRGBA &rgb) const;
   void sampleBilinear(double x, double y, CRGBA &rgb) const;
 
+  CRGBA getBilinearRGBAPixel(double xx, double yy) const;
+
  private:
   static void reshapeNearest(CImagePtr old_image, CImagePtr &new_image);
   void reshapeNearest(CImagePtr &new_image) const;
@@ -579,6 +581,8 @@ class CImage {
 
   static void reshapeBilinear(CImagePtr old_image, CImagePtr &new_image);
   void reshapeBilinear(CImagePtr &new_image) const;
+
+  CRGBA getBilinearRGBAPixel(double xx, int x1, int x2, double yy, int y1, int y2) const;
 
   //------
 
@@ -681,7 +685,7 @@ class CImage {
   // Draw
 
  public:
-  void fillRGBARectangle(int x1, int y1, int x2, int y2, CRGBA &rgba);
+  void fillRGBARectangle(int x1, int y1, int x2, int y2, const CRGBA &rgba);
   void fillColorIndexRectangle(int x1, int y1, int x2, int y2, int ind);
 
   void drawColorIndexPoint(int x, int y, int color_ind);
