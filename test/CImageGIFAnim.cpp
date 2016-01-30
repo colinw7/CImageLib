@@ -1,16 +1,14 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
-#include <CImageLib/CImageGIF.h>
-#include <CFileUtil/CFileUtil.h>
+#include <CImageLib.h>
+#include <CImageGIF.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc < 4) {
-    cerr << "Usage: CImageGIFAnim " <<
-            "<delay> <ofile> <ifiles>" << endl;
+    std::cerr << "Usage: CImageGIFAnim " << "<delay> <ofile> <ifiles>" << std::endl;
     exit(1);
   }
 
@@ -18,7 +16,7 @@ main(int argc, char **argv)
 
   CFile *ofile = new CFile(argv[2]);
 
-  vector<CImagePtr> images;
+  std::vector<CImagePtr> images;
 
   int num_files = argc - 3;
 

@@ -5,9 +5,6 @@
 
 #include <cstring>
 
-using std::cerr;
-using std::endl;
-
 struct SGIImage {
   ushort  magic;
   uchar   compressed;
@@ -47,8 +44,10 @@ read(CFile *file, CImagePtr &image)
 
   sgi_image.magic = getShort(file);
 
-  if (sgi_image.magic != 474)
-    CTHROW("Invalid SGI File");
+  if (sgi_image.magic != 474) {
+    CImage::errorMsg("Invalid SGI File");
+    return false;
+  }
 
   sgi_image.compressed      = getByte(file);
   sgi_image.bytes_per_pixel = getByte(file);
@@ -58,20 +57,22 @@ read(CFile *file, CImagePtr &image)
   sgi_image.z_size          = getShort(file);
 
   if (CImageState::getDebug()) {
-    cerr << "Magic       " << sgi_image.magic           << endl;
-    cerr << "Compressed  " << (int) sgi_image.compressed      << endl;
-    cerr << "Bytes/Pixel " << (int) sgi_image.bytes_per_pixel << endl;
-    cerr << "Dimension   " << sgi_image.dimension       << endl;
-    cerr << "X Size      " << sgi_image.x_size          << endl;
-    cerr << "Y Size      " << sgi_image.y_size          << endl;
-    cerr << "Z Size      " << sgi_image.z_size          << endl;
+    CImage::infoMsg("Magic       " + std::to_string(sgi_image.magic));
+    CImage::infoMsg("Compressed  " + std::to_string((int) sgi_image.compressed));
+    CImage::infoMsg("Bytes/Pixel " + std::to_string((int) sgi_image.bytes_per_pixel));
+    CImage::infoMsg("Dimension   " + std::to_string(sgi_image.dimension));
+    CImage::infoMsg("X Size      " + std::to_string(sgi_image.x_size));
+    CImage::infoMsg("Y Size      " + std::to_string(sgi_image.y_size));
+    CImage::infoMsg("Z Size      " + std::to_string(sgi_image.z_size));
   }
 
   //------
 
-  if (sgi_image.bytes_per_pixel != 1)
-    CTHROW(CStrUtil::toString(sgi_image.bytes_per_pixel) +
-           " Bytes Per Pixel not Supported");
+  if (sgi_image.bytes_per_pixel != 1) {
+    CImage::errorMsg(CStrUtil::toString(sgi_image.bytes_per_pixel) +
+                     " Bytes Per Pixel not Supported");
+    return false;
+  }
 
   //------
 
@@ -104,8 +105,10 @@ read(CFile *file, CImagePtr &image)
 
   delete [] data;
 
-  if (data1 == NULL)
-    CTHROW("Unhandled Data Type");
+  if (data1 == 0) {
+    CImage::errorMsg("Unhandled Data Type");
+    return false;
+  }
 
   //------
 
@@ -141,8 +144,10 @@ readHeader(CFile *file, CImagePtr &image)
 
   sgi_image.magic = getShort(file);
 
-  if (sgi_image.magic != 474)
-    CTHROW("Invalid SGI File");
+  if (sgi_image.magic != 474) {
+    CImage::errorMsg("Invalid SGI File");
+    return false;
+  }
 
   sgi_image.compressed      = getByte(file);
   sgi_image.bytes_per_pixel = getByte(file);
@@ -152,13 +157,13 @@ readHeader(CFile *file, CImagePtr &image)
   sgi_image.z_size          = getShort(file);
 
   if (CImageState::getDebug()) {
-    cerr << "Magic       " << sgi_image.magic                 << endl;
-    cerr << "Compressed  " << (int) sgi_image.compressed      << endl;
-    cerr << "Bytes/Pixel " << (int) sgi_image.bytes_per_pixel << endl;
-    cerr << "Dimension   " << sgi_image.dimension             << endl;
-    cerr << "X Size      " << sgi_image.x_size                << endl;
-    cerr << "Y Size      " << sgi_image.y_size                << endl;
-    cerr << "Z Size      " << sgi_image.z_size                << endl;
+    CImage::infoMsg("Magic       " + std::to_string(sgi_image.magic));
+    CImage::infoMsg("Compressed  " + std::to_string((int) sgi_image.compressed));
+    CImage::infoMsg("Bytes/Pixel " + std::to_string((int) sgi_image.bytes_per_pixel));
+    CImage::infoMsg("Dimension   " + std::to_string(sgi_image.dimension));
+    CImage::infoMsg("X Size      " + std::to_string(sgi_image.x_size));
+    CImage::infoMsg("Y Size      " + std::to_string(sgi_image.y_size));
+    CImage::infoMsg("Z Size      " + std::to_string(sgi_image.z_size));
   }
 
   //------
@@ -177,8 +182,8 @@ CImageSGI::
 convertDataBW(uchar *data, SGIImage *sgi_image, uint **data1,
               CRGBA **colors, int *num_colors)
 {
-  *data1      = NULL;
-  *colors     = NULL;
+  *data1      = 0;
+  *colors     = 0;
   *num_colors = 0;
 
   uchar *c_flags  = new uchar [256];
@@ -208,7 +213,7 @@ convertDataBW(uchar *data, SGIImage *sgi_image, uint **data1,
   }
 
   if (CImageState::getDebug())
-    cerr << num_c << " Grays" << endl;
+    CImage::infoMsg(std::to_string(num_c) + " Grays");
 
   *num_colors = num_c;
   *colors     = new CRGBA [num_c];
@@ -223,7 +228,7 @@ convertDataBW(uchar *data, SGIImage *sgi_image, uint **data1,
     (*colors)[i].setRGBAI(g, g, g);
 
     if (CImageState::getDebug())
-      cerr << "Color : Gray " << g << endl;
+      CImage::infoMsg("Color : Gray " + std::to_string(g));
 
     c_flags[g] = i;
   }
@@ -277,7 +282,7 @@ uchar *
 CImageSGI::
 readCompressedData(CFile *file, SGIImage *sgi_image)
 {
-  uchar *data = NULL;
+  uchar *data = 0;
 
   uint buffer_len = 2*sgi_image->x_size + 10;
   uint table_len  = sgi_image->y_size*sgi_image->z_size;
@@ -327,7 +332,8 @@ readCompressedData(CFile *file, SGIImage *sgi_image)
 
         if (length_table[y + z*sgi_image->y_size] > buffer_len) {
           delete [] data;
-          CTHROW("Bad Data");
+
+          CImage::warnMsg("Bad Data");
         }
 
         file->read(buffer, length_table[y + z*sgi_image->y_size]);

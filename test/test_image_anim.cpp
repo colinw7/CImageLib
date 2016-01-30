@@ -1,8 +1,7 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CFileUtil/CFileUtil.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
@@ -15,8 +14,8 @@ main(int argc, char **argv)
 
   CFile *ifile = new CFile(argv[1]);
 
-  string base   = ifile->getBase();
-  string suffix = ifile->getSuffix();
+  std::string base   = ifile->getBase();
+  std::string suffix = ifile->getSuffix();
 
   //------
 
@@ -34,7 +33,7 @@ main(int argc, char **argv)
 
     sprintf(number_string, "%02d", i);
 
-    string ofilename = base + "_" + number_string + "." + suffix;
+    std::string ofilename = base + "_" + number_string + "." + suffix;
 
     CFile *ofile = new CFile(ofilename);
 

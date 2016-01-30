@@ -36,11 +36,11 @@ class CImageBMP : public CImageFmt {
   const CImageBMP &operator=(const CImageBMP &bmp);
 
  private:
-  void readHeader(CFile *file, CImageBMPHeader *header);
+  bool readHeader(CFile *file, CImageBMPHeader *header);
 
   void readColors(CFile *file, CImageBMPHeader *header, CRGBA **colors);
 
-  void readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data);
+  bool readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data);
 
   void readCmp0Data8(CFile *file, int width, int height, uint **data, int *num_data);
   void readCmp1Data8(CFile *file, int width, int height, uint **data, int *num_data);

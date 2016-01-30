@@ -1,13 +1,12 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
 
 static void testCreateMask();
 static void testMask1();
 static void testMask2();
 
 int
-main(int argc, char **argv)
+main(int /*argc*/, char ** /*argv*/)
 {
   testCreateMask();
 
@@ -60,7 +59,7 @@ testMask1()
 
   image2->setAlphaByGray(false);
 
-  image1->mask(image2);
+  image1->alphaMask(image2);
 
   image1->writeGIF(ofile);
 
@@ -85,7 +84,7 @@ testMask2()
 
   CImagePtr image2 = CImageMgrInst->createImage(src2);
 
-  image1->mask(image2);
+  image1->alphaMask(image2);
 
   image1->writePNG(ofile);
 

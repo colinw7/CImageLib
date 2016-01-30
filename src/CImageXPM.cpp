@@ -6,11 +6,7 @@
 
 #include <cstring>
 
-using std::string;
-using std::cerr;
-using std::endl;
-
-static const string xpm_pixel_chars_ =
+static const std::string xpm_pixel_chars_ =
  ".#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 static int xpm_chars_per_pixel_;
@@ -18,12 +14,12 @@ static int xpm_x_hot_;
 static int xpm_y_hot_;
 
 struct CImageXPMColor {
-  string name;
-  string mono;
-  string symb;
-  string grey4;
-  string grey;
-  string color;
+  std::string name;
+  std::string mono;
+  std::string symb;
+  std::string grey4;
+  std::string grey;
+  std::string color;
 
   CImageXPMColor() :
    name (""),
@@ -34,8 +30,8 @@ struct CImageXPMColor {
    color("") {
   }
 
-  string colorName() const {
-    string str = color;
+  std::string colorName() const {
+    std::string str = color;
 
     if (str == "")
       str = grey;
@@ -64,14 +60,14 @@ struct CImageXPMData {
    width            (0),
    height           (0),
    num_colors       (0),
-   colors           (NULL),
+   colors           (0),
    transparent      (false),
    transparent_color(0),
    chars_per_pixel  (0),
    x_hot            (0),
    y_hot            (0),
    extension        (false),
-   data             (NULL) {
+   data             (0) {
   }
 };
 
@@ -93,15 +89,17 @@ read(CFile *file, CImagePtr &image)
 {
   CImageXPMData xpm_data;
 
-  CFileData *file_data = NULL;
+  CFileData *file_data = 0;
 
   try {
     file->rewind();
 
     file_data = file->readAll();
 
-    if (! file_data)
+    if (! file_data) {
+      CImage::errorMsg("Failed to read file");
       return false;
+    }
 
     char *data = (char *) file_data->getData();
 
@@ -111,28 +109,36 @@ read(CFile *file, CImagePtr &image)
 
     //------
 
-    if (! readHeader(data, &i))
-      CTHROW("Failed to read header");
+    if (! readHeader(data, &i)) {
+      CImage::errorMsg("Failed to read header");
+      return false;
+    }
 
     //------
 
-    if (! skipDcl(data, &i))
-      CTHROW("Failed to read declarations");
+    if (! skipDcl(data, &i)) {
+      CImage::errorMsg("Failed to read declarations");
+      return false;
+    }
 
     //------
 
-    if (! readValues(data, &i, &xpm_data))
-      CTHROW("Failed to read values");
+    if (! readValues(data, &i, &xpm_data)) {
+      CImage::errorMsg("Failed to read values");
+      return false;
+    }
 
     //------
 
-    if (! readColors(data, &i, &xpm_data))
-      CTHROW("Failed to read colors");
+    if (! readColors(data, &i, &xpm_data)) {
+      CImage::errorMsg("Failed to read colors");
+      return false;
+    }
 
     //------
 
     if (! readData(data, &i, &xpm_data))
-      CTHROW("Failed to read data");
+      return false;
 
     //------
 
@@ -170,6 +176,8 @@ read(CFile *file, CImagePtr &image)
     return true;
   }
   catch (...) {
+    CImage::errorMsg("Failed to read file");
+
     delete [] xpm_data.colors;
 
     delete file_data;
@@ -182,8 +190,10 @@ bool
 CImageXPM::
 read(const char **strings, uint num_strings, CImagePtr &image)
 {
-  if (num_strings <= 0)
+  if (num_strings <= 0) {
+    CImage::errorMsg("No data strings");
     return false;
+  }
 
   //------
 
@@ -195,8 +205,10 @@ read(const char **strings, uint num_strings, CImagePtr &image)
 
     //------
 
-    if (! readValuesString(&xpm_data, strings[i]))
-      CTHROW("Failed to read values");
+    if (! readValuesString(&xpm_data, strings[i])) {
+      CImage::errorMsg("Failed to read values");
+      return false;
+    }
 
     ++i;
 
@@ -207,11 +219,15 @@ read(const char **strings, uint num_strings, CImagePtr &image)
     xpm_data.colors = new CImageXPMColor [xpm_data.num_colors];
 
     for (j = 0; j < xpm_data.num_colors; ++j) {
-      if (i >= (int) num_strings)
-        CTHROW("Failed to read colors");
+      if (i >= (int) num_strings) {
+        CImage::errorMsg("Failed to read colors");
+        return false;
+      }
 
-      if (! readColorString(&xpm_data, strings[i], &xpm_data.colors[j]))
-        CTHROW("Failed to read colors");
+      if (! readColorString(&xpm_data, strings[i], &xpm_data.colors[j])) {
+        CImage::errorMsg("Failed to read colors");
+        return false;
+      }
 
       ++i;
     }
@@ -223,16 +239,18 @@ read(const char **strings, uint num_strings, CImagePtr &image)
     xpm_data.data = new uint [xpm_data.width*xpm_data.height];
 
     for (j = 0; j < xpm_data.height; ++j) {
-      if (i >= (int) num_strings)
-        CTHROW("Failed to read data");
+      if (i >= (int) num_strings) {
+        CImage::errorMsg("Failed to read data");
+        return false;
+      }
 
       if (xpm_data.num_colors <= 256) {
         if (! readDataString(&xpm_data, strings[i], xpm_data.data, &pos))
-          CTHROW("Failed to read data");
+          return false;
       }
       else {
         if (! readData24String(&xpm_data, colors, strings[i], xpm_data.data, &pos))
-          CTHROW("Failed to read data");
+          return false;
       }
 
       ++i;
@@ -277,6 +295,8 @@ read(const char **strings, uint num_strings, CImagePtr &image)
     return true;
   }
   catch (...) {
+    CImage::errorMsg("Failed read file");
+
     delete [] xpm_data.colors;
 
     return false;
@@ -287,7 +307,7 @@ bool
 CImageXPM::
 readHeader(CFile *file, CImagePtr &image)
 {
-  CFileData *file_data = NULL;
+  CFileData *file_data = 0;
 
   file->rewind();
 
@@ -304,16 +324,22 @@ readHeader(CFile *file, CImagePtr &image)
 
     //------
 
-    if (! readHeader(data, &i))
-      CTHROW("Failed to read header");
+    if (! readHeader(data, &i)) {
+      CImage::errorMsg("Failed to read header");
+      return false;
+    }
 
-    if (! skipDcl(data, &i))
-      CTHROW("Failed to read declarations");
+    if (! skipDcl(data, &i)) {
+      CImage::errorMsg("Failed to read declarations");
+      return false;
+    }
 
     //------
 
-    if (! readValues(data, &i, &xpm_data))
-      CTHROW("Failed to read values");
+    if (! readValues(data, &i, &xpm_data)) {
+      CImage::errorMsg("Failed to read values");
+      return false;
+    }
 
     //------
 
@@ -322,7 +348,8 @@ readHeader(CFile *file, CImagePtr &image)
     image->setSize(xpm_data.width, xpm_data.height);
   }
   catch (...) {
-    CTHROW("Failed to read XPM file");
+    CImage::errorMsg("Failed to read XPM file");
+    return false;
   }
 
   delete file_data;
@@ -336,22 +363,28 @@ readHeader(const char *data, int *i)
 {
   CStrUtil::skipSpace(data, i);
 
-  if (data[*i] != '/' || data[*i + 1] != '*')
+  if (data[*i] != '/' || data[*i + 1] != '*') {
+    CImage::errorMsg("Failed find header start comment");
     return false;
+  }
 
   *i += 2;
 
   CStrUtil::skipSpace(data, i);
 
-  if (data[*i] != 'X' || data[*i + 1] != 'P' || data[*i + 2] != 'M')
+  if (data[*i] != 'X' || data[*i + 1] != 'P' || data[*i + 2] != 'M') {
+    CImage::errorMsg("Failed find \"XPM\" in comment");
     return false;
+  }
 
   *i += 3;
 
   CStrUtil::skipSpace(data, i);
 
-  if (data[*i] != '*' || data[*i + 1] != '/')
+  if (data[*i] != '*' || data[*i + 1] != '/') {
+    CImage::errorMsg("Failed find header end comment");
     return false;
+  }
 
   *i += 2;
 
@@ -399,8 +432,10 @@ readValues(const char *data, int *i, CImageXPMData *xpm_data)
 
   char *str = readString(data, i);
 
-  if (str == NULL)
+  if (str == 0) {
+    CImage::errorMsg("Failed value string");
     return false;
+  }
 
   //------
 
@@ -425,29 +460,37 @@ readValuesString(CImageXPMData *xpm_data, const char *str)
 
   CStrUtil::skipSpace(str, &i);
 
-  if (! CStrUtil::readInteger(str, &i, &xpm_data->width))
-    CTHROW("Invalid XPM");
+  if (! CStrUtil::readInteger(str, &i, &xpm_data->width)) {
+    CImage::errorMsg("Failed to read width");
+    return false;
+  }
 
   //------
 
   CStrUtil::skipSpace(str, &i);
 
-  if (! CStrUtil::readInteger(str, &i, &xpm_data->height))
-    CTHROW("Invalid XPM");
+  if (! CStrUtil::readInteger(str, &i, &xpm_data->height)) {
+    CImage::errorMsg("Failed to read height");
+    return false;
+  }
 
   //------
 
   CStrUtil::skipSpace(str, &i);
 
-  if (! CStrUtil::readInteger(str, &i, &xpm_data->num_colors))
-    CTHROW("Invalid XPM");
+  if (! CStrUtil::readInteger(str, &i, &xpm_data->num_colors)) {
+    CImage::errorMsg("Failed to read num colors");
+    return false;
+  }
 
   //------
 
   CStrUtil::skipSpace(str, &i);
 
-  if (! CStrUtil::readInteger(str, &i, &xpm_data->chars_per_pixel))
-    CTHROW("Invalid XPM");
+  if (! CStrUtil::readInteger(str, &i, &xpm_data->chars_per_pixel)) {
+    CImage::errorMsg("Failed to read chars per pixel");
+    return false;
+  }
 
   //------
 
@@ -495,14 +538,18 @@ readColors(const char *data, int *i, CImageXPMData *xpm_data)
 
     char *str = readString(data, i);
 
-    if (str == NULL)
+    if (str == 0) {
+      CImage::errorMsg("Failed to read color string");
       return false;
+    }
 
     //------
 
     bool flag = readColorString(xpm_data, str, &xpm_data->colors[j]);
 
     if (! flag) {
+      CImage::errorMsg("Failed to parse color string '" + std::string(str) + "'");
+
       delete [] str;
 
       return false;
@@ -526,7 +573,7 @@ readColorString(CImageXPMData *xpm_data, const char *str, CImageXPMColor *color)
 
   //------
 
-  color->name = string(&str[i], xpm_data->chars_per_pixel);
+  color->name = std::string(&str[i], xpm_data->chars_per_pixel);
 
   i += xpm_data->chars_per_pixel;
 
@@ -544,7 +591,7 @@ readColorString(CImageXPMData *xpm_data, const char *str, CImageXPMColor *color)
 
       skipToColorKey(str, &i);
 
-      color->mono = CStrUtil::stripSpaces(string(&str[j], i - j));
+      color->mono = CStrUtil::stripSpaces(std::string(&str[j], i - j));
     }
     else if (str[i] == 's' && isspace(str[i + 1])) {
       i += 2;
@@ -555,7 +602,7 @@ readColorString(CImageXPMData *xpm_data, const char *str, CImageXPMColor *color)
 
       skipToColorKey(str, &i);
 
-      color->symb = CStrUtil::stripSpaces(string(&str[j], i - j));
+      color->symb = CStrUtil::stripSpaces(std::string(&str[j], i - j));
     }
     else if (str[i] == 'g' && str[i + 1] == '4' && isspace(str[i + 2])) {
       i += 2;
@@ -566,7 +613,7 @@ readColorString(CImageXPMData *xpm_data, const char *str, CImageXPMColor *color)
 
       skipToColorKey(str, &i);
 
-      color->grey4 = CStrUtil::stripSpaces(string(&str[j], i - j));
+      color->grey4 = CStrUtil::stripSpaces(std::string(&str[j], i - j));
     }
     else if (str[i] == 'g' && isspace(str[i + 1])) {
       i += 2;
@@ -577,7 +624,7 @@ readColorString(CImageXPMData *xpm_data, const char *str, CImageXPMColor *color)
 
       skipToColorKey(str, &i);
 
-      color->grey = CStrUtil::stripSpaces(string(&str[j], i - j));
+      color->grey = CStrUtil::stripSpaces(std::string(&str[j], i - j));
     }
     else if (str[i] == 'c' && isspace(str[i + 1])) {
       i += 2;
@@ -588,10 +635,12 @@ readColorString(CImageXPMData *xpm_data, const char *str, CImageXPMColor *color)
 
       skipToColorKey(str, &i);
 
-      color->color = CStrUtil::stripSpaces(string(&str[j], i - j));
+      color->color = CStrUtil::stripSpaces(std::string(&str[j], i - j));
     }
-    else
+    else {
+      CImage::errorMsg("Invalid color key '" + std::string(&str[i], 1) + "'");
       return false;
+    }
 
     CStrUtil::skipSpace(str, &i);
   }
@@ -626,6 +675,8 @@ isColorKey(const char *str)
   else if (str[0] == 'c' && isspace(str[1]))
     return true;
 
+  CImage::errorMsg("Invalid color key '" + std::string(&str[0], 1) + "'");
+
   return false;
 }
 
@@ -657,8 +708,10 @@ readData(const char *data, int *i, CImageXPMData *xpm_data)
 
     char *str = readString(data, i);
 
-    if (str == NULL)
+    if (str == 0) {
+      CImage::errorMsg("Failed to read color string");
       return false;
+    }
 
     //------
 
@@ -699,10 +752,14 @@ bool
 CImageXPM::
 readDataString(CImageXPMData *xpm_data, const char *str, uint *data, int *pos)
 {
-  int len = strlen(str);
+  int len  = strlen(str);
+  int elen = xpm_data->width*xpm_data->chars_per_pixel;
 
-  if (len != xpm_data->width*xpm_data->chars_per_pixel)
+  if (len != elen) {
+    CImage::errorMsg("Invalid string '" + std::string(str) + "' : (expected " +
+                     std::to_string(elen) + " chars got " + std::to_string(len) + ")");
     return false;
+  }
 
   //------
 
@@ -717,7 +774,7 @@ readDataString(CImageXPMData *xpm_data, const char *str, uint *data, int *pos)
           break;
 
       if (j >= xpm_data->num_colors) {
-        cerr << "No color for symbol " << str[i] << endl;
+        CImage::warnMsg("No color for symbol '" + std::string(&str[i], 1) + "'");
         j = 0;
       }
 
@@ -730,7 +787,7 @@ readDataString(CImageXPMData *xpm_data, const char *str, uint *data, int *pos)
   }
   else {
     for (int x = 0; x < xpm_data->width; ++x) {
-      string name = string(&str[i], xpm_data->chars_per_pixel);
+      std::string name = std::string(&str[i], xpm_data->chars_per_pixel);
 
       int j = 0;
 
@@ -740,7 +797,7 @@ readDataString(CImageXPMData *xpm_data, const char *str, uint *data, int *pos)
       }
 
       if (j >= xpm_data->num_colors) {
-        cerr << "No color for symbol " << name << endl;
+        CImage::warnMsg("No color for symbol '" + name + "'");
         j = 0;
       }
 
@@ -761,17 +818,21 @@ bool
 CImageXPM::
 readData24String(CImageXPMData *xpm_data, CRGBA *colors, const char *str, uint *data, int *pos)
 {
-  int len = strlen(str);
+  int len  = strlen(str);
+  int elen = xpm_data->width*xpm_data->chars_per_pixel;
 
-  if (len != xpm_data->width*xpm_data->chars_per_pixel)
+  if (len != elen) {
+    CImage::errorMsg("Invalid string '" + std::string(str) + "' : (expected " +
+                     std::to_string(elen) + " chars got " + std::to_string(len) + ")");
     return false;
+  }
 
   //------
 
   int i = 0;
 
   for (int x = 0; x < xpm_data->width; ++x) {
-    string name = string(&str[i], xpm_data->chars_per_pixel);
+    std::string name = std::string(&str[i], xpm_data->chars_per_pixel);
 
     int j = 0;
 
@@ -781,7 +842,7 @@ readData24String(CImageXPMData *xpm_data, CRGBA *colors, const char *str, uint *
     }
 
     if (j >= xpm_data->num_colors) {
-      cerr << "No color for symbol " << name << endl;
+      CImage::warnMsg("No color for symbol '" + name + "'");
       j = 0;
     }
 
@@ -804,7 +865,7 @@ createImageColors(CImageXPMData *xpm_data)
   CRGBA *colors = new CRGBA [xpm_data->num_colors];
 
   for (int i = 0; i < xpm_data->num_colors; ++i) {
-    string name = xpm_data->colors[i].colorName();
+    std::string name = xpm_data->colors[i].colorName();
 
     if (name != "") {
       if (CStrUtil::casecmp(name, "none") == 0) {
@@ -817,7 +878,7 @@ createImageColors(CImageXPMData *xpm_data)
         lookupColor(name, colors[i]);
     }
     else {
-      std::cerr << "No color data for color " << i << std::endl;
+      CImage::warnMsg("No color data for color number " + std::to_string(i));
 
       colors[i].setRGBAI(0, 0, 0);
     }
@@ -857,7 +918,7 @@ readString(const char *data, int *i)
   CStrUtil::skipSpace(data, i);
 
   if (data[*i] != '\"')
-    return NULL;
+    return 0;
 
   (*i)++;
 
@@ -871,7 +932,7 @@ readString(const char *data, int *i)
     (*i)++;
 
   if (data[*i] != '\"')
-    return NULL;
+    return 0;
 
   char *str = CStrUtil::strndup(&data[j], *i - j);
 
@@ -894,7 +955,7 @@ readString(const char *data, int *i)
 
 bool
 CImageXPM::
-lookupColor(const string &name, CRGBA &color)
+lookupColor(const std::string &name, CRGBA &color)
 {
   if (name[0] != '#') {
     int r, g, b;
@@ -902,7 +963,7 @@ lookupColor(const string &name, CRGBA &color)
     if (CImageColorDef::getRGBI(name, &r, &g, &b))
       color.setRGBAI(r, g, b);
     else {
-      cerr << "Color name '" << name << "' not found" << endl;
+      CImage::warnMsg("Color name '" + name + "' not found");
 
       color.setRGBAI(0, 0, 0);
     }
@@ -937,7 +998,7 @@ lookupColor(const string &name, CRGBA &color)
       color.setRGBAI(r, g, b);
     }
     else {
-      cerr << "Color name '" << name << "' not found" << endl;
+      CImage::warnMsg("Color name '" + name + "' not found");
 
       color.setRGBAI(0, 0, 0);
     }
@@ -955,8 +1016,8 @@ write(CFile *file, CImagePtr image)
   CImagePtr image1 = image;
 
   if (! image1->hasColormap()) {
-    cerr << "XPM Image Depth greater than 8 not supported" << endl;
-    cerr << "Converting image to 256 colors" << endl;
+    CImage::infoMsg("XPM Image Depth greater than 8 not supported - "
+                    "Converting image to 256 colors");
 
     image1 = image1->dup();
 
@@ -972,7 +1033,7 @@ write(CFile *file, CImagePtr image)
 
   //------
 
-  string base = file->getBase();
+  std::string base = file->getBase();
 
   file->write("/* XPM */\n");
   file->write("\n");
@@ -1099,11 +1160,11 @@ getColorUsage(CImagePtr image, char **used, int *num_used)
     }
 }
 
-string
+std::string
 CImageXPM::
 pixelToSymbol(int pixel)
 {
-  string pixel_string;
+  std::string pixel_string;
 
   if (pixel == -1) {
     for (int i = 0; i < xpm_chars_per_pixel_; ++i)
@@ -1127,7 +1188,7 @@ pixelToSymbol(int pixel)
   return pixel_string;
 }
 
-string
+std::string
 CImageXPM::
 colorToString(CImagePtr image, int color)
 {
@@ -1139,10 +1200,10 @@ colorToString(CImagePtr image, int color)
 
   sprintf(color_string, "#%02x%02x%02x", r & 0xFF, g & 0xFF, b & 0xFF);
 
-  return string(color_string);
+  return std::string(color_string);
 }
 
-string
+std::string
 CImageXPM::
 colorToMonoString(CImagePtr image, int color)
 {

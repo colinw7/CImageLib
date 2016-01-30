@@ -1,13 +1,12 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CImageLib/CImageLib.h>
-#include <COS/COS.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <COSTime.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc != 2) {
-    cerr << "Usage: test_image_iter <ifile>" << endl;
+    std::cerr << "Usage: test_image_iter <ifile>" << std::endl;
     exit(1);
   }
 
@@ -26,7 +25,7 @@ main(int argc, char **argv)
   int    secs1, usecs1, secs2, usecs2;
 
   {
-  COS::getHRTime(&secs1, &usecs1);
+  COSTime::getHRTime(&secs1, &usecs1);
 
   CImage::pixel_iterator p1 = image->pixel_begin();
   CImage::pixel_iterator p2 = image->pixel_end  ();
@@ -34,15 +33,15 @@ main(int argc, char **argv)
   for ( ; p1 != p2; ++p1)
     p1.getRGBPixel(rgb);
 
-  COS::getHRTime(&secs2, &usecs2);
+  COSTime::getHRTime(&secs2, &usecs2);
 
-  COS::diffHRTime(secs1, usecs1, secs2, usecs2, &secs);
+  COSTime::diffHRTime(secs1, usecs1, secs2, usecs2, &secs);
 
-  cout << secs << endl;
+  std::cout << secs << std::endl;
   }
 
   {
-  COS::getHRTime(&secs1, &usecs1);
+  COSTime::getHRTime(&secs1, &usecs1);
 
   uint width  = image->getWidth ();
   uint height = image->getHeight();
@@ -52,11 +51,11 @@ main(int argc, char **argv)
   for (uint pos = 0; pos < size; ++pos)
     image->getRGBPixel(pos, rgb);
 
-  COS::getHRTime(&secs2, &usecs2);
+  COSTime::getHRTime(&secs2, &usecs2);
 
-  COS::diffHRTime(secs1, usecs1, secs2, usecs2, &secs);
+  COSTime::diffHRTime(secs1, usecs1, secs2, usecs2, &secs);
 
-  cout << secs << endl;
+  std::cout << secs << std::endl;
   }
 
   exit(0);

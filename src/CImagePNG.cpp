@@ -26,22 +26,22 @@ read(CFile *file, CImagePtr &image)
     return false;
   }
 
-  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 
-  if (png_ptr == NULL)
+  if (png_ptr == 0)
     return false;
 
   png_infop info_ptr = png_create_info_struct(png_ptr);
 
-  if (info_ptr == NULL) {
-    png_destroy_read_struct(&png_ptr, NULL, NULL);
+  if (info_ptr == 0) {
+    png_destroy_read_struct(&png_ptr, 0, 0);
     return false;
   }
 
   png_infop end_info = png_create_info_struct(png_ptr);
 
-  if (end_info == NULL) {
-    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+  if (end_info == 0) {
+    png_destroy_read_struct(&png_ptr, &info_ptr, 0);
     return false;
   }
 
@@ -220,22 +220,22 @@ readHeader(CFile *file, CImagePtr &image)
     return false;
   }
 
-  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 
-  if (png_ptr == NULL)
+  if (png_ptr == 0)
     return false;
 
   png_infop info_ptr = png_create_info_struct(png_ptr);
 
-  if (info_ptr == NULL) {
-    png_destroy_read_struct(&png_ptr, NULL, NULL);
+  if (info_ptr == 0) {
+    png_destroy_read_struct(&png_ptr, 0, 0);
     return false;
   }
 
   png_infop end_info = png_create_info_struct(png_ptr);
 
-  if (end_info == NULL) {
-    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+  if (end_info == 0) {
+    png_destroy_read_struct(&png_ptr, &info_ptr, 0);
     return false;
   }
 
@@ -274,6 +274,11 @@ CImagePNG::
 write(CFile *file, CImagePtr image)
 {
 #ifdef IMAGE_PNG
+  if (image->getWidth() == 0 && image->getHeight() == 0)
+    return false;
+
+  //---
+
   CImagePtr image1 = image;
 
   file->open(CFile::WRITE);
@@ -285,7 +290,7 @@ write(CFile *file, CImagePtr image)
   }
 
   png_structp png_ptr =
-    png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, pngWriteErrorHandler, NULL);
+    png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, pngWriteErrorHandler, 0);
 
   if (! png_ptr)
     return false;
@@ -293,7 +298,7 @@ write(CFile *file, CImagePtr image)
   png_infop info_ptr = png_create_info_struct(png_ptr);
 
   if (! info_ptr) {
-    png_destroy_write_struct(&png_ptr, NULL);
+    png_destroy_write_struct(&png_ptr, 0);
     return false;
   }
 
@@ -340,7 +345,7 @@ write(CFile *file, CImagePtr image)
     png_write_row(png_ptr, row_data);
   }
 
-  png_write_end(png_ptr, NULL);
+  png_write_end(png_ptr, 0);
 
   delete [] row_data;
 

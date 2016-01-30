@@ -1,25 +1,26 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
-#include <CFileUtil/CFileUtil.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
+#include <CRGBName.h>
+#include <cstring>
 
 int
 main(int argc, char **argv)
 {
   bool debug = false;
 
-  string ifilename;
-  string ofilename;
-  string icolorName;
-  string ocolorName;
+  std::string ifilename;
+  std::string ofilename;
+  std::string icolorName;
+  std::string ocolorName;
 
   for (int i = 1; i < argc; ++i) {
     if (argv[i][0] == '-') {
       if (strcmp(&argv[i][1], "debug") == 0)
         debug = true;
       else
-        cerr << "Invalid option " << argv[i];
+        std::cerr << "Invalid option " << argv[i];
     }
     else {
       if      (ifilename == "")
@@ -31,17 +32,18 @@ main(int argc, char **argv)
       else if (ocolorName == "")
         ocolorName = argv[i];
       else
-        cerr << "Invalid argument " << argv[i];
+        std::cerr << "Invalid argument " << argv[i];
     }
   }
 
   if (ifilename == "" || ofilename == "") {
-    cerr << "Usage: CImageColorReplace [-debug] <ifile> <ofile> <icolor> <ocolor>" << endl;
+    std::cerr << "Usage: CImageColorReplace [-debug] "
+                 "<ifile> <ofile> <icolor> <ocolor>" << std::endl;
     exit(1);
   }
 
-  CRGBA icolor = CRGBA(icolorName);
-  CRGBA ocolor = CRGBA(ocolorName);
+  CRGBA icolor = CRGBName::toRGBA(icolorName);
+  CRGBA ocolor = CRGBName::toRGBA(ocolorName);
 
   CFile ifile(ifilename);
   CFile ofile(ofilename);

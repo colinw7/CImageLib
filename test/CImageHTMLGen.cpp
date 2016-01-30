@@ -1,8 +1,8 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
-#include <CFileUtil/CFileUtil.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
+#include <cstring>
 
 #define UNSET_INT -999
 
@@ -41,7 +41,7 @@ main(int argc, char **argv)
           bg = argv[i];
       }
       else {
-        cerr << "Invalid arg: " << argv[i] << std::endl;
+        std::cerr << "Invalid arg: " << argv[i] << std::endl;
         exit(1);
       }
     }
@@ -56,8 +56,8 @@ main(int argc, char **argv)
 
   if (x_size == UNSET_INT || y_size == UNSET_INT || width == UNSET_INT ||
       ostr == "" || istrs.empty()) {
-    cerr << "Usage: CImageHTMLGen " <<
-            "<x_size> <y_size> <width> <ofile> <ifiles>" << endl;
+    std::cerr << "Usage: CImageHTMLGen " <<
+                 "<x_size> <y_size> <width> <ofile> <ifiles>" << std::endl;
     exit(1);
   }
 
@@ -78,20 +78,20 @@ main(int argc, char **argv)
   if (num_y == 1 && num_x > num_files)
     num_x = num_files;
 
-  cout << "<html>" << endl;
-  cout << "<head>" << endl;
-  cout << "<title>" << title << "</title>" << endl;
+  std::cout << "<html>" << std::endl;
+  std::cout << "<head>" << std::endl;
+  std::cout << "<title>" << title << "</title>" << std::endl;
 
   if (bg != "")
-    cout << "<body bgcolor=" << bg << ">" << endl;
+    std::cout << "<body bgcolor=" << bg << ">" << std::endl;
   else
-    cout << "<body>" << endl;
+    std::cout << "<body>" << std::endl;
 
   if (h1 != "")
-    cout << "<h1>" << h1 << "</h1>" << endl;
+    std::cout << "<h1>" << h1 << "</h1>" << std::endl;
 
-  cout << "<img src=\"" << ostr << "\" usemap=\"#map1\">" << endl;
-  cout << "<map name=\"map1\">" << endl;
+  std::cout << "<img src=\"" << ostr << "\" usemap=\"#map1\">" << std::endl;
+  std::cout << "<map name=\"map1\">" << std::endl;
 
   CImage::setResizeType(CIMAGE_RESIZE_BILINEAR);
 
@@ -122,7 +122,7 @@ main(int argc, char **argv)
       if (image1.isValid()) {
         CImagePtr image2;
 
-        if (x_size < image1->getWidth() || y_size < image1->getHeight()) {
+        if (x_size < int(image1->getWidth()) || y_size < int(image1->getHeight())) {
           int dx = abs(image1->getWidth () - x_size);
           int dy = abs(image1->getHeight() - y_size);
 
@@ -140,12 +140,12 @@ main(int argc, char **argv)
 
         image2->convertToRGB();
 
-        cout << "<area shape=rect coords=\"" <<
-                x << "," << y << "," << (x + x_size) << "," << (y + y_size) <<
-                "\" href=\"" << istrs[k] << "\">" << endl;
+        std::cout << "<area shape=rect coords=\"" <<
+                     x << "," << y << "," << (x + x_size) << "," << (y + y_size) <<
+                     "\" href=\"" << istrs[k] << "\">" << std::endl;
 
-        int w = min((int) image2->getWidth (), x_size);
-        int h = min((int) image2->getHeight(), y_size);
+        int w = std::min((int) image2->getWidth (), x_size);
+        int h = std::min((int) image2->getHeight(), y_size);
 
         image->subCopyFrom(image2, 0, 0, x_size, y_size,
                            x + (x_size - w)/2, y + (y_size - h)/2);
@@ -153,9 +153,9 @@ main(int argc, char **argv)
     }
   }
 
-  cout << "</map>" << endl;
-  cout << "</body>" << endl;
-  cout << "</html>" << endl;
+  std::cout << "</map>" << std::endl;
+  std::cout << "</body>" << std::endl;
+  std::cout << "</html>" << std::endl;
 
   CFileType type = CFileUtil::getImageTypeFromName(ostr);
 

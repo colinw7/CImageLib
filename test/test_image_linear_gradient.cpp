@@ -1,16 +1,17 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CFileUtil/CFileUtil.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CMath/CLinearGradient.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CLinearGradient.h>
+#include <CRGBName.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
+#include <cstring>
 
 int
 main(int argc, char **argv)
 {
   if (argc < 11) {
-    cerr << "Usage: test_image_linear_gradient " <<
-            "<ofile> w h x1 y1 x2 y2 spread {color offset}" << endl;
+    std::cerr << "Usage: test_image_linear_gradient " <<
+                 "<ofile> w h x1 y1 x2 y2 spread {color offset}" << std::endl;
     exit(1);
   }
 
@@ -44,7 +45,7 @@ main(int argc, char **argv)
   int num_offsets = (argc - 9)/2;
 
   for (int i = 0; i < num_offsets; ++i) {
-    CRGBA rgba(argv[2*i + 9]);
+    CRGBA rgba = CRGBName::toRGBA(argv[2*i + 9]);
 
     double offset;
 

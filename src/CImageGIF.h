@@ -48,21 +48,17 @@ class CImageGIF : public CImageFmt {
   static CImageAnim *createAnim(CFile *file);
 
  private:
-  static void readHeader(CFile *file, CImagePtr &image,
-                         CImageGIFHeader *header);
+  static bool readHeader(CFile *file, CImagePtr &image, CImageGIFHeader *header);
 
   static void readGlobalColors(CFile *file, CImageGIFData *gif_data);
 
-  static void readAnimData(CFile *file, CImageAnim *image_anim,
-                           CImageGIFData *gif_data);
+  static bool readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data);
 
-  static bool decompressData(uchar *in_data, int in_data_size,
-                             uchar *out_data, int out_data_size);
+  static bool decompressData(uchar *in_data, int in_data_size, uchar *out_data, int out_data_size);
 
   static uint readCode(uint *bit_offset, uchar *data);
 
-  static void deInterlace(uchar *image_data,
-                          CImageGIFImageHeader *image_header);
+  static void deInterlace(uchar *image_data, CImageGIFImageHeader *image_header);
 
   static void writeHeader(CFile *file, CImagePtr image);
   static void writeGraphicsBlock(CFile *file, CImagePtr image, int delay=0);

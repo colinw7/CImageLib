@@ -1,14 +1,13 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CFileUtil/CFileUtil.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc != 4) {
-    cerr << "Usage: CImageIsometric " << "<ifile> <ofile> <width>" << endl;
+    std::cerr << "Usage: CImageIsometric " << "<ifile> <ofile> <width>" << std::endl;
     exit(1);
   }
 

@@ -1,4 +1,4 @@
-#include <CImageLibI.h>
+#include <CImageInvert.h>
 
 CImagePtr
 CImage::

@@ -1,4 +1,4 @@
-#include <CImageLibI.h>
+#include <CImageFloodFill.h>
 
 struct CFillSegment {
   int y, xl, xr, dy;

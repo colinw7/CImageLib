@@ -4,11 +4,6 @@
 #include <CStrUtil.h>
 #include <cstring>
 
-using std::string;
-using std::vector;
-using std::cerr;
-using std::endl;
-
 #define CIMAGE_GIF_DICT_SIZE 5021
 
 #define GIF87a 0
@@ -131,7 +126,7 @@ readHeader(CFile *file, CImagePtr &image)
     image->setSize(header.width, header.height);
   }
   catch (...) {
-    CTHROW("Failed to read GIF file");
+    CImage::errorMsg("Failed to read GIF file");
     return false;
   }
 
@@ -154,9 +149,9 @@ createAnim(CFile *file)
 
   gif_data->header = new CImageGIFHeader;
 
-  gif_data->global_colors     = NULL;
+  gif_data->global_colors     = 0;
   gif_data->num_global_colors = 0;
-  gif_data->local_colors      = NULL;
+  gif_data->local_colors      = 0;
   gif_data->num_local_colors  = 0;
 
   //------
@@ -177,12 +172,13 @@ createAnim(CFile *file)
     readAnimData(file, image_anim, gif_data);
   }
   catch (...) {
-    CTHROW("Failed to read GIF file");
+    CImage::errorMsg("Failed to read GIF file");
+    return 0;
   }
 
   //------
 
-  if (gif_data != NULL) {
+  if (gif_data != 0) {
     delete gif_data->header;
 
     delete [] gif_data->global_colors;
@@ -196,7 +192,7 @@ createAnim(CFile *file)
   return image_anim;
 }
 
-void
+bool
 CImageGIF::
 readHeader(CFile *file, CImagePtr &, CImageGIFHeader *header)
 {
@@ -226,22 +222,26 @@ readHeader(CFile *file, CImagePtr &, CImageGIFHeader *header)
   header->global_color_table = (header->flags >> 7) & 0x01;
 
   if (CImageState::getDebug()) {
-    cerr << "Signature     " << header->signature[0] << header->signature[1] <<
-                                header->signature[2] << endl;
-    cerr << "Version       " << header->version[0] << header->version[1] <<
-                                header->version[2] << endl;
-    cerr << "Width         " << header->width << endl;
-    cerr << "Height        " << header->height << endl;
-    cerr << "Num Colors    " << (1 << (header->color_bits + 1)) << endl;
-    cerr << "Colors Sorted " << (int) header->colors_sorted << endl;
-    cerr << "Max Colors    " << 1 << (header->max_color_bits + 1) << endl;
-    cerr << "Global Colors " << (int) header->global_color_table << endl;
-    cerr << "Background    " << (int) header->background << endl;
-    cerr << "Aspect        " << (int) header->aspect << endl;
+    CImage::infoMsg("Signature     " + std::to_string(header->signature[0]) +
+                                       std::to_string(header->signature[1]) +
+                                       std::to_string(header->signature[2]));
+    CImage::infoMsg("Version       " + std::to_string(header->version[0]) +
+                                       std::to_string(header->version[1]) +
+                                       std::to_string(header->version[2]));
+    CImage::infoMsg("Width         " + std::to_string(header->width));
+    CImage::infoMsg("Height        " + std::to_string(header->height));
+    CImage::infoMsg("Num Colors    " + std::to_string((1 << (header->color_bits + 1))));
+    CImage::infoMsg("Colors Sorted " + std::to_string((int) header->colors_sorted));
+    CImage::infoMsg("Max Colors    " + std::to_string((1 << (header->max_color_bits + 1))));
+    CImage::infoMsg("Global Colors " + std::to_string((int) header->global_color_table));
+    CImage::infoMsg("Background    " + std::to_string((int) header->background));
+    CImage::infoMsg("Aspect        " + std::to_string((int) header->aspect));
   }
 
-  if (strncmp(header->signature, "GIF", 3) != 0)
-    CTHROW("Not a GIF File");
+  if (strncmp(header->signature, "GIF", 3) != 0) {
+    CImage::errorMsg("Not a GIF File");
+    return false;
+  }
 
 #if 0
   int type;
@@ -250,9 +250,13 @@ readHeader(CFile *file, CImagePtr &, CImageGIFHeader *header)
     type = GIF87a;
   else if (strncmp(header->version, "89a", 3) == 0)
     type = GIF89a;
-  else
-    CTHROW("Invalid GIF Version");
+  else {
+    CImage::errorMsg("Invalid GIF Version");
+    return false;
+  }
 #endif
+
+  return true;
 }
 
 void
@@ -272,14 +276,14 @@ readGlobalColors(CFile *file, CImageGIFData *gif_data)
 
   if (CImageState::getDebug()) {
     for (int i = 0; i < gif_data->num_global_colors; ++i)
-      cerr << "Color: " << i << " " <<
-              (int) gif_data->global_colors[i].r << " " <<
-              (int) gif_data->global_colors[i].g << " " <<
-              (int) gif_data->global_colors[i].b << endl;
+      CImage::infoMsg("Color: " + std::to_string(i) + " " +
+                      std::to_string((int) gif_data->global_colors[i].r) + " " +
+                      std::to_string((int) gif_data->global_colors[i].g) + " " +
+                      std::to_string((int) gif_data->global_colors[i].b));
   }
 }
 
-void
+bool
 CImageGIF::
 readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 {
@@ -307,7 +311,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
       ++inum;
 
       if (CImageState::getDebug())
-        cerr << "Image Id" << endl;
+        CImage::infoMsg("Image Id");
 
       CImageGIFImageHeader *image_header = new CImageGIFImageHeader;
 
@@ -343,14 +347,14 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
         image_header->color_bits        = (image_header->flags     ) & 0x07;
 
         if (CImageState::getDebug()) {
-          cerr << "Left          " << image_header->left << endl;
-          cerr << "Top           " << image_header->top << endl;
-          cerr << "Width         " << image_header->width << endl;
-          cerr << "Height        " << image_header->height << endl;
-          cerr << "Local Colors  " << image_header->local_color_table << endl;
-          cerr << "Interlaced    " << image_header->interlaced << endl;
-          cerr << "Colors Sorted " << image_header->colors_sorted << endl;
-          cerr << "Num Colors    " << (1 << (image_header->color_bits + 1)) << endl;
+          CImage::infoMsg("Left          " + std::to_string(image_header->left));
+          CImage::infoMsg("Top           " + std::to_string(image_header->top));
+          CImage::infoMsg("Width         " + std::to_string(image_header->width));
+          CImage::infoMsg("Height        " + std::to_string(image_header->height));
+          CImage::infoMsg("Local Colors  " + std::to_string(image_header->local_color_table));
+          CImage::infoMsg("Interlaced    " + std::to_string(image_header->interlaced));
+          CImage::infoMsg("Colors Sorted " + std::to_string(image_header->colors_sorted));
+          CImage::infoMsg("Num Colors    " + std::to_string(1 << (image_header->color_bits + 1)));
         }
 
         if (image_header->local_color_table &&
@@ -364,9 +368,9 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
           if (CImageState::getDebug()) {
             for (int i = 0; i < gif_data->num_local_colors; ++i)
-              cerr << gif_data->local_colors[i].r << " " <<
-                      gif_data->local_colors[i].g << " " <<
-                      gif_data->local_colors[i].b << endl;
+              CImage::infoMsg(std::to_string(gif_data->local_colors[i].r) + " " +
+                              std::to_string(gif_data->local_colors[i].g) + " " +
+                              std::to_string(gif_data->local_colors[i].b));
           }
         }
 
@@ -480,17 +484,19 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
         delete image_header;
 
-        image_header = NULL;
+        image_header = 0;
       }
       catch (...) {
         delete image_header;
 
-        CTHROW("Failed to read GIF file");
+        CImage::errorMsg("Failed to read GIF file");
+
+        return false;
       }
     }
     else if (id == CONTROL_ID) {
       if (CImageState::getDebug())
-        cerr << "Control Id" << endl;
+        CImage::infoMsg("Control Id");
 
       try {
         uchar id1;
@@ -498,14 +504,14 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
         file->read(&id1, 1);
 
         if (CImageState::getDebug())
-          cerr << "Id = " << CStrUtil::toHexString(id1) << endl;
+          CImage::infoMsg("Id = " + CStrUtil::toHexString(id1));
 
         uchar size;
 
         file->read(&size, 1);
 
         if (CImageState::getDebug())
-          cerr << "Size = " << CStrUtil::toHexString(size) << endl;
+          CImage::infoMsg("Size = " + CStrUtil::toHexString(size));
 
         //if (id1 == CONTROL_APPEXT_ID) size = 11;
 
@@ -516,7 +522,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
         if (id1 == CONTROL_LABEL_ID) {
           if (CImageState::getDebug())
-            cerr << "Graphics Control Extension" << endl;
+            CImage::infoMsg("Graphics Control Extension");
 
           delay             = (compress_data.buffer[2] << 8) |
                               compress_data.buffer[1];
@@ -526,20 +532,20 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
           dispose           = ((compress_data.buffer[0] & 0x1C) >> 2);
 
           if (CImageState::getDebug()) {
-            cerr << "Delay       " << delay << endl;
-            cerr << "Transparent " << transparent << " " <<
-                                      transparent_color << endl;
-            cerr << "User Input  " << user_input << endl;
-            cerr << "Dispose     " << dispose << endl;
+            CImage::infoMsg("Delay       " + std::to_string(delay));
+            CImage::infoMsg("Transparent " + std::to_string(transparent) + " " +
+                                             std::to_string(transparent_color));
+            CImage::infoMsg("User Input  " + std::to_string(user_input));
+            CImage::infoMsg("Dispose     " + std::to_string(dispose));
           }
         }
         else if (id1 == CONTROL_APPEXT_ID) {
           if (CImageState::getDebug())
-            cerr << "Application Extension" << endl;
+            CImage::infoMsg("Application Extension");
         }
         else if (id1 == CONTROL_COMMENT_ID) {
           if (CImageState::getDebug())
-            cerr << "Comment" << endl;
+            CImage::infoMsg("Comment");
 
           uchar len = 0;
 
@@ -555,7 +561,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
           }
         }
         else {
-          cerr << "Unknown control block " << (int) id1 << endl;
+          CImage::errorMsg("Unknown control block " + std::to_string((int) id1));
         }
 
         // skip to block terminator
@@ -570,15 +576,16 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
         }
 
         if (CImageState::getDebug())
-          cerr << "@ " << file->getPos() << endl;
+          CImage::infoMsg("@ " + std::to_string(file->getPos()));
       }
       catch (...) {
-        CTHROW("Failed to read GIF file");
+        CImage::errorMsg("Failed to read GIF file");
+        return false;
       }
     }
     else if (id == TRAILER_ID) {
       if (CImageState::getDebug())
-        cerr << "Trailer Id" << endl;
+        CImage::errorMsg("Trailer Id");
 
       break;
     }
@@ -588,7 +595,8 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
       file->read(&pad, 1);
     }
     else {
-      cerr << "Invalid Id " << int(id) << " @ " << file->getPos() << endl;
+      CImage::errorMsg("Invalid Id " + std::to_string(int(id)) +
+                       " @ " + std::to_string(file->getPos()));
 
       uchar c;
 
@@ -600,6 +608,8 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
       }
     }
   }
+
+  return true;
 }
 
 bool
@@ -638,7 +648,7 @@ decompressData(uchar *in_data, int in_data_size,
 
       if (num_out_data + 1 > out_data_size) {
         if (CImageState::getDebug())
-          cerr << "Output Data Overflow !!!" << endl;
+          CImage::infoMsg("Output Data Overflow !!!");
 
         break;
       }
@@ -668,7 +678,7 @@ decompressData(uchar *in_data, int in_data_size,
 
       if (num_out_data + num_out_bytes > out_data_size) {
         if (CImageState::getDebug())
-          cerr << "Output Data Overflow !!!" << endl;
+          CImage::infoMsg("Output Data Overflow !!!");
 
         break;
       }
@@ -773,8 +783,8 @@ write(CFile *file, CImagePtr image)
   CImagePtr image1 = image;
 
   if (! image->hasColormap()) {
-    cerr << "GIF Image Depth greater than 8 not supported" << endl;
-    cerr << "Converting image to 256 colors" << endl;
+    CImage::warnMsg("GIF Image Depth greater than 8 not supported - "
+                    "Converting image to 256 colors");
 
     image1 = image1->dup();
 
@@ -835,7 +845,7 @@ write(CFile *file, CImagePtr image)
 
 bool
 CImageGIF::
-writeAnim(CFile *file, const vector<CImagePtr> &images, int delay)
+writeAnim(CFile *file, const std::vector<CImagePtr> &images, int delay)
 {
   if (images.empty())
     return false;
@@ -845,14 +855,14 @@ writeAnim(CFile *file, const vector<CImagePtr> &images, int delay)
 
   uint num_images = images.size();
 
-  vector<CImagePtr> images1;
+  std::vector<CImagePtr> images1;
 
   for (uint i = 0; i < num_images; ++i) {
     CImagePtr image1 = images[i];
 
     if (! image1->hasColormap()) {
-      cerr << "GIF Image Depth greater than 8 not supported" << endl;
-      cerr << "Converting image to 256 colors" << endl;
+      CImage::warnMsg("GIF Image Depth greater than 8 not supported - "
+                      "Converting image to 256 colors");
 
       image1 = image1->dup();
 

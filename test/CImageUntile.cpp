@@ -1,9 +1,9 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CStrUtil.h>
+#include <cstring>
 
-string
+std::string
 indToString(const char *format, int ix, int iy)
 {
   char buffer[1024];
@@ -19,11 +19,11 @@ main(int argc, char **argv)
   bool        flip_dir = false;
   const char *format   = "_%d_%d";
 
-  char *filename = NULL;
-  char *dx_str   = NULL;
-  char *dy_str   = NULL;
-  char *sx_str   = NULL;
-  char *sy_str   = NULL;
+  char *filename = 0;
+  char *dx_str   = 0;
+  char *dy_str   = 0;
+  char *sx_str   = 0;
+  char *sy_str   = 0;
 
   for (int i = 1; i < argc; ++i) {
     if (argv[i][0] == '-') {
@@ -34,7 +34,7 @@ main(int argc, char **argv)
           format = argv[++i];
       }
       else
-        cerr << "Invalid option: " << argv[i] << endl;
+        std::cerr << "Invalid option: " << argv[i] << std::endl;
     }
     else {
       if      (! filename) filename = argv[i];
@@ -46,8 +46,8 @@ main(int argc, char **argv)
   }
 
   if (! filename || ! dx_str || ! dy_str) {
-    cerr << "Usage: CImageUntile [-flip_dir] [-format <format>] "
-            "<ifile> <dx> <dy> [<sx>] [<sy>]" << endl;
+    std::cerr << "Usage: CImageUntile [-flip_dir] [-format <format>] "
+                 "<ifile> <dx> <dy> [<sx>] [<sy>]" << std::endl;
     exit(1);
   }
 
@@ -78,10 +78,10 @@ main(int argc, char **argv)
       for (int x = 0, ix = 1; x < width; x += dx + sx, ++ix) {
         CImagePtr image1 = image->subImage(x, y, dx, dy);
 
-        string ind_str = indToString(format, ix, iy);
+        std::string ind_str = indToString(format, ix, iy);
 
-        string filename = ifile->getDir() + "/" + ifile->getBase() +
-                          ind_str + "." + ifile->getSuffix();
+        std::string filename = ifile->getDir() + "/" + ifile->getBase() +
+                               ind_str + "." + ifile->getSuffix();
 
         image1->write(filename, type);
       }
@@ -92,10 +92,10 @@ main(int argc, char **argv)
       for (int y = 0, iy = 1; y < height; y += dy + sy, ++iy) {
         CImagePtr image1 = image->subImage(x, y, dx, dy);
 
-        string ind_str = indToString(format, iy, ix);
+        std::string ind_str = indToString(format, iy, ix);
 
-        string filename = ifile->getDir() + "/" + ifile->getBase() +
-                          ind_str + "." + ifile->getSuffix();
+        std::string filename = ifile->getDir() + "/" + ifile->getBase() +
+                               ind_str + "." + ifile->getSuffix();
 
         image1->write(filename, type);
       }

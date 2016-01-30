@@ -2,15 +2,13 @@
 #include <CImagePPM.h>
 #include <CStrUtil.h>
 
-using std::string;
-
 bool
 CImagePPM::
 read(CFile *file, CImagePtr &image)
 {
   file->rewind();
 
-  string line;
+  std::string line;
 
   file->readLine(line);
 
@@ -38,7 +36,7 @@ bool
 CImagePPM::
 readV6(CFile *file, CImagePtr &image)
 {
-  string line;
+  std::string line;
 
   file->readLine(line);
 

@@ -1,15 +1,14 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CFileUtil/CFileUtil.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc < 8) {
-    cerr << "Usage: test_image_turbulence " <<
-            "<ofile> w h fractal freq octaves seed" << endl;
+    std::cerr << "Usage: test_image_turbulence " <<
+                 "<ofile> w h fractal freq octaves seed" << std::endl;
     exit(1);
   }
 

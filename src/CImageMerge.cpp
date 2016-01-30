@@ -1,7 +1,4 @@
-#include <CImageLibI.h>
-
-using std::min;
-using std::max;
+#include <CImageMerge.h>
 
 CImagePtr
 CImage::
@@ -32,10 +29,10 @@ merge(CImagePtr image1, CImagePtr image2)
   int width2  = timage2->getWidth ();
   int height2 = timage2->getHeight();
 
-  int min_width  = min(width1 , width2 );
-  int min_height = min(height1, height2);
-  int max_width  = max(width1 , width2 );
-  int max_height = max(height1, height2);
+  int min_width  = std::min(width1 , width2 );
+  int min_height = std::min(height1, height2);
+  int max_width  = std::max(width1 , width2 );
+  int max_height = std::max(height1, height2);
 
   image->setDataSize(max_width, max_height);
 
@@ -91,7 +88,7 @@ merge(CImagePtr image1, CImagePtr image2)
       timage1->getRGBAPixel(x - dxl1, y - dyt1, &r1, &g1, &b1, &a1);
       timage2->getRGBAPixel(x - dxl2, y - dyt2, &r2, &g2, &b2, &a2);
 
-      double a11 = min(1 - a2, a1);
+      double a11 = std::min(1 - a2, a1);
 
       image->setRGBAPixel(x, y,
                           r2*a2 + a11*r1,

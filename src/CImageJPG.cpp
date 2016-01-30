@@ -4,9 +4,6 @@
 #include <cstring>
 #include <setjmp.h>
 
-using std::cerr;
-using std::endl;
-
 #ifdef IMAGE_JPEG
 extern "C" {
 #include <jpeglib.h>
@@ -14,6 +11,8 @@ extern "C" {
 #endif
 
 static jmp_buf jpeg_setjmp_buffer;
+
+std::vector<char> CImageJPG::errorBuffer_;
 
 bool
 CImageJPG::
@@ -243,7 +242,8 @@ int
 CImageJPG::
 jpgProcessMarker(struct jpeg_decompress_struct *cinfo)
 {
-  cerr << "In jpgProcessMarker" << endl;
+  if (CImageState::getDebug())
+    CImage::infoMsg("In jpgProcessMarker");
 
   int length = 0;
 
@@ -276,9 +276,9 @@ void
 CImageJPG::
 jpgErrorProc(struct jpeg_common_struct *cinfo)
 {
-  cerr << "JPEG Error" << endl;
-
   (*cinfo->err->output_message)(cinfo);
+
+  CImage::errorMsg("JPEG Error '" + std::string(&errorBuffer_[0]) + "'");
 
   longjmp(jpeg_setjmp_buffer, 1);
 }
@@ -287,11 +287,9 @@ void
 CImageJPG::
 jpgMessageProc(struct jpeg_common_struct *cinfo)
 {
-  char buffer[JMSG_LENGTH_MAX];
+  errorBuffer_.resize(JMSG_LENGTH_MAX + 1);
 
-  (*cinfo->err->format_message)(cinfo, buffer);
-
-  cerr << buffer << endl;
+  (*cinfo->err->format_message)(cinfo, &errorBuffer_[0]);
 }
 #endif
 

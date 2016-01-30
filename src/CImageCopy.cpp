@@ -1,10 +1,6 @@
-#include <CImageLibI.h>
+#include <CImageCopy.h>
 
 #include <cstring>
-
-using std::min;
-using std::max;
-using std::map;
 
 CImageCopyType CImage::copy_type = CIMAGE_COPY_ALL;
 
@@ -114,7 +110,7 @@ subCopyFrom(CImagePtr src, int src_x, int src_y, int width, int height, int dst_
   if (src->hasColormap()) {
     convertToColorIndex();
 
-    map<int,int> colorMap;
+    std::map<int,int> colorMap;
 
     int num_colors = src->getNumColors();
 
@@ -203,7 +199,7 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
   if (hasColormap()) {
     dst->convertToColorIndex();
 
-    map<int,int> colorMap;
+    std::map<int,int> colorMap;
 
     int num_colors = getNumColors();
 
@@ -268,7 +264,7 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
   }
 }
 
-void
+bool
 CImage::
 combine(CImagePtr image, int x, int y)
 {
@@ -279,19 +275,20 @@ combine(CImagePtr image, int x, int y)
   int iheight1 = image->getHeight();
 
   int x1 = x;
-  int x2 = min(x + iwidth1  - 1, iwidth  - 1);
+  int x2 = std::min(x + iwidth1  - 1, iwidth  - 1);
   int y1 = y;
-  int y2 = min(y + iheight1 - 1, iheight - 1);
+  int y2 = std::min(y + iheight1 - 1, iheight - 1);
 
   if (hasColormap() && image->hasColormap()) {
     int color_ind;
 
-    for (int y = y1; y <= y2; ++y)
+    for (int y = y1; y <= y2; ++y) {
       for (int x = x1; x <= x2; ++x) {
         color_ind = image->getColorIndexPixel(x, y);
 
         drawColorIndexPoint(x, y, color_ind);
       }
+    }
   }
   else {
     CRGBA rgba;
@@ -299,13 +296,16 @@ combine(CImagePtr image, int x, int y)
     if (hasColormap())
       convertToRGB();
 
-    for (int y = y1; y <= y2; ++y)
+    for (int y = y1; y <= y2; ++y) {
       for (int x = x1; x <= x2; ++x) {
         image->getRGBAPixel(x, y, rgba);
 
         drawRGBAPoint(x, y, rgba);
       }
+    }
   }
+
+  return true;
 }
 
 CImagePtr
@@ -314,12 +314,12 @@ combine(CImagePtr image1, CImagePtr image2, int x, int y)
 {
   CImagePtr image = image1->dup();
 
-  image->combine(image2, x, y);
+  (void) image->combine(image2, x, y);
 
   return image;
 }
 
-void
+bool
 CImage::
 combineAlpha(CImagePtr image, int x, int y)
 {
@@ -330,9 +330,9 @@ combineAlpha(CImagePtr image, int x, int y)
   int iheight1 = image->getHeight();
 
   int x1 = x;
-  int x2 = min(x + iwidth1  - 1, iwidth  - 1);
+  int x2 = std::min(x + iwidth1  - 1, iwidth  - 1);
   int y1 = y;
-  int y2 = min(y + iheight1 - 1, iheight - 1);
+  int y2 = std::min(y + iheight1 - 1, iheight - 1);
 
   CRGBA rgba1, rgba2;
 
@@ -350,4 +350,6 @@ combineAlpha(CImagePtr image, int x, int y)
       setRGBAPixel(x, y, rgba1);
     }
   }
+
+  return true;
 }

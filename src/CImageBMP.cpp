@@ -2,10 +2,6 @@
 #include <CImageBMP.h>
 #include <CThrow.h>
 
-using std::vector;
-using std::cerr;
-using std::endl;
-
 struct CImageBMPHeader {
   int file_size;
   int start_offset;
@@ -21,15 +17,18 @@ bool
 CImageBMP::
 read(CFile *file, CImagePtr &image)
 {
-  CRGBA *colors = NULL;
-  uint  *data   = NULL;
+  bool rc = true;
+
+  CRGBA *colors = 0;
+  uint  *data   = 0;
 
   file->rewind();
 
   try {
     CImageBMPHeader header;
 
-    readHeader(file, &header);
+    if (! readHeader(file, &header))
+      return false;
 
     //------
 
@@ -37,7 +36,8 @@ read(CFile *file, CImagePtr &image)
 
     //------
 
-    readData(file, image, &header, &data);
+    if (! readData(file, image, &header, &data))
+      return false;
 
     //------
 
@@ -55,14 +55,16 @@ read(CFile *file, CImagePtr &image)
       image->setRGBAData(data);
   }
   catch (...) {
-    CTHROW("Failed to read BMP file");
+    CImage::errorMsg("Failed to read BMP file");
 
     delete [] colors;
+
+    rc = false;
   }
 
   delete [] data;
 
-  return true;
+  return rc;
 }
 
 bool
@@ -74,7 +76,8 @@ readHeader(CFile *file, CImagePtr &image)
   try {
     CImageBMPHeader header;
 
-    readHeader(file, &header);
+    if (! readHeader(file, &header))
+      return false;
 
     //------
 
@@ -83,13 +86,14 @@ readHeader(CFile *file, CImagePtr &image)
     image->setSize(header.width, header.height);
   }
   catch (...) {
-    CTHROW("Failed to read BMP file");
+    CImage::errorMsg("Failed to read BMP file");
+    return false;
   }
 
   return true;
 }
 
-void
+bool
 CImageBMP::
 readHeader(CFile *file, CImageBMPHeader *header)
 {
@@ -97,15 +101,17 @@ readHeader(CFile *file, CImageBMPHeader *header)
 
   file->read(buffer, 14);
 
-  if (buffer[0] != 'B' || buffer[1] != 'M')
-    CTHROW("Missing 'BM' at start of File");
+  if (buffer[0] != 'B' || buffer[1] != 'M') {
+    CImage::errorMsg("Missing 'BM' at start of File");
+    return false;
+  }
 
   readInteger(&buffer[ 2], &header->file_size   );
   readInteger(&buffer[10], &header->start_offset);
 
   if (CImageState::getDebug()) {
-    cerr << "File Size    " << header->file_size    << endl;
-    cerr << "Start Offset " << header->start_offset << endl;
+    CImage::infoMsg("File Size    " + std::to_string(header->file_size));
+    CImage::infoMsg("Start Offset " + std::to_string(header->start_offset));
   }
 
   //------
@@ -115,10 +121,12 @@ readHeader(CFile *file, CImageBMPHeader *header)
   readInteger(&buffer[0], &header->header_size);
 
   if (CImageState::getDebug())
-    cerr << "Header Size " << header->header_size << endl;
+    CImage::infoMsg("Header Size " + std::to_string(header->header_size));
 
-  if (header->header_size != 40)
-    CTHROW("Invalid Header Size");
+  if (header->header_size != 40) {
+    CImage::errorMsg("Invalid Header Size");
+    return false;
+  }
 
   //------
 
@@ -131,20 +139,22 @@ readHeader(CFile *file, CImageBMPHeader *header)
   readInteger(&buffer[28], &header->num_colors );
 
   if (CImageState::getDebug()) {
-    cerr << "Width       " << header->width       << endl;
-    cerr << "Height      " << header->height      << endl;
-    cerr << "Depth       " << header->depth       << endl;
-    cerr << "Compression " << header->compression << endl;
-    cerr << "Num Colors  " << header->num_colors  << endl;
+    CImage::infoMsg("Width       " + std::to_string(header->width      ));
+    CImage::infoMsg("Height      " + std::to_string(header->height     ));
+    CImage::infoMsg("Depth       " + std::to_string(header->depth      ));
+    CImage::infoMsg("Compression " + std::to_string(header->compression));
+    CImage::infoMsg("Num Colors  " + std::to_string(header->num_colors ));
   }
 
   //------
 
   if (header->depth != 1 && header->depth != 4  &&
       header->depth != 8 && header->depth != 24) {
-    cerr << "BMP Depth " << header->depth << " not supported" << endl;
-    CTHROW("Depth not supported");
+    CImage::errorMsg("BMP Depth " + std::to_string(header->depth) + " not supported");
+    return false;
   }
+
+  return true;
 }
 
 void
@@ -165,23 +175,25 @@ readColors(CFile *file, CImageBMPHeader *header, CRGBA **colors)
       (*colors)[i].setRGBAI(buffer[i*4 + 2], buffer[i*4 + 1], buffer[i*4 + 0]);
 
       if (CImageState::getDebug())
-        cerr << "Color " << (i + 1) << ") " <<
-                buffer[i*4 + 2] << "," << buffer[i*4 + 1] << "," << buffer[i*4 + 0] << "," <<
-                buffer[i*4 + 3] << endl;
+        CImage::infoMsg("Color " + std::to_string(i + 1) + ") " +
+                        std::string((char *) &buffer[i*4 + 2], 1) + "," +
+                        std::string((char *) &buffer[i*4 + 1], 1) + "," +
+                        std::string((char *) &buffer[i*4 + 0], 1) + "," +
+                        std::string((char *) &buffer[i*4 + 3], 1));
     }
   }
   else
     header->num_colors = 0;
 }
 
-void
+bool
 CImageBMP::
 readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 {
   if     (header->depth == 24) {
     if (header->compression != 0) {
-      cerr << "Compression not supported for Depth " << header->depth << endl;
-      CTHROW("Compression not supported for Depth");
+      CImage::errorMsg("Compression not supported for Depth " + std::to_string(header->depth));
+      return false;
     }
 
     int line_width  = 3*header->width;
@@ -191,7 +203,7 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 
     *data = new uint [num_data];
 
-    vector<uchar> line_buffer;
+    std::vector<uchar> line_buffer;
 
     line_buffer.resize(line_width);
 
@@ -229,15 +241,15 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
     else if (header->compression == 1)
           readCmp1Data8(file, header->width, header->height, data, &num_data);
     else {
-      cerr << "Compression " << header->compression <<
-              " not supported for Depth " << header->depth << endl;
-      CTHROW("Compression Type not supported for Depth");
+      CImage::errorMsg("Compression " + std::to_string(header->compression) +
+                       " not supported for Depth " + std::to_string(header->depth));
+      return false;
     }
   }
   else if (header->depth == 4) {
     if (header->compression != 0) {
-      cerr << "Compression not supported for Depth " << header->depth << endl;
-      CTHROW("Compression Type not supported for Depth");
+      CImage::errorMsg("Compression not supported for Depth " + std::to_string(header->depth));
+      return false;
     }
 
     int num_data = header->width*header->height;
@@ -248,7 +260,7 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 
     int width1 = 4*bytes_per_line;
 
-    vector<uchar> buffer1;
+    std::vector<uchar> buffer1;
 
     buffer1.resize(width1);
 
@@ -280,7 +292,7 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 
     int width2 = width1/8;
 
-    vector<uchar> buffer1;
+    std::vector<uchar> buffer1;
 
     buffer1.resize(width2);
 
@@ -319,6 +331,8 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 
     header->depth = 8;
   }
+
+  return true;
 }
 
 void
@@ -333,7 +347,7 @@ readCmp0Data8(CFile *file, int width, int height, uint **data, int *num_data)
 
   int pad = bytes_per_line*4 - width;
 
-  vector<uchar> buffer;
+  std::vector<uchar> buffer;
 
   buffer.resize(width);
 
@@ -568,7 +582,7 @@ write(CFile *file, CImagePtr image)
 
     int num_data = line_width1*height;
 
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
     buffer.resize(line_width);
 
@@ -602,7 +616,7 @@ write(CFile *file, CImagePtr image)
     }
   }
   else if (depth == 8) {
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
      buffer.resize(width);
 
@@ -638,7 +652,7 @@ write(CFile *file, CImagePtr image)
 
     int width1 = 4*bytes_per_line;
 
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
     buffer.resize(width1);
 
@@ -675,7 +689,7 @@ write(CFile *file, CImagePtr image)
 
     int width2 = width1/8;
 
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
     buffer.resize(width2);
 

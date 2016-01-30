@@ -1,28 +1,27 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CFile/CDir.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CDir.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc < 3) {
-    cerr << "Usage: test_image_html_frame " <<
-            "<size> <name> <ifiles>" << endl;
+    std::cerr << "Usage: test_image_html_frame " <<
+                 "<size> <name> <ifiles>" << std::endl;
     exit(1);
   }
 
   int size = CStrUtil::toInteger(argv[1]);
 
-  string hname = argv[2];
+  std::string hname = argv[2];
 
   int num_files = argc - 3;
 
-  vector<string> names, bases;
+  std::vector<std::string> names, bases;
 
   for (int i = 0; i < num_files; ++i) {
-    string name = argv[i + 3];
+    std::string name = argv[i + 3];
 
     names.push_back(name);
 

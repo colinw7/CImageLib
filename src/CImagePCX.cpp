@@ -3,9 +3,6 @@
 
 #include <cstring>
 
-using std::cerr;
-using std::endl;
-
 #define ENCODE_SHORT(a) (((a)[0]) + ((a)[1] << 8))
 
 struct PCXHeader {
@@ -224,21 +221,21 @@ readHeader(CFile *file, CImagePtr &, PCXHeader *header)
     return false;
 
   if (CImageState::getDebug()) {
-    cerr << "identifier        = " << header->identifier << endl;
-    cerr << "version           = " << header->version << endl;
-    cerr << "encoding          = " << header->encoding << endl;
-    cerr << "bits_per_pixel    = " << header->bits_per_pixel << endl;
-    cerr << "x_start           = " << header->x_start << endl;
-    cerr << "y_start           = " << header->y_start << endl;
-    cerr << "x_end             = " << header->x_end << endl;
-    cerr << "y_end             = " << header->y_end << endl;
-    cerr << "horiz_res         = " << header->horiz_res << endl;
-    cerr << "vert_res          = " << header->vert_res << endl;
-    cerr << "num_bit_planes    = " << header->num_bit_planes << endl;
-    cerr << "bytes_per_line    = " << header->bytes_per_line << endl;
-    cerr << "palette_type      = " << header->palette_type << endl;
-    cerr << "horiz_screen_size = " << header->horiz_screen_size << endl;
-    cerr << "vert_screen_size  = " << header->vert_screen_size << endl;
+    CImage::infoMsg("identifier        = " + std::to_string(header->identifier));
+    CImage::infoMsg("version           = " + std::to_string(header->version));
+    CImage::infoMsg("encoding          = " + std::to_string(header->encoding));
+    CImage::infoMsg("bits_per_pixel    = " + std::to_string(header->bits_per_pixel));
+    CImage::infoMsg("x_start           = " + std::to_string(header->x_start));
+    CImage::infoMsg("y_start           = " + std::to_string(header->y_start));
+    CImage::infoMsg("x_end             = " + std::to_string(header->x_end));
+    CImage::infoMsg("y_end             = " + std::to_string(header->y_end));
+    CImage::infoMsg("horiz_res         = " + std::to_string(header->horiz_res));
+    CImage::infoMsg("vert_res          = " + std::to_string(header->vert_res));
+    CImage::infoMsg("num_bit_planes    = " + std::to_string(header->num_bit_planes));
+    CImage::infoMsg("bytes_per_line    = " + std::to_string(header->bytes_per_line));
+    CImage::infoMsg("palette_type      = " + std::to_string(header->palette_type));
+    CImage::infoMsg("horiz_screen_size = " + std::to_string(header->horiz_screen_size));
+    CImage::infoMsg("vert_screen_size  = " + std::to_string(header->vert_screen_size));
   }
 
   return true;

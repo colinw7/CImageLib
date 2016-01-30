@@ -1,6 +1,4 @@
-#include <CImageLibI.h>
-
-using std::vector;
+#include <CImageScroll.h>
 
 void
 CImage::
@@ -22,7 +20,7 @@ scrollX(int offset)
 
   int width = right - left + 1;
 
-  vector<uint> buffer;
+  std::vector<uint> buffer;
 
   buffer.resize(width);
 
@@ -57,7 +55,7 @@ scrollY(int offset)
 
   int height = top - bottom + 1;
 
-  vector<uint> buffer;
+  std::vector<uint> buffer;
 
   buffer.resize(height);
 

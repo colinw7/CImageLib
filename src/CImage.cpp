@@ -2,13 +2,6 @@
 
 #include <cstring>
 
-using std::string;
-using std::map;
-using std::min;
-using std::max;
-using std::cerr;
-using std::endl;
-
 static double rgb_scale = 1.0/255.0;
 
 bool            CImage::combine_enabled_  = true;
@@ -19,7 +12,7 @@ CImage() :
  type_  (CFILE_TYPE_NONE),
  size_  (0, 0),
  border_(),
- data_  (NULL),
+ data_  (0),
  colors_(),
  window_(),
  bg_    (0,0,0)
@@ -32,7 +25,7 @@ CImage(int width, int height) :
  type_  (CFILE_TYPE_NONE),
  size_  (width, height),
  border_(),
- data_  (NULL),
+ data_  (0),
  colors_(),
  window_(),
  bg_    (0,0,0)
@@ -53,7 +46,7 @@ CImage(const CISize2D &size) :
  type_  (CFILE_TYPE_NONE),
  size_  (size),
  border_(),
- data_  (NULL),
+ data_  (0),
  colors_(),
  window_(),
  bg_    (0,0,0)
@@ -74,14 +67,14 @@ CImage(const CImage &image) :
  type_  (image.type_),
  size_  (image.size_),
  border_(image.border_),
- data_  (NULL),
+ data_  (0),
  colors_(),
  window_(image.window_),
  bg_    (image.bg_)
 {
   int size = size_.area();
 
-  if (size > 0 && image.data_ != NULL) {
+  if (size > 0 && image.data_ != 0) {
     data_ = new uint [size];
 
     memcpy(data_, image.data_, size*sizeof(uint));
@@ -100,7 +93,7 @@ CImage(const CImage &image, int x, int y, int width, int height) :
  type_  (CFILE_TYPE_NONE),
  size_  (width, height),
  border_(),
- data_  (NULL),
+ data_  (0),
  colors_(),
  window_(),
  bg_    (0, 0, 0)
@@ -172,13 +165,13 @@ operator=(const CImage &image)
 
   int size = size_.area();
 
-  if (size > 0 && image.data_ != NULL) {
+  if (size > 0 && image.data_ != 0) {
     data_ = new uint [size];
 
     memcpy(data_, image.data_, size*sizeof(uint));
   }
   else
-    data_ = NULL;
+    data_ = 0;
 
   colors_.clear();
 
@@ -214,7 +207,7 @@ dup() const
 
 //-----------
 
-string
+std::string
 CImage::
 getTypeName() const
 {
@@ -311,10 +304,10 @@ getWindow(int *left, int *bottom, int *right, int *top) const
   if (window_.isSet()) {
     window_.get(left, bottom, right, top);
 
-    *left   = min(max(*left  , 0), size_.width  - 1);
-    *bottom = min(max(*bottom, 0), size_.height - 1);
-    *right  = min(max(*right , 0), size_.width  - 1);
-    *top    = min(max(*top   , 0), size_.height - 1);
+    *left   = std::min(std::max(*left  , 0), size_.width  - 1);
+    *bottom = std::min(std::max(*bottom, 0), size_.height - 1);
+    *right  = std::min(std::max(*right , 0), size_.width  - 1);
+    *top    = std::min(std::max(*top   , 0), size_.height - 1);
   }
   else {
     *left   = 0;
@@ -599,10 +592,10 @@ CImage::
 getRGBAPixel(int ind, double *r, double *g, double *b, double *a) const
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index")) {
-    if (r != NULL) *r = 0.0;
-    if (g != NULL) *g = 0.0;
-    if (b != NULL) *b = 0.0;
-    if (a != NULL) *a = 0.0;
+    if (r != 0) *r = 0.0;
+    if (g != 0) *g = 0.0;
+    if (b != 0) *b = 0.0;
+    if (a != 0) *a = 0.0;
 
     return;
   }
@@ -611,18 +604,18 @@ getRGBAPixel(int ind, double *r, double *g, double *b, double *a) const
     uint pixel = data_[ind];
 
     if (! CASSERT(pixel < colors_.size(), "Invalid Color Ind")) {
-      if (r != NULL) *r = 0.0;
-      if (g != NULL) *g = 0.0;
-      if (b != NULL) *b = 0.0;
-      if (a != NULL) *a = 0.0;
+      if (r != 0) *r = 0.0;
+      if (g != 0) *g = 0.0;
+      if (b != 0) *b = 0.0;
+      if (a != 0) *a = 0.0;
 
       return;
     }
 
-    if (r != NULL) *r = colors_[pixel].getRed  ();
-    if (g != NULL) *g = colors_[pixel].getGreen();
-    if (b != NULL) *b = colors_[pixel].getBlue ();
-    if (a != NULL) *a = colors_[pixel].getAlpha();
+    if (r != 0) *r = colors_[pixel].getRed  ();
+    if (g != 0) *g = colors_[pixel].getGreen();
+    if (b != 0) *b = colors_[pixel].getBlue ();
+    if (a != 0) *a = colors_[pixel].getAlpha();
   }
   else
     pixelToRGBA(data_[ind], r, g, b, a);
@@ -641,7 +634,7 @@ getRGBAPixel(int ind, CRGBA &rgba) const
     if (pixel < colors_.size())
       rgba = colors_[pixel];
     else {
-      cerr << "Invalid Color Ind: " <<  pixel << endl;
+      errorMsg("Invalid Color Ind: " + std::to_string(pixel));
       rgba = CRGBA(0,0,0);
     }
   }
@@ -668,10 +661,10 @@ CImage::
 getRGBAPixelI(int ind, uint *r, uint *g, uint *b, uint *a) const
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index")) {
-    if (r != NULL) *r = 0;
-    if (g != NULL) *g = 0;
-    if (b != NULL) *b = 0;
-    if (a != NULL) *a = 0;
+    if (r != 0) *r = 0;
+    if (g != 0) *g = 0;
+    if (b != 0) *b = 0;
+    if (a != 0) *a = 0;
 
     return;
   }
@@ -680,18 +673,18 @@ getRGBAPixelI(int ind, uint *r, uint *g, uint *b, uint *a) const
     uint pixel = data_[ind];
 
     if (! CASSERT(pixel < colors_.size(), "Invalid Color Ind")) {
-      if (r != NULL) *r = 0;
-      if (g != NULL) *g = 0;
-      if (b != NULL) *b = 0;
-      if (a != NULL) *a = 0;
+      if (r != 0) *r = 0;
+      if (g != 0) *g = 0;
+      if (b != 0) *b = 0;
+      if (a != 0) *a = 0;
 
       return;
     }
 
-    if (r != NULL) *r = colors_[pixel].getRedI  ();
-    if (g != NULL) *g = colors_[pixel].getGreenI();
-    if (b != NULL) *b = colors_[pixel].getBlueI ();
-    if (a != NULL) *a = colors_[pixel].getAlphaI();
+    if (r != 0) *r = colors_[pixel].getRedI  ();
+    if (g != 0) *g = colors_[pixel].getGreenI();
+    if (b != 0) *b = colors_[pixel].getBlueI ();
+    if (a != 0) *a = colors_[pixel].getAlphaI();
   }
   else
     pixelToRGBAI(data_[ind], r, g, b, a);
@@ -886,16 +879,14 @@ getNumColors() const
   if (hasColormap())
     return colors_.size();
   else {
-    map<uint, bool> used;
+    std::map<uint, bool> used;
 
     int size = size_.area();
 
-    map<uint, bool>::iterator p1, p2;
-
-    p2 = used.end();
+    auto p2 = used.end();
 
     for (int i = 0; i < size; ++i) {
-      p1 = used.find(data_[i]);
+      auto p1 = used.find(data_[i]);
 
       if (p1 == p2) {
         used[data_[i]] = true;
@@ -1457,7 +1448,7 @@ memUsage() const
 
   mem += sizeof(CImage);
 
-  if (data_ != NULL)
+  if (data_ != 0)
     mem += size_.area()*sizeof(uint);
 
   int num_colors = colors_.size();
@@ -1507,5 +1498,38 @@ boxScale(int w, int h) const
   int iw = getWidth ();
   int ih = getHeight();
 
-  return min((1.0*w)/iw, (1.0*h)/ih);
+  return std::min((1.0*w)/iw, (1.0*h)/ih);
+}
+
+//----------
+
+void
+CImage::
+errorMsg(const std::string &msg)
+{
+  std::cerr << "Error: " + msg << std::endl;
+}
+
+void
+CImage::
+warnMsg(const std::string &msg)
+{
+  std::cerr << "Warning: " + msg << std::endl;
+}
+
+void
+CImage::
+debugMsg(const std::string &msg)
+{
+  std::cerr << msg << std::endl;
+}
+
+void
+CImage::
+infoMsg(const std::string &msg, bool newline)
+{
+  std::cerr << msg;
+
+  if (newline)
+    std::cerr << std::endl;
 }

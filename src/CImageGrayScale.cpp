@@ -1,4 +1,4 @@
-#include <CImageLibI.h>
+#include <CImageGrayScale.h>
 
 CImagePtr
 CImage::

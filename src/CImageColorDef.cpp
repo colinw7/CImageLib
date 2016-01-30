@@ -3,11 +3,9 @@
 
 #include <cstring>
 
-using std::string;
-
 bool
 CImageColorDef::
-getRGB(const string &name, double *r, double *g, double *b)
+getRGB(const std::string &name, double *r, double *g, double *b)
 {
   int ri, gi, bi;
 
@@ -25,19 +23,19 @@ getRGB(const string &name, double *r, double *g, double *b)
 
 bool
 CImageColorDef::
-getRGBI(const string &name, int *r, int *g, int *b)
+getRGBI(const std::string &name, int *r, int *g, int *b)
 {
   int i;
 
-  string lname = CStrUtil::toLower(name);
+  std::string lname = CStrUtil::toLower(name);
 
   const char *name1 = lname.c_str();
 
-  for (i = 0; color_def_data[i].name != NULL; ++i)
+  for (i = 0; color_def_data[i].name != 0; ++i)
     if (strcmp(color_def_data[i].name, name1) == 0)
       break;
 
-  if (color_def_data[i].name == NULL)
+  if (color_def_data[i].name == 0)
     return false;
 
   *r = color_def_data[i].r;

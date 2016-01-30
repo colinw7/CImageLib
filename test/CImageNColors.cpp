@@ -1,8 +1,8 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
-#include <CFileUtil/CFileUtil.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
+#include <cstring>
 
 int
 main(int argc, char **argv)
@@ -12,8 +12,8 @@ main(int argc, char **argv)
 
   CImage::ConvertMethod method = CImage::CONVERT_NEAREST_LOGICAL;
 
-  string ifilename;
-  string ofilename;
+  std::string ifilename;
+  std::string ofilename;
 
   for (int i = 1; i < argc; ++i) {
     if (argv[i][0] == '-') {
@@ -23,14 +23,14 @@ main(int argc, char **argv)
         ++i;
 
         if (i >= argc) {
-          cerr << "Missing Value for -n" << endl;
+          std::cerr << "Missing Value for -n" << std::endl;
           exit(1);
         }
 
         n = atoi(argv[i]);
 
         if (n < 2 || n > 256) {
-          cerr << "Illegal Value for -n" << endl;
+          std::cerr << "Illegal Value for -n" << std::endl;
           exit(1);
         }
       }
@@ -39,7 +39,7 @@ main(int argc, char **argv)
       else if (strcmp(&argv[i][1], "physical") == 0)
         method = CImage::CONVERT_NEAREST_PHYSICAL;
       else
-        cerr << "Invalid option " << argv[i];
+        std::cerr << "Invalid option " << argv[i];
     }
     else {
       if      (ifilename == "")
@@ -47,13 +47,13 @@ main(int argc, char **argv)
       else if (ofilename == "")
         ofilename = argv[i];
       else
-        cerr << "Invalid argument " << argv[i];
+        std::cerr << "Invalid argument " << argv[i];
     }
   }
 
   if (ifilename == "" || ofilename == "") {
-    cerr << "Usage: CImageNColors [-n <n>] [-logical|-physical] [-debug] "
-            "<ifile> <ofile>" << endl;
+    std::cerr << "Usage: CImageNColors [-n <n>] [-logical|-physical] [-debug] "
+                 "<ifile> <ofile>" << std::endl;
     exit(1);
   }
 

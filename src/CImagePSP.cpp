@@ -4,10 +4,6 @@
 
 #include <cstring>
 
-using std::vector;
-using std::cerr;
-using std::endl;
-
 enum PSPBlockID {
   PSP_IMAGE_BLOCK = 0,
   PSP_CREATOR_BLOCK,
@@ -40,7 +36,7 @@ read(CFile *file, CImagePtr &image)
   file->read(buffer, 32);
 
   if (strncmp((char *) buffer, "Paint Shop Pro Image File", 25) != 0) {
-    CTHROW("Invalid Paint Shop Pro Image File");
+    CImage::errorMsg("Invalid Paint Shop Pro Image File");
     return false;
   }
 
@@ -52,11 +48,11 @@ read(CFile *file, CImagePtr &image)
   getShort(&buffer[0], &version1);
   getShort(&buffer[2], &version2);
 
-  CRGBA *colors     = NULL;
+  CRGBA *colors     = 0;
   int    num_colors = 0;
 
-  vector<uchar *> layers;
-  vector<int>     layer_sizes;
+  std::vector<uchar *> layers;
+  std::vector<int>     layer_sizes;
 
   int depth;
   int width;
@@ -72,7 +68,7 @@ read(CFile *file, CImagePtr &image)
     }
 
     if (! isBlockID(&buffer[0])) {
-      CTHROW("Invalid Paint Shop Pro Image File");
+      CImage::errorMsg("Invalid Paint Shop Pro Image File");
       return false;
     }
 
@@ -109,7 +105,7 @@ read(CFile *file, CImagePtr &image)
     delete [] buffer1;
 
     if (! flag) {
-      CTHROW("Invalid Paint Shop Pro Image File");
+      CImage::errorMsg("Invalid Paint Shop Pro Image File");
       return false;
     }
   }
@@ -118,30 +114,30 @@ read(CFile *file, CImagePtr &image)
 
   if      (depth == 1) {
     if (layers.size() < 1) {
-      CTHROW("Invalid Paint Shop Pro Image File");
+      CImage::errorMsg("Invalid Paint Shop Pro Image File");
       return false;
     }
   }
   else if (depth == 4) {
     if (layers.size() < 1) {
-      CTHROW("Invalid Paint Shop Pro Image File");
+      CImage::errorMsg("Invalid Paint Shop Pro Image File");
       return false;
     }
   }
   else if (depth == 8) {
     if (layers.size() < 1) {
-      CTHROW("Invalid Paint Shop Pro Image File");
+      CImage::errorMsg("Invalid Paint Shop Pro Image File");
       return false;
     }
   }
   else if (depth == 24) {
     if (layers.size() < 3) {
-      CTHROW("Invalid Paint Shop Pro Image File");
+      CImage::errorMsg("Invalid Paint Shop Pro Image File");
       return false;
     }
   }
   else {
-    CTHROW("Invalid Paint Shop Pro Image File");
+    CImage::errorMsg("Invalid Paint Shop Pro Image File");
     return false;
   }
 
@@ -228,11 +224,11 @@ readImageBlock(uchar *buffer, int *width, int *height,
   getByte   (&buffer[27], grey_scale );
 
   if (CImageState::getDebug()) {
-    cerr << "Width       = " << *width       << endl;
-    cerr << "Height      = " << *height      << endl;
-    cerr << "Depth       = " << *depth       << endl;
-    cerr << "Compression = " << *compression << endl;
-    cerr << "Gray Scale  = " << *grey_scale  << endl;
+    CImage::infoMsg("Width       = " + std::to_string(*width));
+    CImage::infoMsg("Height      = " + std::to_string(*height));
+    CImage::infoMsg("Depth       = " + std::to_string(*depth));
+    CImage::infoMsg("Compression = " + std::to_string(*compression));
+    CImage::infoMsg("Gray Scale  = " + std::to_string(*grey_scale));
   }
 
   return true;
@@ -245,7 +241,7 @@ readColorBlock(uchar *buffer, CRGBA **colors, int *num_colors)
   getInteger(&buffer[0], num_colors);
 
   if (CImageState::getDebug())
-    cerr << "Num Colors = " << *num_colors << endl;
+    CImage::infoMsg("Num Colors = " + std::to_string(*num_colors));
 
   *colors = new CRGBA [*num_colors];
 
@@ -259,8 +255,8 @@ readColorBlock(uchar *buffer, CRGBA **colors, int *num_colors)
     (*colors)[i].setRGBAI(r, g, b);
 
     if (CImageState::getDebug())
-      cerr << "Colors[" << (i + 1) << "] = " <<
-              r << ", " << g << ", " << b << endl;
+      CImage::infoMsg("Colors[" + std::to_string(i + 1) + "] = " +
+                      std::to_string(r) + ", " + std::to_string(g) + ", " + std::to_string(b));
   }
 
   return true;
@@ -269,10 +265,10 @@ readColorBlock(uchar *buffer, CRGBA **colors, int *num_colors)
 bool
 CImagePSP::
 readLayerStartBlock(uchar *buffer, int compression,
-                    vector<uchar *> *layers, vector<int> *layer_sizes)
+                    std::vector<uchar *> *layers, std::vector<int> *layer_sizes)
 {
   if (! isBlockID(&buffer[0])) {
-    CTHROW("Invalid Paint Shop Pro Image File");
+    CImage::errorMsg("Invalid Paint Shop Pro Image File");
     return false;
   }
 
@@ -281,7 +277,7 @@ readLayerStartBlock(uchar *buffer, int compression,
   getShort(&buffer[4], &id);
 
   if (id != PSP_LAYER_BLOCK) {
-    CTHROW("Invalid Paint Shop Pro Image File");
+    CImage::errorMsg("Invalid Paint Shop Pro Image File");
     return false;
   }
 
@@ -299,7 +295,7 @@ readLayerStartBlock(uchar *buffer, int compression,
 
   pos += len1;
 
-  uchar *block_data1 = NULL;
+  uchar *block_data1 = 0;
   int    block_size2 = 0;
 
   for (int i = 0; i < num_channels; ++i) {
@@ -316,7 +312,7 @@ readLayerStartBlock(uchar *buffer, int compression,
     delete [] block_data;
 
     if (! flag) {
-      CTHROW("Invalid Paint Shop Pro Image File");
+      CImage::errorMsg("Invalid Paint Shop Pro Image File");
       return false;
     }
 
@@ -343,7 +339,7 @@ readLayerChannelSubBlock(uchar *buffer, uchar **block_data,
                             int *block_len)
 {
   if (! isBlockID(&buffer[0])) {
-    CTHROW("Invalid Paint Shop Pro Image File");
+    CImage::errorMsg("Invalid Paint Shop Pro Image File");
     return false;
   }
 
@@ -352,7 +348,7 @@ readLayerChannelSubBlock(uchar *buffer, uchar **block_data,
   getShort(&buffer[4], &id);
 
   if (id != PSP_CHANNEL_BLOCK) {
-    CTHROW("Invalid Paint Shop Pro Image File");
+    CImage::errorMsg("Invalid Paint Shop Pro Image File");
     return false;
   }
 

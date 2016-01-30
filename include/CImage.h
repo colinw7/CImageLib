@@ -706,17 +706,17 @@ class CImage {
   // Combine
 
  public:
-  static void combine(CImagePtr image1, CImagePtr image2, const CRGBACombineDef &def);
+  static bool combine(CImagePtr image1, CImagePtr image2, const CRGBACombineDef &def);
 
-  void combine(CImagePtr image, const CRGBACombineDef &def);
+  bool combine(CImagePtr image, const CRGBACombineDef &def);
 
-  static void combineDef(CImagePtr image1, CImagePtr image2);
+  static bool combineDef(CImagePtr image1, CImagePtr image2);
 
-  void combineDef(CImagePtr image);
+  bool combineDef(CImagePtr image);
 
-  static void combine(CImagePtr image1, CImagePtr image2);
+  static bool combine(CImagePtr image1, CImagePtr image2);
 
-  void combine(CImagePtr image);
+  bool combine(CImagePtr image);
 
   //------
 
@@ -756,11 +756,11 @@ class CImage {
   void subCopyTo  (CImagePtr &dst, int src_x=0, int src_y=0, int width=-1, int height=-1,
                    int dest_x=0, int dest_y=0) const;
 
-  void combine(CImagePtr image, int x, int y);
+  bool combine(CImagePtr image, int x=0, int y=0);
 
-  static CImagePtr combine(CImagePtr image1, CImagePtr image2, int x, int y);
+  static CImagePtr combine(CImagePtr image1, CImagePtr image2, int x=0, int y=0);
 
-  void combineAlpha(CImagePtr image, int x, int y);
+  bool combineAlpha(CImagePtr image, int x=0, int y=0);
 
   //------
 
@@ -1117,6 +1117,14 @@ class CImage {
   bool readXWDHeader(CFile *file);
 
   bool writeXWD(CFile *file);
+
+  //------
+
+  // Misc
+  static void errorMsg(const std::string &msg);
+  static void warnMsg (const std::string &msg);
+  static void debugMsg(const std::string &msg);
+  static void infoMsg (const std::string &msg, bool newline=true);
 };
 
 #endif

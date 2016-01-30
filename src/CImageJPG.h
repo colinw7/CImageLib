@@ -40,6 +40,9 @@ class CImageJPG : public CImageFmt {
   static void jpgErrorProc(struct jpeg_common_struct *);
   static void jpgMessageProc(struct jpeg_common_struct *);
 #endif
+
+ private:
+  static std::vector<char> errorBuffer_;
 };
 
 #endif

@@ -1,10 +1,7 @@
-#include <CImageLibI.h>
+#include <CImageResize.h>
 #include <CMathGen.h>
 
 #include <cstring>
-
-using std::min;
-using std::max;
 
 CImageResizeType CImage::resize_type = CIMAGE_RESIZE_NEAREST;
 
@@ -318,8 +315,8 @@ reshapeNearest(CImagePtr &new_image) const
       double x1 = 0.0;
 
       for (int x = 0; x < width2; ++x, x1 += dx) {
-        int x2 = min(max(int(x1), 0), width1  - 1);
-        int y2 = min(max(int(y1), 0), height1 - 1);
+        int x2 = std::min(std::max(int(x1), 0), width1  - 1);
+        int y2 = std::min(std::max(int(y1), 0), height1 - 1);
 
         getRGBAPixel(x2, y2, &r, &g, &b, &a);
 
@@ -332,8 +329,8 @@ reshapeNearest(CImagePtr &new_image) const
       double x1 = 0.0;
 
       for (int x = 0; x < width2; ++x, x1 += dx) {
-        int x2 = min(max(int(x1), 0), width1  - 1);
-        int y2 = min(max(int(y1), 0), height1 - 1);
+        int x2 = std::min(std::max(int(x1), 0), width1  - 1);
+        int y2 = std::min(std::max(int(y1), 0), height1 - 1);
 
         int pixel = getColorIndexPixel(x2, y2);
 
@@ -375,15 +372,15 @@ reshapeAverage(CImagePtr &new_image) const
   double y2 = dy;
 
   for (int y = 0; y < height2; ++y, y1 = y2, y2 += dy) {
-    yy1 = min(max(CMathGen::Round(y1), 0), height1 - 1);
-    yy2 = min(max(CMathGen::Round(y2), 0), height1 - 1);
+    yy1 = std::min(std::max(CMathGen::Round(y1), 0), height1 - 1);
+    yy2 = std::min(std::max(CMathGen::Round(y2), 0), height1 - 1);
 
     double x1 = 0.0;
     double x2 = dx;
 
     for (int x = 0; x < width2; ++x, x1 = x2, x2 += dx) {
-      xx1 = min(max(CMathGen::Round(x1), 0), width1 - 1);
-      xx2 = min(max(CMathGen::Round(x2), 0), width1 - 1);
+      xx1 = std::min(std::max(CMathGen::Round(x1), 0), width1 - 1);
+      xx2 = std::min(std::max(CMathGen::Round(x2), 0), width1 - 1);
 
       double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
 
@@ -422,10 +419,10 @@ getAverageRGBAPixel(double x1, double x2, double y1, double y1) const
   int width1  = getWidth ();
   int height1 = getHeight();
 
-  int yy1 = min(max(CMathGen::Round(y1), 0), height1 - 1);
-  int yy2 = min(max(CMathGen::Round(y2), 0), height1 - 1);
-  int xx1 = min(max(CMathGen::Round(x1), 0), width1 - 1);
-  int xx2 = min(max(CMathGen::Round(x2), 0), width1 - 1);
+  int yy1 = std::min(std::max(CMathGen::Round(y1), 0), height1 - 1);
+  int yy2 = std::min(std::max(CMathGen::Round(y2), 0), height1 - 1);
+  int xx1 = std::min(std::max(CMathGen::Round(x1), 0), width1 - 1);
+  int xx2 = std::min(std::max(CMathGen::Round(x2), 0), width1 - 1);
 
   for (int yy = yy1; yy <= yy2; ++yy) {
     for (int xx = xx1; xx <= xx2; ++xx) {

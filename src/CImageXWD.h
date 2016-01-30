@@ -35,8 +35,7 @@ class CImageXWD : public CImageFmt {
   const CImageXWD &operator=(const CImageXWD &xwd);
 
  private:
-  void readHeader(CFile *file, CImagePtr &image,
-                  XWDFileHeader *hdr, bool *swap_flag);
+  bool readHeader(CFile *file, CImagePtr &image, XWDFileHeader *hdr, bool *swap_flag);
 
   uint getPixel(XWDFileHeader *hdr, uchar *data, uint *pos);
 

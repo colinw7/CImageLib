@@ -1,4 +1,4 @@
-#include <CImageLibI.h>
+#include <CImageGradient.h>
 #include <CLinearGradient.h>
 #include <CRadialGradient.h>
 

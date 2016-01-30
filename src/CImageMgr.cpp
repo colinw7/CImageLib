@@ -18,10 +18,6 @@
 #include <CImageXPM.h>
 #include <CImageXWD.h>
 
-using std::string;
-using std::cerr;
-using std::endl;
-
 CImageThumbnailMgr::
 CImageThumbnailMgr(uint width, uint height) :
  size_(width, height), image_mgr_()
@@ -35,7 +31,7 @@ CImageThumbnailMgr::
 
 CImagePtr
 CImageThumbnailMgr::
-lookupImage(const string &name)
+lookupImage(const std::string &name)
 {
   CImageSizedFileSrc src(name, size_.width, size_.height, true);
 
@@ -69,8 +65,8 @@ CImageMgr() :
 CImageMgr::
 ~CImageMgr()
 {
-  ImageFileMap::iterator p1 = image_file_map_.begin();
-  ImageFileMap::iterator p2 = image_file_map_.end  ();
+  auto p1 = image_file_map_.begin();
+  auto p2 = image_file_map_.end  ();
 
   for ( ; p1 != p2; ++p1)
     delete (*p1).second;
@@ -89,9 +85,9 @@ bool
 CImageMgr::
 getFmt(CFileType type, CImageFmt **fmt)
 {
-  *fmt = NULL;
+  *fmt = 0;
 
-  TypeFmtMap::iterator p = fmt_map_.find(type);
+  auto p = fmt_map_.find(type);
 
   if (p == fmt_map_.end())
     return false;
@@ -207,7 +203,7 @@ deleteImage(CImage *image)
 
 CImagePtr
 CImageMgr::
-lookupImage(const string &fileName)
+lookupImage(const std::string &fileName)
 {
   CImageFileSrc src(fileName);
 
@@ -220,7 +216,7 @@ lookupImage(const CImageSrc &src)
 {
   CImageFile *file = lookupFile(src);
 
-  if (file != NULL)
+  if (file != 0)
     return CImagePtr(file->getImage());
 
   if      (src.isType(CImageSrc::DATA_SRC)) {
@@ -232,8 +228,10 @@ lookupImage(const CImageSrc &src)
 
     creating_ = false;
 
-    if (! image->read((const uchar *) data->getDataP(), data->getDataLen()))
-      cerr << "Failed to read image" << endl;
+    if (! image->read((const uchar *) data->getDataP(), data->getDataLen())) {
+      CImage::errorMsg("Failed to read image");
+      return CImagePtr();
+    }
 
     return image;
   }
@@ -246,8 +244,10 @@ lookupImage(const CImageSrc &src)
 
     creating_ = false;
 
-    if (! image->readXPM(data->getStrs(), data->getNumStrs()))
-     cerr << "Failed to read image" << endl;
+    if (! image->readXPM(data->getStrs(), data->getNumStrs())) {
+      CImage::errorMsg("Failed to read image");
+      return CImagePtr();
+    }
 
     return image;
   }
@@ -260,8 +260,10 @@ lookupImage(const CImageSrc &src)
 
     creating_ = false;
 
-    if (! image->readXBM(data->getData(), data->getWidth(), data->getHeight()))
-     cerr << "Failed to read image" << endl;
+    if (! image->readXBM(data->getData(), data->getWidth(), data->getHeight())) {
+      CImage::errorMsg("Failed to read image");
+      return CImagePtr();
+    }
 
     return image;
   }
@@ -277,7 +279,7 @@ lookupFile(const CImageSrc &src)
     const CImageSizedFileSrc *sized_file =
       dynamic_cast<const CImageSizedFileSrc *>(&src);
 
-    const string &fileName = sized_file->getFilename();
+    const std::string &fileName = sized_file->getFilename();
 
     int  width       = sized_file->getWidth();
     int  height      = sized_file->getHeight();
@@ -291,23 +293,23 @@ lookupFile(const CImageSrc &src)
   else if (src.isType(CImageSrc::FILE_SRC)) {
     const CImageFileSrc *file = dynamic_cast<const CImageFileSrc *>(&src);
 
-    const string &fileName = file->getFilename();
+    const std::string &fileName = file->getFilename();
 
     CImageFile *ifile = lookupFile(fileName);
 
     return ifile;
   }
   else
-    return NULL;
+    return 0;
 }
 
 CImageFile *
 CImageMgr::
-lookupFile(const string &fileName)
+lookupFile(const std::string &fileName)
 {
   CImageFile *data = lookupFileI(fileName);
 
-  if (data != NULL)
+  if (data != 0)
     return data;
 
   return addFile(fileName);
@@ -315,19 +317,19 @@ lookupFile(const string &fileName)
 
 CImageFile *
 CImageMgr::
-lookupFileI(const string &fileName)
+lookupFileI(const std::string &fileName)
 {
-  ImageFileMap::iterator p = image_file_map_.find(fileName);
+  auto p = image_file_map_.find(fileName);
 
   if (p != image_file_map_.end())
     return (*p).second;
 
-  return NULL;
+  return 0;
 }
 
 CImageFile *
 CImageMgr::
-addFile(const string &fileName)
+addFile(const std::string &fileName)
 {
   CImageFile *data = addFileI(fileName);
 
@@ -336,35 +338,35 @@ addFile(const string &fileName)
 
 CImageFile *
 CImageMgr::
-addFileI(const string &fileName)
+addFileI(const std::string &fileName)
 {
   CImageFile *file = new CImageFile(fileName);
 
   image_file_map_[fileName] = file;
 
   if (debug_)
-    cerr << "Created Image File " << fileName << endl;
+    CImage::infoMsg("Created Image File '" + fileName + "'");
 
   return file;
 }
 
 bool
 CImageMgr::
-removeFile(const string &fileName)
+removeFile(const std::string &fileName)
 {
-  image_file_map_[fileName] = NULL;
+  image_file_map_[fileName] = 0;
 
   return true;
 }
 
 CImageSizedFile *
 CImageMgr::
-lookupSizedFile(const string &fileName, int width, int height, bool keep_aspect)
+lookupSizedFile(const std::string &fileName, int width, int height, bool keep_aspect)
 {
   CImageSizedFile *data =
     lookupSizedFileI(fileName, width, height, keep_aspect);
 
-  if (data != NULL)
+  if (data != 0)
     return data;
 
   return addSizedFile(fileName, width, height, keep_aspect);
@@ -372,19 +374,19 @@ lookupSizedFile(const string &fileName, int width, int height, bool keep_aspect)
 
 CImageSizedFile *
 CImageMgr::
-lookupSizedFileI(const string &fileName, int width, int height, bool keep_aspect)
+lookupSizedFileI(const std::string &fileName, int width, int height, bool keep_aspect)
 {
   CImageFile *data = lookupFileI(fileName);
 
-  if (data != NULL)
+  if (data != 0)
     return data->lookupSizedFile(width, height, keep_aspect);
   else
-    return NULL;
+    return 0;
 }
 
 CImageSizedFile *
 CImageMgr::
-addSizedFile(const string &fileName, int width, int height, bool keep_aspect)
+addSizedFile(const std::string &fileName, int width, int height, bool keep_aspect)
 {
   CImageSizedFile *data =
     addSizedFileI(fileName, width, height, keep_aspect);
@@ -394,14 +396,14 @@ addSizedFile(const string &fileName, int width, int height, bool keep_aspect)
 
 CImageSizedFile *
 CImageMgr::
-addSizedFileI(const string &fileName, int width, int height, bool keep_aspect)
+addSizedFileI(const std::string &fileName, int width, int height, bool keep_aspect)
 {
   CImageFile *data = lookupFileI(fileName);
 
-  if (data == NULL)
+  if (data == 0)
     data = addFileI(fileName);
 
-  string fileName1 = fileName +
+  std::string fileName1 = fileName +
     "?width=" + CStrUtil::toString(width) +
     "&height=" + CStrUtil::toString(height) +
     "&keep_aspect=" + CStrUtil::toString(keep_aspect);
@@ -411,18 +413,18 @@ addSizedFileI(const string &fileName, int width, int height, bool keep_aspect)
   image_sized_file_map_[fileName1] = sized_file;
 
   if (debug_)
-    cerr << "Created Sized Image File " << fileName << endl;
+    CImage::infoMsg("Created Sized Image File '" + fileName + "'");
 
   return sized_file;
 }
 
 bool
 CImageMgr::
-removeSizedFile(const string &fileName, int width, int height, bool keep_aspect)
+removeSizedFile(const std::string &fileName, int width, int height, bool keep_aspect)
 {
   CImageFile *data = lookupFileI(fileName);
 
-  if (data == NULL)
+  if (data == 0)
     return false;
 
   return data->removeSizedFile(width, height, keep_aspect);

@@ -5,9 +5,6 @@
 
 #include <cstring>
 
-using std::vector;
-using std::string;
-
 static char hex_chars[] = "0123456789abcdefABCDEF";
 
 bool
@@ -80,7 +77,7 @@ readHeader(CFile *file, CImagePtr &image)
 
   file->rewind();
 
-  bool flag = readBitmap(file, &width, &height, NULL, &x_hot, &y_hot);
+  bool flag = readBitmap(file, &width, &height, 0, &x_hot, &y_hot);
 
   if (! flag)
     return false;
@@ -106,8 +103,8 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
     *x_hot  = 0;
     *y_hot  = 0;
 
-    if (data != NULL)
-      *data = NULL;
+    if (data != 0)
+      *data = 0;
 
     //------
 
@@ -115,7 +112,7 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
     //------
 
-    vector<char> text;
+    std::vector<char> text;
 
     text.resize(text_len + 1);
 
@@ -148,7 +145,7 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
     CStrUtil::skipNonSpace(ptext, &i);
 
-    string str = string(&ptext[j], i - j);
+    std::string str = std::string(&ptext[j], i - j);
 
     *width = CStrUtil::toInteger(str);
 
@@ -171,13 +168,13 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
     CStrUtil::skipNonSpace(ptext, &i);
 
-    str = string(&ptext[j], i - j);
+    str = std::string(&ptext[j], i - j);
 
     *height = CStrUtil::toInteger(str);
 
     //------
 
-    if (data != NULL) {
+    if (data != 0) {
       int width1 = ((*width) + 7)/8;
 
       int num_bytes = (*width)*(*height);
@@ -194,12 +191,14 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
         for (int k = 0; k < width1; ++k) {
           while (ptext[i] != '\0' &&
                  (ptext[i] != '0' || ptext[i + 1] != 'x' ||
-                  strchr(hex_chars, ptext[i + 2]) == NULL ||
-                  strchr(hex_chars, ptext[i + 3]) == NULL))
+                  strchr(hex_chars, ptext[i + 2]) == 0 ||
+                  strchr(hex_chars, ptext[i + 3]) == 0))
             ++i;
 
-          if (ptext[i] == '\0')
-            CTHROW("Invalid Hex Number in Data");
+          if (ptext[i] == '\0') {
+            CImage::errorMsg("Invalid Hex Number in Data");
+            return false;
+          }
 
           hex_string[0] = ptext[i + 2];
           hex_string[1] = ptext[i + 3];
@@ -208,8 +207,10 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
           int no = sscanf(hex_string, "%x", &hex_value);
 
-          if (no != 1)
-            CTHROW("Invalid Hex Number in Data");
+          if (no != 1) {
+            CImage::errorMsg("Invalid Hex Number in Data");
+            return false;
+          }
 
           i += 4;
 
@@ -230,7 +231,7 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
     return true;
   }
   catch (...) {
-    if (data != NULL)
+    if (data != 0)
       delete [] *data;
 
     return false;
@@ -292,7 +293,7 @@ bool
 CImageXBM::
 write(CFile *file, CImagePtr image)
 {
-  string base = file->getBase();
+  std::string base = file->getBase();
 
   file->write("#define ");
   file->write(base.c_str());

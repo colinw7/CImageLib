@@ -1,4 +1,4 @@
-#include <CImageLibI.h>
+#include <CImageTile.h>
 
 CImagePtr
 CImage::

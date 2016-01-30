@@ -1,15 +1,14 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CFile/CDir.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
-#include <CFileUtil/CFileUtil.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CDir.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc < 3) {
-    cerr << "Usage: CImageThumbnails " << "<size> <ifiles>" << endl;
+    std::cerr << "Usage: CImageThumbnails " << "<size> <ifiles>" << std::endl;
     exit(1);
   }
 
@@ -36,7 +35,7 @@ main(int argc, char **argv)
     if ((int) image->getWidth() > size || (int) image->getHeight() > size)
       image = image->resizeKeepAspect(size, size);
 
-    image->write(".thumbnails/" + string(argv[i]));
+    image->write(".thumbnails/" + std::string(argv[i]));
   }
 
   exit(0);

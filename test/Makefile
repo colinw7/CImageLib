@@ -9,10 +9,24 @@ OBJ_DIR = .
 LIB_DIR = ../lib
 BIN_DIR = ../bin
 
-all: $(BIN_DIR)/CImageConvert
+#PROG = CImageColorReplace
+PROG = CImageConvert
+#PROG = CImageCursorCombine
+#PROG = CImageCursor
+#PROG = CImageGIFAnim
+#PROG = CImageHTMLGen
+#PROG = CImageInfo
+#PROG = CImageIsometric
+#PROG = CImageNColors
+#PROG = CImageProcess
+#PROG = CImageResize
+#PROG = CImageThumbnails
+#PROG = CImageUntile
+
+all: $(BIN_DIR)/$(PROG)
 
 SRC = \
-CImageConvert.cpp
+$(PROG).cpp
 
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
@@ -41,12 +55,12 @@ LIBS = \
 
 clean:
 	$(RM) -f *.o
-	$(RM) -f CImageConvert
+	$(RM) -f $(PROG)
 
 .SUFFIXES: .cpp
 
 .cpp.o:
 	$(CC) -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
 
-$(BIN_DIR)/CImageConvert: $(OBJS) $(LIB_DIR)/libCImageLib.a
-	$(CC) $(LDEBUG) -o $(BIN_DIR)/CImageConvert $(OBJS) $(LFLAGS) $(LIBS)
+$(BIN_DIR)/$(PROG): $(OBJS) $(LIB_DIR)/libCImageLib.a
+	$(CC) $(LDEBUG) -o $(BIN_DIR)/$(PROG) $(OBJS) $(LFLAGS) $(LIBS)

@@ -1,23 +1,23 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
-#include <CFileUtil/CFileUtil.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
+#include <cstring>
 
 int
 main(int argc, char **argv)
 {
   bool debug = false;
 
-  string ifilename;
-  string ofilename;
+  std::string ifilename;
+  std::string ofilename;
 
   for (int i = 1; i < argc; ++i) {
     if (argv[i][0] == '-') {
       if (strcmp(&argv[i][1], "debug") == 0)
         debug = true;
       else
-        cerr << "Invalid option " << argv[i];
+        std::cerr << "Invalid option " << argv[i];
     }
     else {
       if      (ifilename == "")
@@ -25,19 +25,19 @@ main(int argc, char **argv)
       else if (ofilename == "")
         ofilename = argv[i];
       else
-        cerr << "Invalid argument " << argv[i];
+        std::cerr << "Invalid argument " << argv[i];
     }
   }
 
   if (ifilename == "" || ofilename == "") {
-    cerr << "Usage: CImageCursor [-debug] <ifile> <ofile>" << endl;
+    std::cerr << "Usage: CImageCursor [-debug] <ifile> <ofile>" << std::endl;
     exit(1);
   }
 
   CFile ifile(ifilename);
 
-  string ofilename1 = ofilename + ".xbm";
-  string ofilename2 = ofilename + "mask.xbm";
+  std::string ofilename1 = ofilename + ".xbm";
+  std::string ofilename2 = ofilename + "mask.xbm";
 
   CFile ofile1(ofilename1);
   CFile ofile2(ofilename2);

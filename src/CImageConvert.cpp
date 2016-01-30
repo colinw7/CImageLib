@@ -1,8 +1,4 @@
-#include <CImageLibI.h>
-
-using std::map;
-using std::cerr;
-using std::endl;
+#include <CImageConvert.h>
 
 CRGBA CImage::convertBg_ = CRGBA(1,1,1);
 
@@ -14,7 +10,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
 {
   if (hasColormap()) {
     if (getNumColors() > (int) ncolors) {
-      cerr << "convertToNColors not implemented for color map" << endl;
+      CImage::errorMsg("convertToNColors not implemented for color map");
       return;
     }
   }
@@ -25,7 +21,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
   // get map of colors and number of each
 
-  map<uint,int> color_map;
+  std::map<uint,int> color_map;
 
   uint r, g, b, ind;
 
@@ -37,7 +33,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
     ind = ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF) << 0);
 
-    map<uint,int>::iterator pc = color_map.find(ind);
+    auto pc = color_map.find(ind);
 
     if (pc != color_map.end())
       ++(*pc).second;
@@ -48,7 +44,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
   uint num_colors = color_map.size();
 
   if (CImageState::getDebug())
-    cerr << "Num Colors " << num_colors << endl;
+    CImage::infoMsg("Num Colors " + std::to_string(num_colors));
 
   //----------
 
@@ -61,18 +57,15 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
     num_colors = 0;
 
-    map<uint,int>::iterator pc1 = color_map.begin();
-    map<uint,int>::iterator pc2 = color_map.end  ();
-
-    for ( ; pc1 != pc2; ++pc1) {
-      if ((*pc1).second <= (int) num)
-        (*pc1).second = 0;
+    for (auto &pc : color_map) {
+      if (pc.second <= (int) num)
+        pc.second = 0;
       else
         ++num_colors;
     }
 
     if (CImageState::getDebug())
-      cerr << "Num Colors " << num_colors << endl;
+      CImage::infoMsg("Num Colors " + std::to_string(num_colors));
   }
 
   //----------
@@ -83,16 +76,13 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
   int color_num = 0;
 
-  map<uint,int>::iterator pc1 = color_map.begin();
-  map<uint,int>::iterator pc2 = color_map.end  ();
-
-  for ( ; pc1 != pc2; ++pc1) {
-    if ((*pc1).second <= 0) {
-      (*pc1).second = -1;
+  for (auto &pc : color_map) {
+    if (pc.second <= 0) {
+      pc.second = -1;
       continue;
     }
 
-    int ind = (*pc1).first;
+    int ind = pc.first;
 
     int r = (ind >> 16) & 0xFF;
     int g = (ind >>  8) & 0xFF;
@@ -100,11 +90,11 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
     addColor(r*f, g*f, b*f, 1);
 
-    (*pc1).second = color_num++;
+    pc.second = color_num++;
   }
 
   if (CImageState::getDebug())
-    cerr << "Num Colors " << color_num << endl;
+    CImage::infoMsg("Num Colors " + std::to_string(color_num));
 
   //----------
 
@@ -118,7 +108,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
       ind = ((r & 0xFF) << 16) | ((g & 0xFF) <<  8) | ((b & 0xFF) <<  0);
 
-      map<uint,int>::iterator pc = color_map.find(ind);
+      auto pc = color_map.find(ind);
 
       if ((*pc).second >= 0) {
         *p1 = (*pc).second;
@@ -130,10 +120,10 @@ convertToNColors(uint ncolors, ConvertMethod method)
         continue;
       }
 
-      int min_d = (1<<24);
+      int min_d = (1 << 24);
 
-      map<uint,int>::iterator pc1 = color_map.begin();
-      map<uint,int>::iterator pc2 = color_map.end  ();
+      auto pc1 = color_map.begin();
+      auto pc2 = color_map.end  ();
 
       for ( ; pc1 != pc2; ++pc1) {
         if ((*pc1).second < 0)
@@ -174,7 +164,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
       ind = ((r & 0xFF) << 16) | ((g & 0xFF) <<  8) | ((b & 0xFF) <<  0);
 
-      map<uint,int>::iterator pc = color_map.find(ind);
+      auto pc = color_map.find(ind);
 
       if ((*pc).second >= 0) {
         current = (*pc).second;
@@ -198,7 +188,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
         ind = ((r & 0xFF) << 16) | ((g & 0xFF) <<  8) | ((b & 0xFF) <<  0);
 
-        map<uint,int>::iterator pc = color_map.find(ind);
+        auto pc = color_map.find(ind);
 
         if ((*pc).second >= 0) {
           current = (*pc).second;
@@ -242,7 +232,9 @@ convertToColorIndex()
 
   while (true) {
     if (CImageState::getDebug())
-      cerr << "Bits R " << r_bits << " G " << g_bits << " B " << b_bits << endl;
+      CImage::infoMsg("Bits R " + std::to_string(r_bits) +
+                          " G " + std::to_string(g_bits) +
+                          " B " + std::to_string(b_bits));
 
     // count number of unique colors
     num_colors = 0;
@@ -283,7 +275,7 @@ convertToColorIndex()
     //----
 
     if (CImageState::getDebug())
-      cerr << "Num Colors " << num_colors << endl;
+      CImage::infoMsg("Num Colors " + std::to_string(num_colors));
 
     //----
 
@@ -380,7 +372,9 @@ convertToColorIndex()
   }
 
   if (CImageState::getDebug())
-    cerr << "Bits R " << r_bits << " G " << g_bits << " B " << b_bits << endl;
+    CImage::infoMsg("Bits R " + std::to_string(r_bits) +
+                        " G " + std::to_string(g_bits) +
+                        " B " + std::to_string(b_bits));
 
   //------
 
@@ -431,13 +425,18 @@ convertToColorIndex()
     int b1 = int(255*(b*a + convertBg_.getBlue ()*(1 - a)));
 
     if (CImageState::getDebug())
-      cerr << "Color " << i + 1 << " = R " << r1 << " G " << g1 << " B " << b1 << endl;
+      CImage::infoMsg("Color " + std::to_string(i + 1) +
+                      " = R " + std::to_string(r1) +
+                        " G " + std::to_string(g1) +
+                        " B " + std::to_string(b1));
 
     addColor(r1*r_factor, g1*g_factor, b1*b_factor, 1.0);
 
     if (CImageState::getDebug())
-      cerr << "Color " << i + 1 << " = R " << r1*r_factor <<
-              " G " << g1*g_factor << " B " << b1*b_factor << endl;
+      CImage::infoMsg("Color " + std::to_string(i + 1) +
+                      " = R " + std::to_string(r1*r_factor) +
+                        " G " + std::to_string(g1*g_factor) +
+                        " B " + std::to_string(b1*b_factor));
   }
 
   if (transparent)

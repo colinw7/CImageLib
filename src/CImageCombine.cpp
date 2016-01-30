@@ -1,44 +1,39 @@
-#include <CImageLibI.h>
+#include <CImageCombine.h>
 
-using std::min;
-using std::max;
-using std::cerr;
-using std::endl;
-
-void
+bool
 CImage::
 combineDef(CImagePtr image1, CImagePtr image2)
 {
-  combine(image1, image2, combine_def_);
+  return combine(image1, image2, combine_def_);
 }
 
-void
+bool
 CImage::
 combineDef(CImagePtr image)
 {
-  combine(image, combine_def_);
+  return combine(image, combine_def_);
 }
 
-void
+bool
 CImage::
 combine(CImagePtr image1, CImagePtr image2, const CRGBACombineDef &def)
 {
-  image1->combine(image2, def);
+  return image1->combine(image2, def);
 }
 
-void
+bool
 CImage::
 combine(CImagePtr image, const CRGBACombineDef &def)
 {
   if (hasColormap() || image->hasColormap()) {
-    cerr << "Can only combine RGBA images" << endl;
-    return;
+    CImage::errorMsg("Can only combine RGBA images");
+    return false;
   }
 
   CRGBA rgba1, rgba2;
 
-  int w = min(getWidth (), image->getWidth ());
-  int h = min(getHeight(), image->getHeight());
+  int w = std::min(getWidth (), image->getWidth ());
+  int h = std::min(getHeight(), image->getHeight());
 
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
@@ -54,28 +49,30 @@ combine(CImagePtr image, const CRGBACombineDef &def)
   }
 
   dataChanged();
+
+  return true;
 }
 
-void
+bool
 CImage::
 combine(CImagePtr image1, CImagePtr image2)
 {
-  image1->combine(image2);
+  return image1->combine(image2, 0, 0);
 }
 
-void
+bool
 CImage::
 combine(CImagePtr image)
 {
   if (hasColormap() || image->hasColormap()) {
-    cerr << "Can only combine RGBA images" << endl;
-    return;
+    CImage::errorMsg("Can only combine RGBA images");
+    return false;
   }
 
   CRGBA rgba;
 
-  int w = min(getWidth (), image->getWidth ());
-  int h = min(getHeight(), image->getHeight());
+  int w = std::min(getWidth (), image->getWidth ());
+  int h = std::min(getHeight(), image->getHeight());
 
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
@@ -88,4 +85,6 @@ combine(CImagePtr image)
   }
 
   dataChanged();
+
+  return true;
 }

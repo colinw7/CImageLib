@@ -1,9 +1,8 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
 
 int
-main(int argc, char **argv)
+main(int /*argc*/, char ** /*argv*/)
 {
   CFile *ifile1 = new CFile("data/image.gif");
   CFile *ifile2 = new CFile("data/image.png");
@@ -42,7 +41,7 @@ main(int argc, char **argv)
 
   CImagePtr image = CImageMgrInst->createImage(src);
 
-  if (image) {
+  if (image.isValid()) {
     image->writeXPM(ofile1);
     image->writeBMP(ofile2);
     image->writeJPG(ofile3);
@@ -59,42 +58,42 @@ main(int argc, char **argv)
 
   image = CImageMgrInst->createImage(src1);
 
-  if (image)
+  if (image.isValid())
     image->writeGIF(tfile1);
 
   CImageFileSrc src2(*ofile2);
 
   image = CImageMgrInst->createImage(src2);
 
-  if (image)
+  if (image.isValid())
     image->writeGIF(tfile2);
 
   CImageFileSrc src3(*ofile3);
 
   image = CImageMgrInst->createImage(src3);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(tfile3);
 
   CImageFileSrc src4(*ofile4);
 
   image = CImageMgrInst->createImage(src4);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(tfile4);
 
   CImageFileSrc src5(*ofile5);
 
   image = CImageMgrInst->createImage(src5);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(tfile5);
 
   CImageFileSrc src6(*ofile6);
 
   image = CImageMgrInst->createImage(src6);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(tfile6);
 
   //------
@@ -103,35 +102,35 @@ main(int argc, char **argv)
 
   image = CImageMgrInst->createImage(src7);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(wfile1);
 
   CImageFileSrc src8(*ifile3);
 
   image = CImageMgrInst->createImage(src8);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(wfile2);
 
   CImageFileSrc src9(*ifile4);
 
   image = CImageMgrInst->createImage(src9);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(wfile3);
 
   CImageFileSrc src10(*ifile5);
 
   image = CImageMgrInst->createImage(src10);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(wfile4);
 
   CImageFileSrc src11(*ifile6);
 
   image = CImageMgrInst->createImage(src11);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(wfile5);
 
   //------
@@ -142,7 +141,7 @@ main(int argc, char **argv)
 
   image = CImageMgrInst->createImage(src12);
 
-  if (image)
+  if (image.isValid())
     image->writeBMP(gfile1);
 
   //------

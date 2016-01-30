@@ -1,10 +1,6 @@
 #include <CImageLib.h>
 #include <CImageICO.h>
 
-using std::vector;
-using std::cerr;
-using std::endl;
-
 struct CImageICOHeader {
   ushort pad1;
   ushort type;
@@ -83,12 +79,12 @@ read(CFile *file, CImagePtr &image)
     file->read((uchar *) &info_header, sizeof(info_header));
 
     if (info_header.size != 40) {
-      cerr << "Invalid Header Size" << endl;
+      CImage::errorMsg("Invalid Header Size");
       goto next;
     }
 
     if (info_header.compression != 0) {
-      cerr << "Compressed ICO not supported" << endl;
+      CImage::errorMsg("Compressed ICO not supported");
       goto next;
     }
 
@@ -107,7 +103,7 @@ read(CFile *file, CImagePtr &image)
       file->read((uchar *) colors, num_colors*sizeof(CImageICOColor));
     }
     else
-      colors = NULL;
+      colors = 0;
 
     //-----
 
@@ -140,7 +136,7 @@ read(CFile *file, CImagePtr &image)
 
       pad = bytes_per_line*4 - cursor_width;
 
-      vector<uchar> buffer;
+      std::vector<uchar> buffer;
 
       buffer.resize(cursor_width);
 
@@ -172,7 +168,7 @@ read(CFile *file, CImagePtr &image)
 
       uint width1 = 4*bytes_per_line;
 
-      vector<uchar> buffer1;
+      std::vector<uchar> buffer1;
 
       buffer1.resize(width1);
 
@@ -202,7 +198,7 @@ read(CFile *file, CImagePtr &image)
 
       int width2 = width1/8;
 
-      vector<uchar> buffer1;
+      std::vector<uchar> buffer1;
 
       buffer1.resize(width2);
 
@@ -463,7 +459,7 @@ write(CFile *file, CImagePtr image)
 
     int num_data = line_width1*image->getHeight();
 
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
     buffer.resize(line_width);
 
@@ -497,7 +493,7 @@ write(CFile *file, CImagePtr image)
     }
   }
   else if (depth == 8) {
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
     buffer.resize(image->getWidth());
 
@@ -533,7 +529,7 @@ write(CFile *file, CImagePtr image)
 
     int width1 = 4*bytes_per_line;
 
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
     buffer.resize(width1);
 
@@ -570,7 +566,7 @@ write(CFile *file, CImagePtr image)
 
     int width2 = width1/8;
 
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
     buffer.resize(width2);
 
@@ -633,7 +629,7 @@ write(CFile *file, CImagePtr image)
 
     int width2 = width1/8;
 
-    vector<uchar> buffer;
+    std::vector<uchar> buffer;
 
     buffer.resize(width2);
 

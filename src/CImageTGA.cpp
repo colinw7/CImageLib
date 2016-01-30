@@ -1,8 +1,6 @@
 #include <CImageLib.h>
 #include <CImageTGA.h>
 
-using std::string;
-
 struct TGAHeader {
   uchar  id_len;
   uchar  has_cmap;
@@ -35,7 +33,7 @@ read(CFile *file, CImagePtr &image)
   if (! readHeader(file, image, &header))
     return false;
 
-  string id;
+  std::string id;
 
   if (header.id_len) {
     char buffer[256];

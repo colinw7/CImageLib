@@ -4,9 +4,6 @@
 
 #include <cstring>
 
-using std::cerr;
-using std::endl;
-
 #define NEW_SUBFILE_TYPE  254
 #define IMAGE_WIDTH       256
 #define IMAGE_HEIGHT      257
@@ -69,11 +66,11 @@ read(CFile *file, CImagePtr &image)
     tif_data.planar_config         = -1;
     tif_data.resolution_unit       = -1;
     tif_data.num_strip_offsets     = 0;
-    tif_data.strip_offsets         = NULL;
+    tif_data.strip_offsets         = 0;
     tif_data.num_strip_byte_counts = 0;
-    tif_data.strip_byte_counts     = NULL;
+    tif_data.strip_byte_counts     = 0;
     tif_data.num_colors            = 0;
-    tif_data.colors                = NULL;
+    tif_data.colors                = 0;
 
     //------
 
@@ -91,7 +88,7 @@ read(CFile *file, CImagePtr &image)
       tif_data.byte_order = 1;
 
     if (CImageState::getDebug())
-      cerr << "Byte Order = " << tif_data.byte_order << endl;
+      CImage::infoMsg("Byte Order = " + std::to_string(tif_data.byte_order));
 
     //------
 
@@ -108,7 +105,7 @@ read(CFile *file, CImagePtr &image)
     readShort(file, &num_tags);
 
     if (CImageState::getDebug())
-      cerr << "Num Tags = " << num_tags << endl;
+      CImage::infoMsg("Num Tags = " + std::to_string(num_tags));
 
     //------
 
@@ -122,9 +119,9 @@ read(CFile *file, CImagePtr &image)
       readInteger(file, &data_count );
 
       if (CImageState::getDebug()) {
-        cerr << "Tag Id      = " << tag_id     << endl;
-        cerr << "Data Type   = " << data_type  << endl;
-        cerr << "Data Count  = " << data_count << endl;
+        CImage::infoMsg("Tag Id      = " + std::to_string(tag_id));
+        CImage::infoMsg("Data Type   = " + std::to_string(data_type));
+        CImage::infoMsg("Data Count  = " + std::to_string(data_count));
       }
 
       int data_offset;
@@ -190,29 +187,39 @@ read(CFile *file, CImagePtr &image)
         readInteger(file, &data_offset);
 
         if (CImageState::getDebug())
-          cerr << "Data Offset = " << data_offset << endl;
+          CImage::infoMsg("Data Offset = " + std::to_string(data_offset));
       }
     }
 
     //------
 
-    if (tif_data.image_width == -1 || tif_data.image_height == -1)
-      CTHROW("Invalid Image Width/Height");
+    if (tif_data.image_width == -1 || tif_data.image_height == -1) {
+      CImage::errorMsg("Invalid Image Width/Height");
+      return false;
+    }
 
-    if (tif_data.bits_per_sample == -1)
-      CTHROW("Invalid Bits per Sample");
+    if (tif_data.bits_per_sample == -1) {
+      CImage::errorMsg("Invalid Bits per Sample");
+      return false;
+    }
 
-    if (tif_data.num_strip_byte_counts != tif_data.num_strip_offsets)
-      CTHROW("Invalid Strip Byte Counts");
+    if (tif_data.num_strip_byte_counts != tif_data.num_strip_offsets) {
+      CImage::errorMsg("Invalid Strip Byte Counts");
+      return false;
+    }
 
     if (tif_data.photometric != TIF_WHITE_IS_ZERO &&
         tif_data.photometric != TIF_BLACK_IS_ZERO &&
         tif_data.photometric != TIF_RGB           &&
-        tif_data.photometric != TIF_PALETTERGB)
-      CTHROW("Unsupported Photometric Type");
+        tif_data.photometric != TIF_PALETTERGB) {
+      CImage::errorMsg("Unsupported Photometric Type");
+      return false;
+    }
 
-    if (tif_data.compression != 1)
-      CTHROW("Unsupported Compression Type");
+    if (tif_data.compression != 1) {
+      CImage::errorMsg("Unsupported Compression Type");
+      return false;
+    }
 
     //------
 
@@ -221,19 +228,27 @@ read(CFile *file, CImagePtr &image)
 
     int depth = tif_data.bits_per_sample*tif_data.samples_per_pixel;
 
-    if (depth != 1 && depth != 8 && depth != 16 && depth != 24)
-      CTHROW("Unsupported Depth");
+    if (depth != 1 && depth != 8 && depth != 16 && depth != 24) {
+      CImage::errorMsg("Unsupported Depth");
+      return false;
+    }
 
-    if (tif_data.photometric == TIF_RGB && depth < 16)
-      CTHROW("Invalid Photometric Type for Depth < 16");
+    if (tif_data.photometric == TIF_RGB && depth < 16) {
+      CImage::errorMsg("Invalid Photometric Type for Depth < 16");
+      return false;
+    }
 
     if ((tif_data.photometric == TIF_WHITE_IS_ZERO ||
          tif_data.photometric == TIF_BLACK_IS_ZERO ||
-         tif_data.photometric == TIF_PALETTERGB) && depth > 8)
-      CTHROW("Invalid Photometric Type for Depth > 8");
+         tif_data.photometric == TIF_PALETTERGB) && depth > 8) {
+      CImage::errorMsg("Invalid Photometric Type for Depth > 8");
+      return false;
+    }
 
-    if (tif_data.photometric == TIF_PALETTERGB && tif_data.colors == NULL)
-      CTHROW("No Colors for RGB");
+    if (tif_data.photometric == TIF_PALETTERGB && tif_data.colors == 0) {
+      CImage::errorMsg("No Colors for RGB");
+      return false;
+    }
 
     if (tif_data.photometric == TIF_WHITE_IS_ZERO ||
         tif_data.photometric == TIF_BLACK_IS_ZERO) {
@@ -272,8 +287,10 @@ read(CFile *file, CImagePtr &image)
       (tif_data.image_height + tif_data.rows_per_strip - 1)/tif_data.rows_per_strip;
 
     if (tif_data.num_strip_offsets     != strips_per_image ||
-        tif_data.num_strip_byte_counts != strips_per_image)
-      CTHROW("Invalid Strip Array Size");
+        tif_data.num_strip_byte_counts != strips_per_image) {
+      CImage::errorMsg("Invalid Strip Array Size");
+      return false;
+    }
 
     uint *data = new uint [tif_data.image_width*tif_data.image_height];
 
@@ -368,7 +385,7 @@ CImageTIF::
 setInteger(int tag_id, int value)
 {
   if (CImageState::getDebug())
-    cerr << "Integer     = " << value << endl;
+    CImage::infoMsg("Integer     = " + std::to_string(value));
 
   switch (tag_id) {
     case IMAGE_WIDTH:
@@ -399,7 +416,7 @@ setInteger(int tag_id, int value)
       tif_data.resolution_unit = value;
       break;
     case STRIP_OFFSETS:
-      if (tif_data.strip_offsets != NULL)
+      if (tif_data.strip_offsets != 0)
         delete [] tif_data.strip_offsets;
 
       tif_data.num_strip_offsets = 1;
@@ -409,7 +426,7 @@ setInteger(int tag_id, int value)
 
       break;
     case STRIP_BYTE_COUNTS:
-      if (tif_data.strip_byte_counts != NULL)
+      if (tif_data.strip_byte_counts != 0)
         delete [] tif_data.strip_byte_counts;
 
       tif_data.num_strip_byte_counts = 1;
@@ -428,20 +445,24 @@ CImageTIF::
 setIntegerArray(int tag_id, int *values, int num_values)
 {
   if (CImageState::getDebug()) {
+    std::string msg;
+
     for (int i = 0; i < num_values; ++i) {
       if (i > 0 && (i % 8) == 0)
-        cerr << endl;
+        msg += "\n";
 
-      cerr << values[i] << " ";
+      msg += std::to_string(values[i]) + " ";
     }
 
     if (num_values > 0 && ((num_values - 1) % 8) != 0)
-      cerr << endl;
+      msg += "\n";
+
+    CImage::infoMsg(msg, false);
   }
 
   switch (tag_id) {
     case STRIP_OFFSETS: {
-      if (tif_data.strip_offsets != NULL)
+      if (tif_data.strip_offsets != 0)
         delete [] tif_data.strip_offsets;
 
       tif_data.num_strip_offsets = num_values;
@@ -452,7 +473,7 @@ setIntegerArray(int tag_id, int *values, int num_values)
       break;
     }
     case STRIP_BYTE_COUNTS: {
-      if (tif_data.strip_byte_counts != NULL)
+      if (tif_data.strip_byte_counts != 0)
         delete [] tif_data.strip_byte_counts;
 
       tif_data.num_strip_byte_counts = num_values;
@@ -463,7 +484,7 @@ setIntegerArray(int tag_id, int *values, int num_values)
       break;
     }
     case COLORMAP: {
-      if (tif_data.colors != NULL)
+      if (tif_data.colors != 0)
         delete [] tif_data.colors;
 
       tif_data.num_colors = num_values/3;

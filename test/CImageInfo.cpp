@@ -1,6 +1,5 @@
-#include <std_c++.h>
-#include <CImageLib/CImageLib.h>
-#include <CFileUtil/CFileUtil.h>
+#include <CImageLib.h>
+#include <CFileUtil.h>
 
 int
 main(int argc, char **argv)
@@ -18,10 +17,10 @@ main(int argc, char **argv)
     image->readHeader(argv[i]);
 
     if (image.isValid())
-      cout << argv[i] << " " << image->getTypeName() << " " <<
-              image->getWidth() << "x" << image->getHeight() << endl;
+      std::cout << argv[i] << " " << image->getTypeName() << " " <<
+                   image->getWidth() << "x" << image->getHeight() << std::endl;
     else
-      cout << argv[i] << " ??" << endl;
+      std::cout << argv[i] << " ??" << std::endl;
   }
 
   return 0;

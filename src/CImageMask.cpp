@@ -1,6 +1,4 @@
-#include <CImageLibI.h>
-
-using std::min;
+#include <CImageMask.h>
 
 CImagePtr
 CImage::
@@ -74,7 +72,7 @@ alphaMask(CImagePtr mask, int xo, int yo)
 
         double a1 = mask->getAlpha(mask_x, mask_y);
 
-        a = min(a*a1, 1.0);
+        a = std::min(a*a1, 1.0);
 
         setRGBAPixel(x, y, r, g, b, a);
       }

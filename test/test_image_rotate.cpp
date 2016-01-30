@@ -1,13 +1,12 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc != 4) {
-    cerr << "Usage: test_image_rotate <ifile> <ofile> <angle>" << endl;
+    std::cerr << "Usage: test_image_rotate <ifile> <ofile> <angle>" << std::endl;
     exit(1);
   }
 

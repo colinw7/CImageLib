@@ -1,9 +1,7 @@
-#include <CImageLibI.h>
+#include <CImageRotate.h>
 #include <CMathGen.h>
+#include <CMathMacros.h>
 #include <cmath>
-
-using std::min;
-using std::max;
 
 CImagePtr
 CImage::
@@ -75,8 +73,8 @@ rotate(double angle)
         int x1 = CMathGen::Round((x - x_offset)*c - (y - y_offset)*s) + left;
         int y1 = CMathGen::Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
 
-        x1 = min(max(x1, left  ), right);
-        y1 = min(max(y1, bottom), top  );
+        x1 = std::min(std::max(x1, left  ), right);
+        y1 = std::min(std::max(y1, bottom), top  );
 
         int ind = getColorIndexPixel(x1, y1);
 
@@ -92,8 +90,8 @@ rotate(double angle)
         int x1 = CMathGen::Round((x - x_offset)*c - (y - y_offset)*s) + left;
         int y1 = CMathGen::Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
 
-        x1 = min(max(x1, left  ), right);
-        y1 = min(max(y1, bottom), top  );
+        x1 = std::min(std::max(x1, left  ), right);
+        y1 = std::min(std::max(y1, bottom), top  );
 
         getRGBAPixel(x1, y1, &r, &g, &b, &a);
 

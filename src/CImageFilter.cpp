@@ -1,8 +1,5 @@
-#include <CImageLibI.h>
+#include <CImageFilter.h>
 #include <cmath>
-
-using std::min;
-using std::max;
 
 void
 CImage::
@@ -194,7 +191,7 @@ gaussianBlur(CImagePtr &dst, double bx, double by, int nx, int ny)
     return src->gaussianBlur(dst, bx, by, nx, ny);
   }
 
-  double minb = min(bx, by);
+  double minb = std::min(bx, by);
 
   if (minb <= 0)
     return false;
@@ -485,10 +482,10 @@ turbulence(bool fractal, double baseFreq, int numOctaves, int seed)
         a = (a + 1.0) / 2.0;
       }
 
-      r = min(max(r, 0.0), 1.0);
-      g = min(max(g, 0.0), 1.0);
-      b = min(max(b, 0.0), 1.0);
-      a = min(max(a, 0.0), 1.0);
+      r = std::min(std::max(r, 0.0), 1.0);
+      g = std::min(std::max(g, 0.0), 1.0);
+      b = std::min(std::max(b, 0.0), 1.0);
+      a = std::min(std::max(a, 0.0), 1.0);
 
       setRGBAPixel(x, y, CRGBA(r, g, b, a));
     }

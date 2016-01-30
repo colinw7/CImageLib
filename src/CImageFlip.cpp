@@ -1,6 +1,4 @@
-#include <CImageLibI.h>
-
-using std::min;
+#include <CImageFlip.h>
 
 CImagePtr
 CImage::
@@ -90,7 +88,7 @@ flipHV()
   int w = right - left + 1;
   int h = top - bottom + 1;
 
-  int s = min(w, h);
+  int s = std::min(w, h);
 
   right = left + s;
   top   = bottom + s;

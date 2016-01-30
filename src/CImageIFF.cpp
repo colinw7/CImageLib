@@ -4,12 +4,6 @@
 
 #include <cstring>
 
-using std::vector;
-using std::min;
-using std::max;
-using std::cerr;
-using std::endl;
-
 #define MAX_NUMBER_OF_COLORS 256
 #define MAX_NUMBER_OF_COLOR_RANGES 24
 
@@ -52,7 +46,7 @@ bool
 CImageIFF::
 read(CFile *file, CImagePtr &image)
 {
-  IFF_UBYTE *screen_memory = NULL;
+  IFF_UBYTE *screen_memory = 0;
 
   try {
     IFFBitMapHeader    bitmap_header;
@@ -108,14 +102,16 @@ read(CFile *file, CImagePtr &image)
       }
       else {
         if (CImageState::getDebug())
-          cerr << "Unknown " << header_name << endl;
+          CImage::infoMsg("Unknown " + std::string(header_name));
 
         readUnknown(file);
       }
     }
 
-    if (! FORM_flag || ! ILBM_flag || ! BMHD_flag || ! BODY_flag)
-      CTHROW("No FORM, ILBM, BMHD or BODY Section");
+    if (! FORM_flag || ! ILBM_flag || ! BMHD_flag || ! BODY_flag) {
+      CImage::errorMsg("No FORM, ILBM, BMHD or BODY Section");
+      return false;
+    }
 
     if (! CAMG_flag) commodore_amiga.ViewModes = 0;
 
@@ -226,7 +222,8 @@ read(CFile *file, CImagePtr &image)
   catch (...) {
     delete [] screen_memory;
 
-    CTHROW("Failed to read IFF file");
+    CImage::errorMsg("Failed to read IFF file");
+    return false;
   }
 
   return true;
@@ -268,7 +265,8 @@ readHeader(CFile *file, CImagePtr &image)
     image->setSize(bitmap_header.w, bitmap_header.h);
   }
   catch (...) {
-    CTHROW("Failed to read IFF file");
+    CImage::errorMsg("Failed to read IFF file");
+    return false;
   }
 
   return true;
@@ -281,13 +279,13 @@ readFORM(CFile *file)
   IFF_ULONG  header_length;
 
   if (CImageState::getDebug())
-    cerr << "FORM" << endl;
+    CImage::infoMsg("FORM");
 
   if (! readHeaderLength(file, &header_length))
     return false;
 
   if (CImageState::getDebug())
-    cerr << "  " << header_length << " bytes" << endl;
+    CImage::infoMsg("  " + std::to_string(header_length) + " bytes");
 
   return true;
 }
@@ -297,7 +295,7 @@ CImageIFF::
 readILBM(CFile *)
 {
   if (CImageState::getDebug())
-    cerr << "ILBM" << endl;
+    CImage::infoMsg("ILBM");
 
   return true;
 }
@@ -307,7 +305,7 @@ CImageIFF::
 readBMHD(CFile *file, IFFBitMapHeader *bitmap_header)
 {
   if (CImageState::getDebug())
-    cerr << "BMHD" << endl;
+    CImage::infoMsg("BMHD");
 
   IFF_ULONG header_length;
 
@@ -315,7 +313,7 @@ readBMHD(CFile *file, IFFBitMapHeader *bitmap_header)
     return false;
 
   if (CImageState::getDebug())
-    cerr << "  " << header_length << " bytes" << endl;
+    CImage::infoMsg("  " + std::to_string(header_length) + " bytes");
 
   if (sizeof(IFFBitMapHeader) != header_length)
     return false;
@@ -332,18 +330,18 @@ readBMHD(CFile *file, IFFBitMapHeader *bitmap_header)
   convertWord((IFF_UWORD *) &bitmap_header->Height);
 
   if (CImageState::getDebug()) {
-    cerr << "  w           = " << bitmap_header->w           << endl;
-    cerr << "  h           = " << bitmap_header->h           << endl;
-    cerr << "  x           = " << bitmap_header->x           << endl;
-    cerr << "  y           = " << bitmap_header->y           << endl;
-    cerr << "  BitPlanes   = " << bitmap_header->BitPlanes   << endl;
-    cerr << "  Masking     = " << bitmap_header->Masking     << endl;
-    cerr << "  Compression = " << bitmap_header->Compression << endl;
-    cerr << "  TransCol    = " << bitmap_header->TransCol    << endl;
-    cerr << "  XAspect     = " << bitmap_header->XAspect     << endl;
-    cerr << "  YAspect     = " << bitmap_header->YAspect     << endl;
-    cerr << "  Width       = " << bitmap_header->Width       << endl;
-    cerr << "  Height      = " << bitmap_header->Height      << endl;
+    CImage::infoMsg("  w           = " + std::to_string(bitmap_header->w));
+    CImage::infoMsg("  h           = " + std::to_string(bitmap_header->h));
+    CImage::infoMsg("  x           = " + std::to_string(bitmap_header->x));
+    CImage::infoMsg("  y           = " + std::to_string(bitmap_header->y));
+    CImage::infoMsg("  BitPlanes   = " + std::to_string(bitmap_header->BitPlanes));
+    CImage::infoMsg("  Masking     = " + std::to_string(bitmap_header->Masking));
+    CImage::infoMsg("  Compression = " + std::to_string(bitmap_header->Compression));
+    CImage::infoMsg("  TransCol    = " + std::to_string(bitmap_header->TransCol));
+    CImage::infoMsg("  XAspect     = " + std::to_string(bitmap_header->XAspect));
+    CImage::infoMsg("  YAspect     = " + std::to_string(bitmap_header->YAspect));
+    CImage::infoMsg("  Width       = " + std::to_string(bitmap_header->Width));
+    CImage::infoMsg("  Height      = " + std::to_string(bitmap_header->Height));
   }
 
   return true;
@@ -354,7 +352,7 @@ CImageIFF::
 readCMAP(CFile *file, IFFColorRegister *cregs, int *num_colors)
 {
   if (CImageState::getDebug())
-    cerr << "CMAP" << endl;
+    CImage::infoMsg("CMAP");
 
   IFF_ULONG header_length;
 
@@ -362,9 +360,9 @@ readCMAP(CFile *file, IFFColorRegister *cregs, int *num_colors)
     return false;
 
   if (CImageState::getDebug())
-    cerr << "  " << header_length << " bytes" << endl;
+    CImage::infoMsg("  " + std::to_string(header_length) + " bytes");
 
-  vector<IFF_UBYTE> buffer;
+  std::vector<IFF_UBYTE> buffer;
 
   buffer.resize(header_length + 1);
 
@@ -379,10 +377,10 @@ readCMAP(CFile *file, IFFColorRegister *cregs, int *num_colors)
     cregs[i].b = buffer[(3 * i) + 2];
 
     if (CImageState::getDebug())
-      cerr << "  " << i << ") " <<
-              "Red "   << (cregs[i].r >> 4) << ", " <<
-              "Green " << (cregs[i].g >> 4) << ", " <<
-              "Blue "  << (cregs[i].b >> 4) << endl;
+      CImage::infoMsg("  "     + std::to_string(i) + ") " +
+                      "Red "   + std::to_string(cregs[i].r >> 4) + ", " +
+                      "Green " + std::to_string(cregs[i].g >> 4) + ", " +
+                      "Blue "  + std::to_string(cregs[i].b >> 4));
   }
 
   return true;
@@ -393,7 +391,7 @@ CImageIFF::
 readCAMG(CFile *file, IFFCommodoreAmiga *commodore_amiga)
 {
   if (CImageState::getDebug())
-    cerr << "CAMG" << endl;
+    CImage::infoMsg("CAMG");
 
   IFF_ULONG header_length;
 
@@ -401,7 +399,7 @@ readCAMG(CFile *file, IFFCommodoreAmiga *commodore_amiga)
     return false;
 
   if (CImageState::getDebug())
-    cerr << "  " << header_length << " bytes" << endl;
+    CImage::infoMsg("  " + std::to_string(header_length) + " bytes");
 
   if (sizeof(IFFCommodoreAmiga) != header_length)
     return false;
@@ -412,16 +410,16 @@ readCAMG(CFile *file, IFFCommodoreAmiga *commodore_amiga)
   convertWord(&commodore_amiga->ViewModes);
 
   if (CImageState::getDebug()) {
-    cerr << "  ViewModes = " << commodore_amiga->ViewModes << endl;
+    CImage::infoMsg("  ViewModes = " + std::to_string(commodore_amiga->ViewModes));
 
     if (commodore_amiga->ViewModes & 0x8000)
-      cerr << "  HIRES" << endl;
+      CImage::infoMsg("  HIRES");
     if (commodore_amiga->ViewModes & 0x0800)
-      cerr << "  HAM" << endl;
+      CImage::infoMsg("  HAM");
     if (commodore_amiga->ViewModes & 0x0080)
-      cerr << "  HALFBRIT" << endl;
+      CImage::infoMsg("  HALFBRIT");
     if (commodore_amiga->ViewModes & 0x0004)
-      cerr << "  LACE" << endl;
+      CImage::infoMsg("  LACE");
   }
 
   return true;
@@ -432,7 +430,7 @@ CImageIFF::
 readCRNG(CFile *file, IFFColorRange *color_range)
 {
   if (CImageState::getDebug())
-    cerr << "CRNG" << endl;
+    CImage::infoMsg("CRNG");
 
   IFF_ULONG header_length;
 
@@ -440,7 +438,7 @@ readCRNG(CFile *file, IFFColorRange *color_range)
     return false;
 
   if (CImageState::getDebug())
-    cerr << "  " << header_length << " bytes" << endl;
+    CImage::infoMsg("  " + std::to_string(header_length) + " bytes");
 
   if (sizeof(IFFColorRange) != header_length)
     return false;
@@ -452,10 +450,10 @@ readCRNG(CFile *file, IFFColorRange *color_range)
   convertWord((IFF_UWORD *) &color_range->active);
 
   if (CImageState::getDebug()) {
-    cerr << "  Rate   = " << color_range->rate   << endl;
-    cerr << "  Active = " << color_range->active << endl;
-    cerr << "  Low    = " << color_range->low    << endl;
-    cerr << "  High   = " << color_range->high   << endl;
+    CImage::infoMsg("  Rate   = " + std::to_string(color_range->rate));
+    CImage::infoMsg("  Active = " + std::to_string(color_range->active));
+    CImage::infoMsg("  Low    = " + std::to_string(color_range->low));
+    CImage::infoMsg("  High   = " + std::to_string(color_range->high));
   }
 
   return true;
@@ -466,7 +464,7 @@ CImageIFF::
 readBody(CFile *file, IFF_UBYTE **screen_memory, IFF_ULONG *screen_memory_size)
 {
   if (CImageState::getDebug())
-    cerr << "BODY" << endl;
+    CImage::infoMsg("BODY");
 
   IFF_ULONG header_length;
 
@@ -474,12 +472,12 @@ readBody(CFile *file, IFF_UBYTE **screen_memory, IFF_ULONG *screen_memory_size)
     return false;
 
   if (CImageState::getDebug())
-    cerr << "  " << header_length << " bytes" << endl;
+    CImage::infoMsg("  " + std::to_string(header_length) + " bytes");
 
   *screen_memory_size = header_length;
   *screen_memory      = new IFF_UBYTE [header_length + 1];
 
-  if (*screen_memory == NULL)
+  if (*screen_memory == 0)
     return false;
 
   if (! readStorage(file, header_length, *screen_memory)) {
@@ -501,7 +499,7 @@ readUnknown(CFile *file)
     return false;
 
   if (CImageState::getDebug())
-    cerr << "  " << header_length << " bytes" << endl;
+    CImage::infoMsg("  " + std::to_string(header_length) + " bytes");
 
   if (! readBytes(file, header_length))
     return false;
@@ -608,7 +606,7 @@ decompressScreenMemory(IFF_UBYTE *screen_memory, IFF_ULONG screen_memory_size, i
 
       if (screen_memory_position  + key > screen_memory_size ||
           screen_memory_position1 + key > screen_memory_size1) {
-        cerr << "Decompress Failed 1" << endl;
+        CImage::errorMsg("Decompress Failed 1");
         break;
       }
 
@@ -620,16 +618,16 @@ decompressScreenMemory(IFF_UBYTE *screen_memory, IFF_ULONG screen_memory_size, i
       int count = 257 - key;
 
       if (screen_memory_position >= screen_memory_size) {
-        cerr << "Decompress Failed 2" << endl;
+        CImage::errorMsg("Decompress Failed 2");
         break;
       }
 
       IFF_UBYTE data_byte = screen_memory[screen_memory_position++];
 
       if (screen_memory_position1 + count > screen_memory_size1) {
-        cerr << "Decompress Failed 3" << endl;
-        cerr << "Count = " << count << ", Left = " <<
-                screen_memory_size1 - screen_memory_position1 << endl;
+        CImage::errorMsg("Decompress Failed 3");
+        CImage::errorMsg("Count = " + std::to_string(count) + ", Left = " +
+                         std::to_string(screen_memory_size1 - screen_memory_position1));
         break;
       }
 
@@ -908,8 +906,8 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
     if (num_c >= 256) {
       if (tol > 0 && tol_inc > 1) {
         if (CImageState::getDebug())
-          cerr << num_c << " Colors at Tolerance of " << tol <<
-                  " (" << tol_inc << ")" << endl;
+          CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
+                          std::to_string(tol) + " (" + std::to_string(tol_inc) + ")");
 
         tol -= tol_inc;
 
@@ -924,14 +922,14 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
     }
 
     if (CImageState::getDebug())
-      cerr << num_c << " Colors at Tolerance of " << tol <<
-              " (" << tol_inc << ")" << endl;
+      CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
+                      std::to_string(tol) + " (" + std::to_string(tol_inc) + ")");
 
     tol += tol_inc;
   }
 
   if (CImageState::getDebug())
-    cerr << num_c << " Colors at Tolerance of " << tol << endl;
+    CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " + std::to_string(tol));
 
   *num_colors = num_c;
   *colors     = new CRGBA [num_c];
@@ -946,7 +944,9 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
     (*colors)[i].setRGBA(r/15.0, g/15.0, b/15.0);
 
     if (CImageState::getDebug())
-      cerr << "Color : R " << r << " G " << g << " B " << b << endl;
+      CImage::infoMsg("Color : R " + std::to_string(r) +
+                             " G " + std::to_string(g) +
+                             " B " + std::to_string(b));
 
     int r1 = r - tol;
     int r2 = r + tol;
@@ -1002,10 +1002,10 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
 {
   if (CImageState::getDebug()) {
     for (int i = 0; i < 64; ++i)
-      cerr << "  " << i <<
-              ") Red "   << cregs[i].r <<
-              ", Green " << cregs[i].g <<
-              ", Blue "  << cregs[i].b << endl;
+      CImage::infoMsg("  "       + std::to_string(i) +
+                      ") Red "   + std::to_string(cregs[i].r) +
+                      ", Green " + std::to_string(cregs[i].g) +
+                      ", Blue "  + std::to_string(cregs[i].b));
   }
 
   for (int i = 0; i < 64; ++i) {
@@ -1014,10 +1014,10 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     cregs[i].b = (cregs[i].b >> 2) & 0x3F;
 
     if (CImageState::getDebug()) {
-      cerr << "  " << i <<
-              ") Red "   << cregs[i].r <<
-              ", Green " << cregs[i].g <<
-              ", Blue "  << cregs[i].b << endl;
+      CImage::infoMsg("  "       + std::to_string(i) +
+                      ") Red "   + std::to_string(cregs[i].r) +
+                      ", Green " + std::to_string(cregs[i].g) +
+                      ", Blue "  + std::to_string(cregs[i].b));
     }
   }
 
@@ -1125,8 +1125,8 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     if (num_c <= 256) {
       if (tol > 0 && tol_inc > 1) {
         if (CImageState::getDebug())
-          cerr << num_c << " Colors at Tolerance of " << tol <<
-                  " (" << tol_inc << ")" << endl;
+          CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
+                          std::to_string(tol) + " (" + std::to_string(tol_inc) + ")");
 
         tol -= tol_inc;
 
@@ -1141,14 +1141,15 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     }
 
     if (CImageState::getDebug())
-      cerr << num_c << " Colors at Tolerance of " << tol <<
-              " (" << tol_inc << ")" << endl;
+      CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
+                      std::to_string(tol) + " (" + std::to_string(tol_inc) + ")");
 
     tol += tol_inc;
   }
 
   if (CImageState::getDebug())
-    cerr << num_c << " Colors at Tolerance of " << tol << endl;
+    CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
+                    std::to_string(tol));
 
   *num_colors = num_c;
   *colors     = new CRGBA [num_c];
@@ -1163,7 +1164,9 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     (*colors)[i].setRGBA(r/63.0, g/63.0, b/63.0);
 
     if (CImageState::getDebug())
-      cerr << "Color : R " << r << " G " << g << " B " << b << endl;
+      CImage::infoMsg("Color : R " + std::to_string(r) +
+                             " G " + std::to_string(g) +
+                             " B " + std::to_string(b));
 
     int r1 = r - tol;
     int r2 = r + tol;
@@ -1245,12 +1248,12 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
         if (c_flags[c] == 1)
           continue;
 
-        int r1 = max(r - tol, 0);
-        int r2 = min(r + tol, 255);
-        int g1 = max(g - tol, 0);
-        int g2 = min(g + tol, 255);
-        int b1 = max(b - tol, 0);
-        int b2 = min(b + tol, 255);
+        int r1 = std::max(r - tol, 0);
+        int r2 = std::min(r + tol, 255);
+        int g1 = std::max(g - tol, 0);
+        int g2 = std::min(g + tol, 255);
+        int b1 = std::max(b - tol, 0);
+        int b2 = std::min(b + tol, 255);
 
         for (int rr = r1; rr <= r2; ++rr)
           for (int gg = g1; gg <= g2; ++gg)
@@ -1274,8 +1277,8 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
     if (num_c <= 256) {
       if (tol > 0 && tol_inc > 1) {
         if (CImageState::getDebug())
-          cerr << num_c << " Colors at Tolerance of " << tol <<
-                  " (" << tol_inc << ")" << endl;
+          CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
+                          std::to_string(tol) + " (" + std::to_string(tol_inc) + ")");
 
         tol -= tol_inc;
 
@@ -1290,14 +1293,15 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
     }
 
     if (CImageState::getDebug())
-      cerr << num_c << " Colors at Tolerance of " << tol <<
-              " (" << tol_inc << ")" << endl;
+      CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
+                      std::to_string(tol) + " (" + std::to_string(tol_inc) + ")");
 
     tol += tol_inc;
   }
 
   if (CImageState::getDebug())
-    cerr << num_c << " Colors at Tolerance of " << tol << endl;
+    CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
+                    std::to_string(tol));
 
   *num_colors = num_c;
   *colors     = new CRGBA [num_c];
@@ -1314,14 +1318,16 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
     (*colors)[i].setRGBAI(r, g, b);
 
     if (CImageState::getDebug())
-      cerr << "Color : R " << r << " G " << g << " B " << b << endl;
+      CImage::infoMsg("Color : R " + std::to_string(r) +
+                             " G " + std::to_string(g) +
+                             " B " + std::to_string(b));
 
-    int r1 = min(r - tol, 0);
-    int r2 = max(r + tol, 255);
-    int g1 = min(g - tol, 0);
-    int g2 = max(g + tol, 255);
-    int b1 = min(b - tol, 0);
-    int b2 = max(b + tol, 255);
+    int r1 = std::min(r - tol, 0);
+    int r2 = std::max(r + tol, 255);
+    int g1 = std::min(g - tol, 0);
+    int g2 = std::max(g + tol, 255);
+    int b1 = std::min(b - tol, 0);
+    int b2 = std::max(b + tol, 255);
 
     for (int rr = r1; rr <= r2; ++rr)
       for (int gg = g1; gg <= g2; ++gg)
@@ -1371,7 +1377,10 @@ convertColors(IFFColorRegister *cregs, int num_colors)
     colors[i].setRGBA(r/15.0, g/15.0, b/15.0);
 
     if (CImageState::getDebug())
-      cerr << i << ") Red " << r << ", Green " << g << ", Blue " << b << endl;
+      CImage::infoMsg(std::to_string(i) +
+                      ") Red "   + std::to_string(r) +
+                      ", Green " + std::to_string(g) +
+                      ", Blue "  + std::to_string(b));
   }
 
   return colors;

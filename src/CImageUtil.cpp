@@ -1,4 +1,4 @@
-#include <CImageLibI.h>
+#include <CImageUtil.h>
 
 union IntData {
   CIMAGE_INT32 l;

@@ -1,13 +1,12 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc != 2) {
-    cerr << "Usage: test_image_color_split <ifile>" << endl;
+    std::cerr << "Usage: test_image_color_split <ifile>" << std::endl;
     exit(1);
   }
 
@@ -29,7 +28,7 @@ main(int argc, char **argv)
 
     image1->removeSinglePixels();
 
-    string filename = ifile->getBase() + CStrUtil::toString(i + 1) + ".gif";
+    std::string filename = ifile->getBase() + CStrUtil::toString(i + 1) + ".gif";
 
     CFile ofile(filename);
 

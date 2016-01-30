@@ -1,15 +1,14 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CImageLib/CImageLib.h>
-#include <CFileUtil/CFileUtil.h>
+#include <CImageLib.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc != 4) {
-    cerr << "Usage: test_image_merge " <<
-            "<ifile1> <ifile2> <ofile>" << endl;
+    std::cerr << "Usage: test_image_merge " <<
+                 "<ifile1> <ifile2> <ofile>" << std::endl;
     exit(1);
   }
 

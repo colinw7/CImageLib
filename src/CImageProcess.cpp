@@ -1,7 +1,4 @@
-#include <CImageLibI.h>
-
-using std::map;
-using std::vector;
+#include <CImageProcess.h>
 
 void
 CImage::
@@ -37,7 +34,7 @@ CImage::ImagePtrList
 CImage::
 colorSplit()
 {
-  map<uint, bool> used;
+  std::map<uint, bool> used;
 
   int width  = getWidth ();
   int height = getHeight();
@@ -53,10 +50,8 @@ colorSplit()
 
   ImagePtrList images;
 
-  map<uint, bool>::iterator pused;
-
-  for (pused = used.begin(); pused != used.end(); ++pused)
-    images.push_back(colorSplitByData((*pused).first));
+  for (const auto &i : used)
+    images.push_back(colorSplitByData(i.first));
 
   return images;
 }
@@ -65,7 +60,7 @@ CImagePtr
 CImage::
 colorSplit(int color_num)
 {
-  map<uint, bool> used;
+  std::map<uint, bool> used;
 
   int width  = getWidth ();
   int height = getHeight();
@@ -82,11 +77,11 @@ colorSplit(int color_num)
   int num_colors = used.size();
 
   if (color_num < 0 || color_num >= num_colors)
-    CTHROW("Bad Color Number");
+    CImage::warnMsg("Bad Color Number " + std::to_string(color_num));
 
   ImagePtrList images;
 
-  map<uint, bool>::iterator pused = used.begin();
+  auto pused = used.begin();
 
   for (int i = 0; i < color_num; ++i)
     ++pused;
@@ -494,7 +489,7 @@ gammaFunc(CColorComponent component, double amplitude, double exponent, double o
 
 void
 CImage::
-tableFunc(CColorComponent component, const vector<double> &values)
+tableFunc(CColorComponent component, const std::vector<double> &values)
 {
   int num_ranges = values.size() - 1;
 
@@ -542,7 +537,7 @@ tableFunc(CColorComponent component, const vector<double> &values)
 
 void
 CImage::
-discreteFunc(CColorComponent component, const vector<double> &values)
+discreteFunc(CColorComponent component, const std::vector<double> &values)
 {
   uint num_ranges = values.size();
 

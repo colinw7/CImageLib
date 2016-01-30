@@ -5,8 +5,6 @@
 
 #include <XWDFile.h>
 
-using std::string;
-
 static int xwd_bits_used  = -1;
 static int xwd_pixel_mask = -1;
 
@@ -26,7 +24,7 @@ read(CFile *file, CImagePtr &image)
 
   // Read Color Map
 
-  CRGBA *colors = NULL;
+  CRGBA *colors = 0;
 
   if (hdr.ncolors > 0) {
     XWDColor *xcolors = new XWDColor [hdr.ncolors];
@@ -79,7 +77,7 @@ read(CFile *file, CImagePtr &image)
   line_pad /= hdr.bits_per_pixel;
   line_pad -= hdr.pixmap_width;
 
-  uint *data1 = NULL;
+  uint *data1 = 0;
 
   if      (hdr.pixmap_depth == 1) {
     hdr.pixmap_depth = 8;
@@ -163,17 +161,20 @@ read(CFile *file, CImagePtr &image)
         getPixel(&hdr, data, &pos);
     }
   }
-  else
-    CTHROW(string("Invalid pixmap depth ") +
-           CStrUtil::toString((int) hdr.pixmap_depth));
+  else {
+    CImage::errorMsg(std::string("Invalid pixmap depth ") +
+                     CStrUtil::toString((int) hdr.pixmap_depth));
+    return false;
+  }
 
   delete [] data;
 
   //------
 
-  if (hdr.xoffset != 0)
-    CTHROW(string("Invalid x offset ") +
-           CStrUtil::toString((int) hdr.xoffset));
+  if (hdr.xoffset != 0) {
+    CImage::errorMsg(std::string("Invalid x offset ") + CStrUtil::toString((int) hdr.xoffset));
+    return false;
+  }
 
   //------
 
@@ -222,7 +223,7 @@ readHeader(CFile *file, CImagePtr &image)
   return true;
 }
 
-void
+bool
 CImageXWD::
 readHeader(CFile *file, CImagePtr &image, XWDFileHeader *hdr, bool *swap_flag)
 {
@@ -259,14 +260,18 @@ readHeader(CFile *file, CImagePtr &image, XWDFileHeader *hdr, bool *swap_flag)
     hdr->window_y         = image->swapBytes32(hdr->window_y);
     hdr->window_bdrwidth  = image->swapBytes32(hdr->window_bdrwidth);
 
-    if (hdr->file_version != XWD_FILE_VERSION)
-      CTHROW("Invalid X Window Dump File");
+    if (hdr->file_version != XWD_FILE_VERSION) {
+      CImage::errorMsg("Invalid X Window Dump File");
+      return false;
+    }
   }
 
   // Skip Extra Header Bytes
 
   if (hdr->header_size > sz_XWDheader)
     file->setPos(hdr->header_size);
+
+  return true;
 }
 
 uint

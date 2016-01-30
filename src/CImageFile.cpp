@@ -1,11 +1,7 @@
 #include <CImageLibI.h>
 
-using std::string;
-using std::cerr;
-using std::endl;
-
 CImageFile::
-CImageFile(const string &fileName) :
+CImageFile(const std::string &fileName) :
  fileName_(fileName), image_(), loaded_(false), sized_file_list_()
 {
 }
@@ -13,11 +9,8 @@ CImageFile(const string &fileName) :
 CImageFile::
 ~CImageFile()
 {
-  SizedFileList::iterator p1 = sized_file_list_.begin();
-  SizedFileList::iterator p2 = sized_file_list_.end  ();
-
-  for ( ; p1 != p2; ++p1)
-    delete *p1;
+  for (auto &p : sized_file_list_)
+    delete p;
 }
 
 CImagePtr
@@ -30,7 +23,7 @@ getImage() const
     th->image_ = CImageMgrInst->createImage();
 
     if (! th->image_->read(fileName_)) {
-      cerr << "Failed to read " << fileName_ << endl;
+      CImage::errorMsg("Failed to read '" + fileName_ + "'");
 
       th->image_ = CImagePtr();
     }
@@ -46,11 +39,8 @@ CImageFile::
 unload()
 {
   if (loaded_) {
-    SizedFileList::iterator p1 = sized_file_list_.begin();
-    SizedFileList::iterator p2 = sized_file_list_.end  ();
-
-    for ( ; p1 != p2; ++p1)
-      (*p1)->unload();
+    for (auto &p : sized_file_list_)
+      p->unload();
 
     image_ = CImagePtr();
 
@@ -64,14 +54,11 @@ CImageSizedFile *
 CImageFile::
 lookupSizedFile(int width, int height, bool keep_aspect)
 {
-  SizedFileList::iterator p1 = sized_file_list_.begin();
-  SizedFileList::iterator p2 = sized_file_list_.end  ();
+  for (auto &p : sized_file_list_)
+    if (p->match(width, height, keep_aspect))
+      return p;
 
-  for ( ; p1 != p2; ++p1)
-    if ((*p1)->match(width, height, keep_aspect))
-      return (*p1);
-
-  return NULL;
+  return 0;
 }
 
 CImageSizedFile *
@@ -111,7 +98,7 @@ CImageSizedFile::
 {
 }
 
-string
+std::string
 CImageSizedFile::
 getFilename() const
 {

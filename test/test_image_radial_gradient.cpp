@@ -1,16 +1,17 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CFileUtil/CFileUtil.h>
-#include <CStrUtil/CStrUtil.h>
-#include <CMath/CRadialGradient.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CRadialGradient.h>
+#include <CRGBName.h>
+#include <CFile.h>
+#include <CFileUtil.h>
+#include <CStrUtil.h>
+#include <cstring>
 
 int
 main(int argc, char **argv)
 {
   if (argc < 12) {
-    cerr << "Usage: test_image_radial_gradient " <<
-            "<ofile> w h xc yc r fx fy spread {color offset}" << endl;
+    std::cerr << "Usage: test_image_radial_gradient " <<
+                 "<ofile> w h xc yc r fx fy spread {color offset}" << std::endl;
     exit(1);
   }
 
@@ -51,7 +52,7 @@ main(int argc, char **argv)
   int num_offsets = (argc - 10)/2;
 
   for (int i = 0; i < num_offsets; ++i) {
-    CRGBA rgba(argv[2*i + 10]);
+    CRGBA rgba = CRGBName::toRGBA(argv[2*i + 10]);
 
     double offset;
 

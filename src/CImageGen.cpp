@@ -1,13 +1,11 @@
-#include <CImageLibI.h>
+#include <CImageGen.h>
 #include <CImageGIF.h>
 #include <CImageXBM.h>
 #include <CImageXPM.h>
 
-using std::string;
-
 CImagePtr
 CImage::
-create(const string &filename)
+create(const std::string &filename)
 {
   CFile file(filename);
 
@@ -16,7 +14,7 @@ create(const string &filename)
 
 CImagePtr
 CImage::
-create(const string &filename, CFileType type)
+create(const std::string &filename, CFileType type)
 {
   CFile file(filename);
 
@@ -242,7 +240,7 @@ create(const char **strings, uint num_strings, CFileType type)
 
 CImagePtr
 CImage::
-createHeader(const string &filename)
+createHeader(const std::string &filename)
 {
   CFile file(filename);
 
@@ -251,7 +249,7 @@ createHeader(const string &filename)
 
 CImagePtr
 CImage::
-createHeader(const string &filename, CFileType type)
+createHeader(const std::string &filename, CFileType type)
 {
   CFile file(filename);
 
@@ -463,7 +461,7 @@ read(const uchar *data, size_t len, CFileType type)
 
 bool
 CImage::
-read(const string &filename, CFileType type)
+read(const std::string &filename, CFileType type)
 {
   CFile file(filename);
 
@@ -625,9 +623,12 @@ read(CFile *file, CFileType type)
 
     bool flag = fmt->read(file, image);
 
+    if (! flag)
+      return false;
+
     replace(image);
 
-    return flag;
+    return true;
   }
 
   return false;
@@ -652,7 +653,7 @@ readHeader(const uchar *data, size_t len)
 
 bool
 CImage::
-readHeader(const string &filename)
+readHeader(const std::string &filename)
 {
   CFile file(filename);
 
@@ -821,7 +822,7 @@ readHeader(CFile *file, CFileType type)
 
 bool
 CImage::
-write(const string &filename, CFileType type)
+write(const std::string &filename, CFileType type)
 {
   CFile file(filename);
 
@@ -839,7 +840,7 @@ write(const char *filename, CFileType type)
 
 bool
 CImage::
-write(const string &filename)
+write(const std::string &filename)
 {
   CFile file(filename);
 
@@ -918,7 +919,7 @@ writePCX(CFile *file)
 
 bool
 CImage::
-writePNG(const string &filename)
+writePNG(const std::string &filename)
 {
   CFile file(filename);
 

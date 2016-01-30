@@ -1,12 +1,11 @@
-#include <std_c++.h>
-#include <CFile/CFile.h>
-#include <CImageLib/CImageLib.h>
+#include <CImageLib.h>
+#include <CFile.h>
 
 int
 main(int argc, char **argv)
 {
   if (argc != 2) {
-    cerr << "Usage: dump_image <file>" << endl;
+    std::cerr << "Usage: dump_image <file>" << std::endl;
     exit(1);
   }
 
