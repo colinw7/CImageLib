@@ -22,7 +22,7 @@ namespace CFileUtil {
   }
 
   inline CFileType getType(CFile *file) {
-    file->getType();
+    return file->getType();
   }
 
   inline CFileType getImageType(CFile *file) {
