@@ -58,6 +58,7 @@ OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPPFLAGS = \
 $(CDEBUG) \
+-DLARGEST_RECT \
 -DIMAGE_PNG \
 -DIMAGE_JPEG \
 -std=c++11 \
