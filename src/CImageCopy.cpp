@@ -266,7 +266,7 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
 
 bool
 CImage::
-combine(CImagePtr image, int x, int y)
+copy(CImagePtr image, int x, int y)
 {
   int iwidth  = getWidth ();
   int iheight = getHeight();
@@ -310,18 +310,18 @@ combine(CImagePtr image, int x, int y)
 
 CImagePtr
 CImage::
-combine(CImagePtr image1, CImagePtr image2, int x, int y)
+copy(CImagePtr image1, CImagePtr image2, int x, int y)
 {
   CImagePtr image = image1->dup();
 
-  (void) image->combine(image2, x, y);
+  (void) image->copy(image2, x, y);
 
   return image;
 }
 
 bool
 CImage::
-combineAlpha(CImagePtr image, int x, int y)
+copyAlpha(CImagePtr image, int x, int y)
 {
   int iwidth  = getWidth ();
   int iheight = getHeight();

@@ -238,7 +238,6 @@ class CImage {
   //----
 
   // Get/Set Data
-
  public:
   CFileType getType() const { return type_; }
   void      setType(CFileType type) { type_ = type; }
@@ -291,7 +290,6 @@ class CImage {
   //----
 
   // Read/Write
-
  public:
   bool read(const std::string &filename, CFileType type=CFILE_TYPE_NONE);
 
@@ -338,7 +336,6 @@ class CImage {
   //----
 
   // Functions
-
  public:
   void clamp(int *x, int *y) {
     *x = std::min(std::max(0, *x), size_.width  - 1);
@@ -531,7 +528,6 @@ class CImage {
   //------
 
   // Resize (New Image), Reshape (Existing Image)
-
  private:
   static CImageResizeType resize_type;
 
@@ -587,14 +583,12 @@ class CImage {
   //------
 
   // Rotate
-
  public:
   CImagePtr rotate(double angle);
 
   //------
 
   // Scroll
-
  public:
   void scroll(int dx, int dy);
 
@@ -604,7 +598,6 @@ class CImage {
   //------
 
   // Flip
-
  public:
   CImagePtr flippedH() const;
   CImagePtr flippedV() const;
@@ -617,14 +610,12 @@ class CImage {
   //------
 
   // Tile
-
  public:
   CImagePtr tile(int width, int height, const CImageTile &tile);
 
   //------
 
   // Convert
-
  private:
   static CRGBA  convertBg_;
   static double convertAlphaTol_;
@@ -662,7 +653,6 @@ class CImage {
   //------
 
   // Mask
-
  public:
   CImagePtr createMask() const;
 
@@ -674,7 +664,6 @@ class CImage {
   //------
 
   // Gray Scale
-
  public:
   CImagePtr grayScaled() const;
 
@@ -683,7 +672,6 @@ class CImage {
   //------
 
   // Draw
-
  public:
   void fillRGBARectangle(int x1, int y1, int x2, int y2, const CRGBA &rgba);
   void fillColorIndexRectangle(int x1, int y1, int x2, int y2, int ind);
@@ -697,14 +685,12 @@ class CImage {
   //------
 
   // Line Art
-
  public:
   void lineArt(double tolerance);
 
   //------
 
   // Combine
-
  public:
   static bool combine(CImagePtr image1, CImagePtr image2, const CRGBACombineDef &def);
 
@@ -721,14 +707,12 @@ class CImage {
   //------
 
   // Merge
-
  public:
   static CImagePtr merge(CImagePtr image1, CImagePtr image2);
 
   //------
 
   // Invert
-
  public:
   CImagePtr inverted() const;
 
@@ -737,7 +721,6 @@ class CImage {
   //------
 
   // Copy
-
  private:
   static CImageCopyType copy_type;
 
@@ -756,16 +739,15 @@ class CImage {
   void subCopyTo  (CImagePtr &dst, int src_x=0, int src_y=0, int width=-1, int height=-1,
                    int dest_x=0, int dest_y=0) const;
 
-  bool combine(CImagePtr image, int x=0, int y=0);
+  bool copy(CImagePtr image, int x=0, int y=0);
 
-  static CImagePtr combine(CImagePtr image1, CImagePtr image2, int x=0, int y=0);
+  static CImagePtr copy(CImagePtr image1, CImagePtr image2, int x=0, int y=0);
 
-  bool combineAlpha(CImagePtr image, int x=0, int y=0);
+  bool copyAlpha(CImagePtr image, int x=0, int y=0);
 
   //------
 
   // Process
-
  public:
   void removeSinglePixels();
 
@@ -804,7 +786,6 @@ class CImage {
   //------
 
   // Filter
-
  public:
   static void unsharpMask(CImagePtr src, CImagePtr &dst, double strength = 2.0);
 
@@ -829,7 +810,6 @@ class CImage {
   //------
 
   // Flood Fill
-
  public:
   void floodFill(int x, int y, const CRGBA &rgba);
   void floodFill(int x, int y, int pixel);
@@ -840,7 +820,6 @@ class CImage {
   //------
 
   // Gradient
-
  public:
   void linearGradient(const CLinearGradient &gradient);
   void radialGradient(const CRadialGradient &gradient);
@@ -848,7 +827,6 @@ class CImage {
   //------
 
   // Util
-
  public:
   static CIMAGE_INT32 swapBytes32(CIMAGE_INT32 i);
   static CIMAGE_INT16 swapBytes16(CIMAGE_INT16 i);
@@ -856,7 +834,6 @@ class CImage {
   //--------------------------
 
   // BMP
-
  protected:
   static CImagePtr createBMP(CFile *file);
   static CImagePtr createBMPHeader(CFile *file);
@@ -870,7 +847,6 @@ class CImage {
   //------
 
   // EPS
-
  protected:
   static CImagePtr createEPS(CFile *file);
   static CImagePtr createEPSHeader(CFile *file);
@@ -884,7 +860,6 @@ class CImage {
   //------
 
   // GIF
-
  protected:
   static CImagePtr createGIF(CFile *file);
   static CImagePtr createGIFHeader(CFile *file);
@@ -900,7 +875,6 @@ class CImage {
   //------
 
   // ICO
-
  protected:
   static CImagePtr createICO(CFile *file);
   static CImagePtr createICOHeader(CFile *file);
@@ -914,7 +888,6 @@ class CImage {
   //------
 
   // IFF
-
  protected:
   static CImagePtr createIFF(CFile *file);
   static CImagePtr createIFFHeader(CFile *file);
@@ -928,7 +901,6 @@ class CImage {
   //------
 
   // JPG
-
  protected:
   static CImagePtr createJPG(CFile *file);
   static CImagePtr createJPGHeader(CFile *file);
@@ -942,7 +914,6 @@ class CImage {
   //------
 
   // PCX
-
  protected:
   static CImagePtr createPCX(CFile *file);
   static CImagePtr createPCXHeader(CFile *file);
@@ -956,7 +927,6 @@ class CImage {
   //------
 
   // PNG
-
  protected:
   static CImagePtr createPNG(CFile *file);
   static CImagePtr createPNGHeader(CFile *file);
@@ -971,7 +941,6 @@ class CImage {
   //------
 
   // PPM
-
  protected:
   static CImagePtr createPPM(CFile *file);
   static CImagePtr createPPMHeader(CFile *file);
@@ -985,7 +954,6 @@ class CImage {
   //------
 
   // PS
-
  protected:
   static CImagePtr createPS(CFile *file);
   static CImagePtr createPSHeader(CFile *file);
@@ -999,7 +967,6 @@ class CImage {
   //------
 
   // PSP
-
  protected:
   static CImagePtr createPSP(CFile *file);
   static CImagePtr createPSPHeader(CFile *file);
@@ -1013,7 +980,6 @@ class CImage {
   //------
 
   // SGI
-
  protected:
   static CImagePtr createSGI(CFile *file);
   static CImagePtr createSGIHeader(CFile *file);
@@ -1027,7 +993,6 @@ class CImage {
   //------
 
   // SVG
-
  protected:
   static CImagePtr createSVG(CFile *file);
   static CImagePtr createSVGHeader(CFile *file);
@@ -1041,7 +1006,6 @@ class CImage {
   //------
 
   // TGA
-
  protected:
   static CImagePtr createTGA(CFile *file);
   static CImagePtr createTGAHeader(CFile *file);
@@ -1055,7 +1019,6 @@ class CImage {
   //------
 
   // TIF
-
  protected:
   static CImagePtr createTIF(CFile *file);
   static CImagePtr createTIFHeader(CFile *file);
@@ -1069,7 +1032,6 @@ class CImage {
   //------
 
   // XBM
-
  protected:
   static CImagePtr createXBM(CFile *file);
   static CImagePtr createXBM(uchar *data, int width, int height);
@@ -1086,7 +1048,6 @@ class CImage {
   //------
 
   // XPM
-
  public:
   static void setXPMHotSpot(int x, int y);
 
@@ -1107,7 +1068,6 @@ class CImage {
   //------
 
   // XWD
-
  protected:
   static CImagePtr createXWD(CFile *file);
   static CImagePtr createXWDHeader(CFile *file);

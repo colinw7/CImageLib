@@ -57,7 +57,7 @@ bool
 CImage::
 combine(CImagePtr image1, CImagePtr image2)
 {
-  return image1->combine(image2, 0, 0);
+  return image1->copy(image2, 0, 0);
 }
 
 bool
