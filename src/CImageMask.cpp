@@ -114,20 +114,26 @@ createRGBAMask(const CRGBA &rgba)
 
   image->setDataSize(size_);
 
+  //---
+
+  // rgba contains r, g, b factors (default gray factors)
   double r, g, b, a;
 
   rgba.getRGBA(&r, &g, &b, &a);
 
+  // normalize (default is already normalized)
   double sum = r + g + b;
 
   r /= sum;
   g /= sum;
   b /= sum;
 
-  double r1, g1, b1, a1;
+  //---
 
   for (int y = 0; y < size_.height; ++y) {
     for (int x = 0; x < size_.width; ++x) {
+      double r1, g1, b1, a1;
+
       getRGBAPixel(x, y, &r1, &g1, &b1, &a1);
 
       a = a1*(r*r1 + g*g1 + b*b1);

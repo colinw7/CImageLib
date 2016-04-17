@@ -40,9 +40,37 @@ combine(CImagePtr image, const CRGBACombineDef &def)
              getRGBAPixel(x, y, rgba1);
       image->getRGBAPixel(x, y, rgba2);
 
-      CRGBA rgba = CRGBA::modeCombine(rgba2, rgba1,
-                                      def.src_mode, def.dst_mode,
-                                      def.func, def.factor);
+      CRGBA rgba = def.combine(rgba1, rgba2);
+
+      setRGBAPixel(x, y, rgba.clamp());
+    }
+  }
+
+  dataChanged();
+
+  return true;
+}
+
+bool
+CImage::
+combine(CImagePtr image, CRGBABlendMode mode)
+{
+  if (hasColormap() || image->hasColormap()) {
+    CImage::errorMsg("Can only combine RGBA images");
+    return false;
+  }
+
+  CRGBA rgba1, rgba2;
+
+  int w = std::min(getWidth (), image->getWidth ());
+  int h = std::min(getHeight(), image->getHeight());
+
+  for (int y = 0; y < h; ++y) {
+    for (int x = 0; x < w; ++x) {
+             getRGBAPixel(x, y, rgba1);
+      image->getRGBAPixel(x, y, rgba2);
+
+      CRGBA rgba = CRGBA::blendCombine(rgba1, rgba2, mode);
 
       setRGBAPixel(x, y, rgba.clamp());
     }
@@ -64,23 +92,38 @@ bool
 CImage::
 combine(CImagePtr image)
 {
+  return combine(0, 0, image);
+}
+
+bool
+CImage::
+combine(int x, int y, CImagePtr image)
+{
   if (hasColormap() || image->hasColormap()) {
     CImage::errorMsg("Can only combine RGBA images");
     return false;
   }
 
-  CRGBA rgba;
+  CRGBA rgba1, rgba2;
 
   int w = std::min(getWidth (), image->getWidth ());
   int h = std::min(getHeight(), image->getHeight());
 
-  for (int y = 0; y < h; ++y) {
-    for (int x = 0; x < w; ++x) {
-      if (image->isTransparent(x, y)) continue;
+  for (int y1 = 0; y1 < h; ++y1) {
+    for (int x1 = 0; x1 < w; ++x1) {
+      if (! validPixel(x1 + x, y1 + y))
+        continue;
 
-      image->getRGBAPixel(x, y, rgba);
+      image->getRGBAPixel(x1, y1, rgba1);
 
-      setRGBAPixel(x, y, rgba);
+      if (! rgba1.getAlphaI())
+        continue;
+
+      getRGBAPixel(x1 + x, y1 + y, rgba2);
+
+      CRGBA rgba = rgba2.combined(rgba1);
+
+      setRGBAPixel(x1 + x, y1 + y, rgba);
     }
   }
 

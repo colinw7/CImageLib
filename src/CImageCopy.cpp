@@ -339,6 +339,8 @@ copyAlpha(CImagePtr image, int x, int y)
   if (hasColormap())
     convertToRGB();
 
+  // image is mask, get alpha from rgba of mask
+  // set alpha of image pixel from mask
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba1);

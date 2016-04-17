@@ -3,6 +3,7 @@
 
 #include <CRGBA.h>
 #include <CRGB.h>
+#include <CRGBACombineDef.h>
 #include <CAlignType.h>
 #include <CISize2D.h>
 #include <CIBBox2D.h>
@@ -440,6 +441,8 @@ class CImage {
 
   void setAlphaByColor(const CRGB &rgb, double a=1.0);
 
+  void setAlpha();
+  void setAlphaGray(double gray);
   void setAlpha(double a);
   void setAlphaByImage(CImagePtr image);
 
@@ -611,7 +614,7 @@ class CImage {
 
   // Tile
  public:
-  CImagePtr tile(int width, int height, const CImageTile &tile);
+  CImagePtr tile(int width, int height, const CImageTile &tile=CImageTile());
 
   //------
 
@@ -696,6 +699,8 @@ class CImage {
 
   bool combine(CImagePtr image, const CRGBACombineDef &def);
 
+  bool combine(CImagePtr image, CRGBABlendMode mode);
+
   static bool combineDef(CImagePtr image1, CImagePtr image2);
 
   bool combineDef(CImagePtr image);
@@ -703,6 +708,8 @@ class CImage {
   static bool combine(CImagePtr image1, CImagePtr image2);
 
   bool combine(CImagePtr image);
+
+  bool combine(int x, int y, CImagePtr image);
 
   //------
 
@@ -760,7 +767,7 @@ class CImage {
   void monochrome();
   void twoColor(const CRGBA &bg, const CRGBA &fg);
 
-  void applyColorMatrix(double *m);
+  void applyColorMatrix(const std::vector<double> &m);
 
   void rotateHue(double dh);
 
@@ -776,12 +783,22 @@ class CImage {
 
   void discreteFunc(CColorComponent component, const std::vector<double> &values);
 
+  CImagePtr erode(bool isAlpha=false) const;
+  CImagePtr erode(const std::vector<int> &mask, bool isAlpha=false) const;
+
+  CImagePtr dilate(bool isAlpha=false) const;
+  CImagePtr dilate(const std::vector<int> &mask, bool isAlpha=false) const;
+
  private:
   CImagePtr colorSplitByData(uint data);
 
   void getClosestColors(int &i1, int &i2);
 
   void replaceColor(int i1, int i2);
+
+  CImagePtr erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const;
+
+  bool isErodePixel(int x, int y, bool isAlpha, CRGBA &rgba) const;
 
   //------
 
@@ -793,11 +810,11 @@ class CImage {
 
   void unsharpMask(CImagePtr &dst, double strength = 2.0);
 
-  static void convolve(CImagePtr src, CImagePtr &dst, const char *kernel, int size, int divisor);
+  static void convolve(CImagePtr src, CImagePtr &dst, const std::vector<double> &kernel);
 
-  CImagePtr convolve(const char *kernel, int size, int divisor);
+  CImagePtr convolve(const std::vector<double> &kernel);
 
-  void convolve(CImagePtr &dst, const char *kernel, int size, int divisor);
+  void convolve(CImagePtr &dst, const std::vector<double> &kernel);
 
   static bool gaussianBlur(CImagePtr src, CImagePtr &dst, double bx, double by, int nx=0, int ny=0);
 

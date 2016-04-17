@@ -313,8 +313,10 @@ twoColor(const CRGBA &bg, const CRGBA &fg)
 
 void
 CImage::
-applyColorMatrix(double *m)
+applyColorMatrix(const std::vector<double> &m)
 {
+  assert(m.size() == 20);
+
   convertToRGB();
 
   CRGBA rgba;
@@ -422,13 +424,13 @@ luminanceToAlpha()
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = rgba.toHSV();
+      //CHSV hsv = rgba.toHSV();
+      //double l = hsv.getValue();
+      //rgba.setAlpha(l);
 
-      double l = hsv.getValue();
+      CRGBA rgba1(0, 0, 0, rgba.getGray());
 
-      rgba.setAlpha(l);
-
-      setRGBAPixel(x, y, rgba);
+      setRGBAPixel(x, y, rgba1);
     }
   }
 }
@@ -499,21 +501,22 @@ tableFunc(CColorComponent component, const std::vector<double> &values)
 
   convertToRGB();
 
-  CRGBA rgba;
-
   int x1, y1, x2, y2;
 
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      // get component color value
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       double value = rgba.getComponent(component);
 
+      // get associated range index
+      int    i = 0;
       double value1, value2;
-
-      int i = 0;
 
       for ( ; i < num_ranges; ++i) {
         value1 = i*delta;
@@ -524,10 +527,12 @@ tableFunc(CColorComponent component, const std::vector<double> &values)
 
       if (i >= num_ranges) continue;
 
+      // remap to new range
       double m = (values[i + 1] - values[i])/(value2 - value1);
 
       value = (value - value1)*m + values[i];
 
+      // update color
       rgba.setComponent(component, value);
 
       setRGBAPixel(x, y, rgba.clamp());
@@ -547,18 +552,20 @@ discreteFunc(CColorComponent component, const std::vector<double> &values)
 
   convertToRGB();
 
-  CRGBA rgba;
-
   int x1, y1, x2, y2;
 
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      // get component color value
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       double value = rgba.getComponent(component);
 
+      // get associated range index
       uint i = 0;
 
       for ( ; i < num_ranges; ++i) {
@@ -570,9 +577,145 @@ discreteFunc(CColorComponent component, const std::vector<double> &values)
 
       if (i >= num_ranges) continue;
 
-      rgba.setComponent(component, values[i]);
+      // set to new value
+      value = values[i];
+
+      // update color
+      rgba.setComponent(component, value);
 
       setRGBAPixel(x, y, rgba.clamp());
     }
   }
+}
+
+CImagePtr
+CImage::
+erode(bool isAlpha) const
+{
+  static std::vector<int> mask = {{ 0, 1, 0, 1, 1, 1, 0, 1, 0 }};
+
+  return erode(mask, isAlpha);
+}
+
+CImagePtr
+CImage::
+erode(const std::vector<int> &mask, bool isAlpha) const
+{
+  return erodeDilate(mask, isAlpha, true);
+}
+
+CImagePtr
+CImage::
+dilate(bool isAlpha) const
+{
+  static std::vector<int> mask = {{ 0, 1, 0, 1, 1, 1, 0, 1, 0 }};
+
+  return dilate(mask, isAlpha);
+}
+
+CImagePtr
+CImage::
+dilate(const std::vector<int> &mask, bool isAlpha) const
+{
+  return erodeDilate(mask, isAlpha, false);
+}
+
+CImagePtr
+CImage::
+erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const
+{
+  // count mask bits
+  int num_hits = 0;
+
+  for (const auto &m : mask)
+    num_hits += m;
+
+  //---
+
+  int width  = getWidth ();
+  int height = getHeight();
+
+  CImagePtr image = CImageMgrInst->createImage();
+
+  image->setDataSize(width, height);
+
+  int x1, y1, x2, y2;
+
+  getWindow(&x1, &y1, &x2, &y2);
+
+  for (int y = y1; y <= y2; ++y) {
+    bool yinside = (y > y1 && y < y2);
+
+    for (int x = x1; x <= x2; ++x) {
+      bool xinside = (x > x1 && x < x2);
+
+      bool isSet = (xinside && yinside);
+
+      CRGBA rgba;
+
+      if (isSet) {
+        // count mask hits
+        int hits = 0;
+
+        if (mask[0] && isErodePixel(x - 1, y - 1, isAlpha, rgba)) ++hits;
+        if (mask[1] && isErodePixel(x    , y - 1, isAlpha, rgba)) ++hits;
+        if (mask[2] && isErodePixel(x + 1, y - 1, isAlpha, rgba)) ++hits;
+        if (mask[3] && isErodePixel(x - 1, y    , isAlpha, rgba)) ++hits;
+        if (mask[4] && isErodePixel(x    , y    , isAlpha, rgba)) ++hits;
+        if (mask[5] && isErodePixel(x + 1, y    , isAlpha, rgba)) ++hits;
+        if (mask[6] && isErodePixel(x - 1, y + 1, isAlpha, rgba)) ++hits;
+        if (mask[7] && isErodePixel(x    , y + 1, isAlpha, rgba)) ++hits;
+        if (mask[8] && isErodePixel(x + 1, y + 1, isAlpha, rgba)) ++hits;
+
+        if (isErode)
+          isSet = (hits == num_hits);
+        else
+          isSet = (hits > 0);
+      }
+
+      int x2 = x - x1;
+      int y2 = y - y1;
+
+      if (isAlpha) {
+        if (isSet) {
+          rgba /= num_hits;
+
+          image->setRGBAPixel(x2, y2, rgba);
+        }
+        else
+          image->setRGBAPixel(x2, y2, CRGBA(0, 0, 0, 0));
+      }
+      else {
+        if (isSet)
+          image->setRGBAPixel(x2, y2, CRGBA(1, 1, 1));
+        else
+          image->setRGBAPixel(x2, y2, CRGBA(0, 0, 0));
+      }
+    }
+  }
+
+  return image;
+}
+
+bool
+CImage::
+isErodePixel(int x, int y, bool isAlpha, CRGBA &rgba) const
+{
+  CRGBA rgba1;
+
+  getRGBAPixel(x, y, rgba1);
+
+  if (isAlpha) {
+    if (rgba1.getAlpha() > 0.5) {
+      rgba += rgba1;
+
+      return true;
+    }
+  }
+  else {
+    if (rgba1.getGray() > 0.5)
+      return true;
+  }
+
+  return false;
 }

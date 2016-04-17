@@ -472,6 +472,8 @@ setRGBAData(uint *data)
     for (int x = 0; x < size_.width; ++x, ++p1, ++p2)
       *p2 = *p1;
 #endif
+
+  dataChanged();
 }
 
 void
@@ -495,6 +497,8 @@ setRGBAData(const CRGBA &rgba)
         *p1 = pixel;
     }
   }
+
+  dataChanged();
 }
 
 void
@@ -546,6 +550,8 @@ setRGBAPixel(int ind, const CRGBA &rgba)
     return false;
 
   data_[ind] = pixel;
+
+  dataChanged();
 
   return true;
 }
@@ -1255,25 +1261,47 @@ pixelToAlphaI(uint pixel, uint *a)
 
 void
 CImage::
+setAlpha()
+{
+  setAlphaGray(1);
+}
+
+void
+CImage::
+setAlphaGray(double gray)
+{
+  if (hasColormap())
+    convertToRGB();
+
+  int i = 0;
+
+  for (int y = 0; y < size_.height; ++y) {
+    for (int x = 0; x < size_.width; ++x, ++i) {
+      double r, g, b, a1;
+
+      pixelToRGBA(data_[i], &r, &g, &b, &a1);
+
+      data_[i] = rgbaToPixel(gray, gray, gray, a1);
+    }
+  }
+}
+
+void
+CImage::
 setAlpha(double a)
 {
-  if (hasColormap()) {
-    int num_colors = colors_.size();
+  if (hasColormap())
+    convertToRGB();
 
-    for (int i = 0; i < num_colors; ++i)
-      colors_[i].setAlpha(a);
-  }
-  else {
-    int i = 0;
+  int i = 0;
 
-    for (int y = 0; y < size_.height; ++y) {
-      for (int x = 0; x < size_.width; ++x, ++i) {
-        double r, g, b, a1;
+  for (int y = 0; y < size_.height; ++y) {
+    for (int x = 0; x < size_.width; ++x, ++i) {
+      double r, g, b, a1;
 
-        pixelToRGBA(data_[i], &r, &g, &b, &a1);
+      pixelToRGBA(data_[i], &r, &g, &b, &a1);
 
-        data_[i] = rgbaToPixel(r, g, b, a);
-      }
+      data_[i] = rgbaToPixel(r, g, b, a);
     }
   }
 }

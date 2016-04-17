@@ -33,29 +33,29 @@ unsharpMask(CImagePtr &dst, double strength)
     return src->unsharpMask(dst, strength);
   }
 
-  char kernel[] = { 0,  0,  1,  0, 0,
-                    0,  8, 21,  8, 0,
-                    1, 21, 59, 21, 1,
-                    0,  8, 21,  8, 0,
-                    0,  0,  1,  0, 0};
+  // 5x5
+  std::vector<double> kernel = {{ 0,  0,  1,  0, 0,
+                                  0,  8, 21,  8, 0,
+                                  1, 21, 59, 21, 1,
+                                  0,  8, 21,  8, 0,
+                                  0,  0,  1,  0, 0 }};
 
-  convolve(dst, kernel, 5, 179);
+  convolve(dst, kernel);
 
   double gstrength = 1.0 - strength;
-
-  int   x, y;
-  CRGBA rgba, rgba1, rgba2;
 
   int wx1, wy1, wx2, wy2;
 
   getWindow(&wx1, &wy1, &wx2, &wy2);
 
-  for (y = wy1; y <= wy2; ++y) {
-    for (x = wx1; x <= wx2; ++x) {
+  for (int y = wy1; y <= wy2; ++y) {
+    for (int x = wx1; x <= wx2; ++x) {
+      CRGBA rgba1, rgba2;
+
            getRGBAPixel(x, y, rgba1);
       dst->getRGBAPixel(x, y, rgba2);
 
-      rgba = rgba1*strength + rgba2*gstrength;
+      CRGBA rgba = rgba1*strength + rgba2*gstrength;
 
       rgba.clamp();
 
@@ -66,44 +66,53 @@ unsharpMask(CImagePtr &dst, double strength)
 
 void
 CImage::
-convolve(CImagePtr src, CImagePtr &dst, const char *kernel, int size, int divisor)
+convolve(CImagePtr src, CImagePtr &dst, const std::vector<double> &kernel)
 {
-  return src->convolve(dst, kernel, size, divisor);
+  return src->convolve(dst, kernel);
 }
 
 CImagePtr
 CImage::
-convolve(const char *kernel, int size, int divisor)
+convolve(const std::vector<double> &kernel)
 {
   CImagePtr image = CImageMgrInst->createImage();
 
   image->setDataSize(size_);
 
-  image->convolve(kernel, size, divisor);
+  image->convolve(kernel);
 
   return image;
 }
 
 void
 CImage::
-convolve(CImagePtr &dst, const char *kernel, int size, int divisor)
+convolve(CImagePtr &dst, const std::vector<double> &kernel)
 {
+  int size   = sqrt(kernel.size());
   int border = (size - 1)/2;
 
-  const char *k;
-  CRGBA       sum, rgba;
-  int         x, y, xk, yk;
+  double divisor = 0;
+
+  for (const auto &k : kernel)
+    divisor += k;
+
+  if (divisor == 0)
+    divisor = 1;
+
+  //---
 
   int wx1, wy1, wx2, wy2;
 
   getWindow(&wx1, &wy1, &wx2, &wy2);
 
-  y = wy1;
+  int y = wy1;
 
   for ( ; y < border; ++y) {
-    x = wx1;
+    int x = wx1;
 
     for ( ; x <= wx2 - border; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       dst->setRGBAPixel(x, y, rgba);
@@ -111,29 +120,34 @@ convolve(CImagePtr &dst, const char *kernel, int size, int divisor)
   }
 
   for ( ; y <= wy2 - border; ++y) {
-    x = wx1;
+    int x = wx1;
 
     for ( ; x < border; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       dst->setRGBAPixel(x, y, rgba);
     }
 
     for ( ; x <= wx2 - border; ++x) {
-      sum.zero();
+      CRGBA sum;
 
-      k = kernel;
+      int k = 0;
 
-      for (yk = -border; yk <= border; ++yk) {
-        for (xk = -border; xk < border; ++xk) {
+      for (int yk = -border; yk <= border; ++yk) {
+        for (int xk = -border; xk <= border; ++xk) {
+          CRGBA rgba;
+
           getRGBAPixel(x + xk, y + yk, rgba);
 
-          sum += rgba*(*k++);
+          sum += rgba*kernel[k];
+
+          ++k;
         }
       }
 
-      if (divisor != 1)
-        sum /= divisor;
+      sum /= divisor;
 
       sum.clamp();
 
@@ -141,6 +155,8 @@ convolve(CImagePtr &dst, const char *kernel, int size, int divisor)
     }
 
     for ( ; x <= wx2; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       dst->setRGBAPixel(x, y, rgba);
@@ -148,9 +164,11 @@ convolve(CImagePtr &dst, const char *kernel, int size, int divisor)
   }
 
   for ( ; y <= wy2; ++y) {
-    x = wx1;
+    int x = wx1;
 
     for ( ; x <= wx2; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       dst->setRGBAPixel(x, y, rgba);
@@ -191,11 +209,16 @@ gaussianBlur(CImagePtr &dst, double bx, double by, int nx, int ny)
     return src->gaussianBlur(dst, bx, by, nx, ny);
   }
 
+  //---
+
   double minb = std::min(bx, by);
 
   if (minb <= 0)
     return false;
 
+  //---
+
+  // calc matrix size
   if (nx == 0) {
     nx = int(6*bx + 1);
 
@@ -216,10 +239,18 @@ gaussianBlur(CImagePtr &dst, double bx, double by, int nx, int ny)
   nx = nx2 - nx1 + 1;
   ny = ny2 - ny1 + 1;
 
-  double **m = new double * [nx];
+  //---
+
+  // set matrix
+  typedef std::vector<double> Reals;
+  typedef std::vector<Reals>  RealsArray;
+
+  RealsArray m;
+
+  m.resize(nx);
 
   for (int i = 0; i < nx; ++i)
-    m[i] = new double [ny];
+    m[i].resize(nx);
 
   double bxy  = bx*by;
   double bxy1 = 2*bxy;
@@ -237,36 +268,39 @@ gaussianBlur(CImagePtr &dst, double bx, double by, int nx, int ny)
     }
   }
 
-  CRGBA rgba, rgba1;
+  //---
 
+  // apply to image
   int wx1, wy1, wx2, wy2;
 
   getWindow(&wx1, &wy1, &wx2, &wy2);
 
   for (int y1 = ny1, y2 = wy1, y3 = ny2; y2 <= wy2; ++y1, ++y2, ++y3) {
     for (int x1 = nx1, x2 = wx1, x3 = nx2; x2 <= wx2; ++x1, ++x2, ++x3) {
-      rgba.zero();
+      CRGBA  rgba;
+      double a = 0.0;
 
-      for (int i = 0, x = x1; i < nx; ++i, ++x)
+      for (int i = 0, x = x1; i < nx; ++i, ++x) {
         for (int j = 0, y = y1; j < ny; ++j, ++y) {
           if (! validPixel(x, y))
             continue;
 
+          CRGBA rgba1;
+
           getRGBAPixel(x, y, rgba1);
 
           rgba += rgba1*m[i][j];
+          a    += rgba1.getAlpha();
         }
+      }
 
       rgba.clamp();
+
+      rgba.setAlpha(a/(nx*ny));
 
       dst->setRGBAPixel(x2, y2, rgba);
     }
   }
-
-  for (int i = 0; i < nx; ++i)
-    delete m[i];
-
-  delete [] m;
 
   return true;
 }
@@ -467,6 +501,16 @@ turbulence(bool fractal, double baseFreq, int numOctaves, int seed)
 
   for (int y = wy1; y <= wy2; ++y) {
     for (int x = wx1; x <= wx2; ++x) {
+      CRGBA rgba;
+
+      getRGBAPixel(x, y, rgba);
+
+      if (rgba.isTransparent())
+        continue;
+
+      //TODO: keep alpha ?
+      //double a = rgba.getAlpha();
+
       point[0] = x;
       point[1] = y;
 
