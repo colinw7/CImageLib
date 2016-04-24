@@ -144,3 +144,19 @@ createRGBAMask(const CRGBA &rgba)
 
   return image;
 }
+
+void
+CImage::
+clipOutside(int x1, int y1, int x2, int y2)
+{
+  CRGBA a(0,0,0,0);
+
+  for (int y = 0; y < size_.height; ++y) {
+    for (int x = 0; x < size_.width; ++x) {
+      if (y >= y1 && y <= y2 && x >= x1 && x <= x2)
+        continue;
+
+      setRGBAPixel(x, y, a);
+    }
+  }
+}

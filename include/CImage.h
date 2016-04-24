@@ -664,6 +664,8 @@ class CImage {
 
   CImagePtr createRGBAMask(const CRGBA &rgba = CRGBA(0.2125, 0.7154, 0.0721));
 
+  void clipOutside(int x1, int y1, int x2, int y2);
+
   //------
 
   // Gray Scale
