@@ -224,6 +224,37 @@ replaceColor(int i1, int i2)
 
 void
 CImage::
+gray()
+{
+  CRGBA rgba;
+
+  if (hasColormap()) {
+    int num_colors = colors_.size();
+
+    for (int i = 0; i < num_colors; ++i)
+      colors_[i].toGray();
+  }
+  else {
+    CRGBA rgba;
+
+    int x1, y1, x2, y2;
+
+    getWindow(&x1, &y1, &x2, &y2);
+
+    for (int y = y1; y <= y2; ++y) {
+      for (int x = x1; x <= x2; ++x) {
+        getRGBAPixel(x, y, rgba);
+
+        rgba.toGray();
+
+        setRGBAPixel(x, y, rgba);
+      }
+    }
+  }
+}
+
+void
+CImage::
 sepia()
 {
   CRGBA rgba;
@@ -301,8 +332,7 @@ twoColor(const CRGBA &bg, const CRGBA &fg)
       for (int x = x1; x <= x2; ++x) {
         getRGBAPixel(x, y, rgba);
 
-        if (rgba.getAlpha() < 0.5 ||
-            rgba.getGray () > 0.5)
+        if (rgba.getAlpha() < 0.5 || rgba.getGray () > 0.5)
           setRGBAPixel(x, y, bg);
         else
           setRGBAPixel(x, y, fg);
@@ -425,11 +455,15 @@ luminanceToAlpha()
       getRGBAPixel(x, y, rgba);
 
       //CHSV hsv = rgba.toHSV();
-      //double l = hsv.getValue();
-      //rgba.setAlpha(l);
+      //double a1 = hsv.getValue();
+      //double a1 = rgba.getGray();
+      double a = 0.2125*rgba.getRed() + 0.7154*rgba.getGreen() + 0.0721*rgba.getBlue();
+      double a1 = a*rgba.getAlpha();
 
-      CRGBA rgba1(0, 0, 0, rgba.getGray());
+      //rgba.setAlpha(a1);
+      //setRGBAPixel(x, y, rgba);
 
+      CRGBA rgba1(a1, a1, a1, a1);
       setRGBAPixel(x, y, rgba1);
     }
   }
@@ -590,9 +624,22 @@ discreteFunc(CColorComponent component, const std::vector<double> &values)
 
 CImagePtr
 CImage::
-erode(bool isAlpha) const
+erode(int r, bool isAlpha) const
 {
-  static std::vector<int> mask = {{ 0, 1, 0, 1, 1, 1, 0, 1, 0 }};
+  int r1 = 2*r + 1;
+  int r2 = r1*r1;
+
+  std::vector<int> mask;
+
+  mask.resize(r2);
+
+  for (int i = 0, iy = -r; iy <= r; ++iy) {
+    for (int ix = -r; ix <= r; ++ix, ++i) {
+      double r1 = hypot(ix, iy);
+
+      mask[i] = (r1 <= r ? 1 : 0);
+    }
+  }
 
   return erode(mask, isAlpha);
 }
@@ -606,9 +653,22 @@ erode(const std::vector<int> &mask, bool isAlpha) const
 
 CImagePtr
 CImage::
-dilate(bool isAlpha) const
+dilate(int r, bool isAlpha) const
 {
-  static std::vector<int> mask = {{ 0, 1, 0, 1, 1, 1, 0, 1, 0 }};
+  int r1 = 2*r + 1;
+  int r2 = r1*r1;
+
+  std::vector<int> mask;
+
+  mask.resize(r2);
+
+  for (int i = 0, iy = -r; iy <= r; ++iy) {
+    for (int ix = -r; ix <= r; ++ix, ++i) {
+      double r1 = hypot(ix, iy);
+
+      mask[i] = (r1 <= r ? 1 : 0);
+    }
+  }
 
   return dilate(mask, isAlpha);
 }
@@ -624,6 +684,8 @@ CImagePtr
 CImage::
 erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const
 {
+  int r = (sqrt(mask.size()) - 1)/2;
+
   // count mask bits
   int num_hits = 0;
 
@@ -644,10 +706,10 @@ erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
-    bool yinside = (y > y1 && y < y2);
+    bool yinside = (y >= y1 + r && y <= y2 - r);
 
     for (int x = x1; x <= x2; ++x) {
-      bool xinside = (x > x1 && x < x2);
+      bool xinside = (x >= x1 + r && x <= x2 - r);
 
       bool isSet = (xinside && yinside);
 
@@ -657,15 +719,10 @@ erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const
         // count mask hits
         int hits = 0;
 
-        if (mask[0] && isErodePixel(x - 1, y - 1, isAlpha, rgba)) ++hits;
-        if (mask[1] && isErodePixel(x    , y - 1, isAlpha, rgba)) ++hits;
-        if (mask[2] && isErodePixel(x + 1, y - 1, isAlpha, rgba)) ++hits;
-        if (mask[3] && isErodePixel(x - 1, y    , isAlpha, rgba)) ++hits;
-        if (mask[4] && isErodePixel(x    , y    , isAlpha, rgba)) ++hits;
-        if (mask[5] && isErodePixel(x + 1, y    , isAlpha, rgba)) ++hits;
-        if (mask[6] && isErodePixel(x - 1, y + 1, isAlpha, rgba)) ++hits;
-        if (mask[7] && isErodePixel(x    , y + 1, isAlpha, rgba)) ++hits;
-        if (mask[8] && isErodePixel(x + 1, y + 1, isAlpha, rgba)) ++hits;
+        for (int i = 0, ix = -r; ix <= r; ++ix)
+          for (int iy = -r; iy <= r; ++iy, ++i)
+            if (mask[i] && isErodePixel(x + ix, y + iy, isAlpha, rgba))
+              ++hits;
 
         if (isErode)
           isSet = (hits == num_hits);

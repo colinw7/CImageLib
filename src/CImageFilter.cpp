@@ -12,13 +12,13 @@ CImagePtr
 CImage::
 unsharpMask(double strength)
 {
-  CImagePtr image = CImageMgrInst->createImage();
+  CImagePtr dst = CImageMgrInst->createImage();
 
-  image->setDataSize(size_);
+  dst->setDataSize(size_);
 
-  unsharpMask(image, strength);
+  unsharpMask(dst, strength);
 
-  return image;
+  return dst;
 }
 
 void
@@ -32,6 +32,8 @@ unsharpMask(CImagePtr &dst, double strength)
 
     return src->unsharpMask(dst, strength);
   }
+
+  //---
 
   // 5x5
   std::vector<double> kernel = {{ 0,  0,  1,  0, 0,
@@ -63,6 +65,277 @@ unsharpMask(CImagePtr &dst, double strength)
     }
   }
 }
+
+//---
+
+CImagePtr
+CImage::
+sobel(bool feldman)
+{
+  CImagePtr dst = CImageMgrInst->createImage();
+
+  dst->setDataSize(size_);
+
+  sobel(dst, feldman);
+
+  return dst;
+}
+
+void
+CImage::
+sobel(CImagePtr &dst, bool feldman)
+{
+  if (hasColormap()) {
+    CImagePtr src = dup();
+
+    src->convertToRGB();
+
+    return src->sobel(dst, feldman);
+  }
+
+  //---
+
+  CImagePtr dst1 = CImageMgrInst->createImage();
+  CImagePtr dst2 = CImageMgrInst->createImage();
+
+  dst1->setDataSize(size_);
+  dst2->setDataSize(size_);
+
+  std::vector<double> kernel1, kernel2;
+
+  if (! feldman) {
+    // sobel 3x3
+    kernel1 = {{ -1,  0,  1, -2, 0, 2, -1, 0, 1 }};
+    kernel2 = {{ -1, -2, -1,  0, 0, 0,  1, 2, 1 }};
+  }
+  else {
+    // sobel-feldman 3x3
+    kernel1 = {{ 3, 10,  3,  0, 0,   0, -3, -10, -3 }};
+    kernel2 = {{ 3,  0, -3, 10, 0, -10,  3,   0, -3 }};
+  }
+
+  convolve(dst1, kernel1);
+  convolve(dst2, kernel2);
+
+  int wx1, wy1, wx2, wy2;
+
+  getWindow(&wx1, &wy1, &wx2, &wy2);
+
+  for (int y = wy1; y <= wy2; ++y) {
+    for (int x = wx1; x <= wx2; ++x) {
+      CRGBA rgba1, rgba2;
+
+      dst1->getRGBAPixel(x, y, rgba1);
+      dst2->getRGBAPixel(x, y, rgba2);
+
+      double r = std::min(hypot(rgba1.getRed  (), rgba2.getRed  ()), 1.0);
+    //double g = std::min(hypot(rgba1.getGreen(), rgba2.getGreen()), 1.0);
+    //double b = std::min(hypot(rgba1.getBlue (), rgba2.getBlue ()), 1.0);
+
+      dst->setRGBAPixel(x, y, CRGBA(r, r, r));
+    }
+  }
+}
+
+//---
+
+CImagePtr
+CImage::
+sobelGradient()
+{
+  CImagePtr dst = CImageMgrInst->createImage();
+
+  dst->setDataSize(size_);
+
+  sobelGradient(dst);
+
+  return dst;
+}
+
+void
+CImage::
+sobelGradient(CImagePtr &dst)
+{
+  if (hasColormap()) {
+    CImagePtr dst = dup();
+
+    dst->convertToRGB();
+
+    return sobelGradient(dst);
+  }
+
+  //---
+
+  int wx1, wy1, wx2, wy2;
+
+  getWindow(&wx1, &wy1, &wx2, &wy2);
+
+  for (int y = wy1; y <= wy2; ++y) {
+    for (int x = wx1; x <= wx2; ++x) {
+      double xgray, ygray, xf, yf;
+
+      sobelPixelGradient(x, y, 1, 1, xgray, ygray, xf, yf);
+
+      double l = hypot(xgray, ygray);
+      double r = std::min(l, 1.0);
+
+      dst->setRGBAPixel(x, y, CRGBA(r, r, r));
+    }
+  }
+}
+
+void
+CImage::
+sobelPixelGradient(int x, int y, int dx, int dy, double &xgray, double &ygray,
+                   double &xf, double &yf)
+{
+  int w = getWidth ();
+  int h = getHeight();
+
+  int wx1, wy1, wx2, wy2;
+
+  getWindow(&wx1, &wy1, &wx2, &wy2);
+
+  if (x < dx || x > w - dx - 1 || y < dy || y > h - dy - 1) {
+    getGrayPixel(x, y, &xgray);
+
+    ygray = xgray;
+
+    xf = 1;
+    yf = 1;
+
+    return;
+  }
+
+  double gray1, gray2, gray3, gray4, gray5, gray6, gray7, gray8, gray9;
+
+  bool left = (x < dx), right  = (x > w - dx - 1);
+  bool top  = (y < dy), bottom = (y > h - dy - 1);
+
+  if      (top && left) {
+    getGrayPixel(x - dx, y - dy, &gray1);
+    getGrayPixel(x     , y - dy, &gray2);
+    getGrayPixel(x - dx, y     , &gray3);
+    getGrayPixel(x     , y     , &gray4);
+
+    xgray = -2*gray1 +2*gray2 -1*gray3 +1*gray4;
+    ygray = -2*gray1 -1*gray2 +2*gray3 +1*gray4;
+
+    xf = 2.0/(3*dx);
+    yf = 2.0/(3*dy);
+  }
+  else if (top && right) {
+    getGrayPixel(x     , y - dy, &gray1);
+    getGrayPixel(x + dx, y - dy, &gray2);
+    getGrayPixel(x     , y     , &gray3);
+    getGrayPixel(x + dx, y     , &gray4);
+
+    xgray = -2*gray1 +2*gray2 -1*gray3 +1*gray4;
+    ygray = -1*gray1 -2*gray2 +1*gray3 +2*gray4;
+
+    xf = 2.0/(3*dx);
+    yf = 2.0/(3*dy);
+  }
+  else if (bottom && left) {
+    getGrayPixel(x - dx, y     , &gray1);
+    getGrayPixel(x     , y     , &gray2);
+    getGrayPixel(x - dx, y + dy, &gray3);
+    getGrayPixel(x     , y + dy, &gray4);
+
+    xgray = -1*gray1 +1*gray2 -2*gray3 +2*gray4;
+    ygray = -2*gray1 -1*gray2 +2*gray3 +1*gray4;
+
+    xf = 2.0/(3*dx);
+    yf = 2.0/(3*dy);
+  }
+  else if (bottom && right) {
+    getGrayPixel(x     , y     , &gray1);
+    getGrayPixel(x + dx, y     , &gray2);
+    getGrayPixel(x     , y + dy, &gray3);
+    getGrayPixel(x + dx, y + dy, &gray4);
+
+    xgray = -1*gray1 +1*gray2 -2*gray3 +2*gray4;
+    ygray = -1*gray1 -2*gray2 +1*gray3 +2*gray4;
+
+    xf = 2.0/(3*dx);
+    yf = 2.0/(3*dy);
+  }
+  else if (top) {
+    getGrayPixel(x - dx, y - dy, &gray1);
+    getGrayPixel(x     , y - dy, &gray2);
+    getGrayPixel(x + dx, y - dy, &gray3);
+    getGrayPixel(x - dx, y     , &gray4);
+    getGrayPixel(x     , y     , &gray5);
+    getGrayPixel(x + dx, y     , &gray6);
+
+    xgray = -2*gray1          +2*gray3 -1*gray4          +1*gray6;
+    ygray = -1*gray1 -2*gray2 -1*gray3 +1*gray4 +2*gray5 +1*gray6;
+
+    xf = 1.0/(3*dx);
+    yf = 1.0/(2*dy);
+  }
+  else if (left) {
+    getGrayPixel(x - dx, y - dy, &gray1);
+    getGrayPixel(x     , y - dy, &gray2);
+    getGrayPixel(x - dx, y     , &gray3);
+    getGrayPixel(x     , y     , &gray4);
+    getGrayPixel(x - dx, y + dy, &gray5);
+    getGrayPixel(x     , y + dy, &gray6);
+
+    xgray = -1*gray1 +1*gray2 -2*gray3 +2*gray4 -1*gray5 +1*gray6;
+    ygray = -2*gray1 -1*gray2                   +2*gray5 +1*gray6;
+
+    xf = 1.0/(2*dx);
+    yf = 1.0/(3*dy);
+  }
+  else if (right) {
+    getGrayPixel(x     , y - dy, &gray1);
+    getGrayPixel(x + dx, y - dy, &gray2);
+    getGrayPixel(x     , y     , &gray3);
+    getGrayPixel(x + dx, y     , &gray4);
+    getGrayPixel(x     , y + dy, &gray5);
+    getGrayPixel(x + dx, y + dy, &gray6);
+
+    xgray = -1*gray1 +1*gray2 -2*gray3 +2*gray4 -1*gray5 +1*gray6;
+    ygray = -1*gray1 -2*gray2                   +1*gray5 +2*gray6;
+
+    xf = 1.0/(2*dx);
+    yf = 1.0/(3*dy);
+  }
+  else if (bottom) {
+    getGrayPixel(x - dx, y     , &gray1);
+    getGrayPixel(x     , y     , &gray2);
+    getGrayPixel(x + dx, y     , &gray3);
+    getGrayPixel(x - dx, y + dy, &gray4);
+    getGrayPixel(x     , y + dy, &gray5);
+    getGrayPixel(x + dx, y + dy, &gray6);
+
+    xgray = -1*gray1          +1*gray3 -2*gray4          +2*gray6;
+    ygray = -1*gray1 -2*gray2 -1*gray3 +1*gray4 +2*gray5 +1*gray6;
+
+    xf = 1.0/(3*dx);
+    yf = 1.0/(2*dy);
+  }
+  else {
+    getGrayPixel(x - dx, y - dy, &gray1);
+    getGrayPixel(x     , y - dy, &gray2);
+    getGrayPixel(x + dx, y - dy, &gray3);
+    getGrayPixel(x - dx, y     , &gray4);
+  //getGrayPixel(x     , y     , &gray5);
+    getGrayPixel(x + dx, y     , &gray6);
+    getGrayPixel(x - dx, y + dy, &gray7);
+    getGrayPixel(x     , y + dy, &gray8);
+    getGrayPixel(x + dx, y + dy, &gray9);
+
+    xgray = -1*gray1          +1*gray3 -2*gray4          +2*gray6 -1*gray7          +1*gray9;
+    ygray = -1*gray1 -2*gray2 -1*gray3                            +1*gray7 +2*gray8 +1*gray9;
+
+    xf = 1.0/(4*dx);
+    yf = 1.0/(4*dy);
+  }
+}
+
+//---
 
 void
 CImage::

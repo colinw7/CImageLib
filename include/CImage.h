@@ -765,6 +765,7 @@ class CImage {
 
   void setNumColors(int num_colors);
 
+  void gray();
   void sepia();
   void monochrome();
   void twoColor(const CRGBA &bg, const CRGBA &fg);
@@ -785,10 +786,10 @@ class CImage {
 
   void discreteFunc(CColorComponent component, const std::vector<double> &values);
 
-  CImagePtr erode(bool isAlpha=false) const;
+  CImagePtr erode(int r=1, bool isAlpha=false) const;
   CImagePtr erode(const std::vector<int> &mask, bool isAlpha=false) const;
 
-  CImagePtr dilate(bool isAlpha=false) const;
+  CImagePtr dilate(int r=1, bool isAlpha=false) const;
   CImagePtr dilate(const std::vector<int> &mask, bool isAlpha=false) const;
 
  private:
@@ -806,11 +807,26 @@ class CImage {
 
   // Filter
  public:
-  static void unsharpMask(CImagePtr src, CImagePtr &dst, double strength = 2.0);
+  static void unsharpMask(CImagePtr src, CImagePtr &dst, double strength=2.0);
 
-  CImagePtr unsharpMask(double strength = 2.0);
+  CImagePtr unsharpMask(double strength=2.0);
 
-  void unsharpMask(CImagePtr &dst, double strength = 2.0);
+  void unsharpMask(CImagePtr &dst, double strength=2.0);
+
+  //--
+
+  CImagePtr sobel(bool feldman=false);
+
+  void sobel(CImagePtr &dst, bool feldman=false);
+
+  CImagePtr sobelGradient();
+
+  void sobelGradient(CImagePtr &dst);
+
+  void sobelPixelGradient(int x, int y, int dx, int dy,
+                          double &xgray, double &ygray, double &xf, double &yf);
+
+  //--
 
   static void convolve(CImagePtr src, CImagePtr &dst, const std::vector<double> &kernel);
 
@@ -818,11 +834,16 @@ class CImage {
 
   void convolve(CImagePtr &dst, const std::vector<double> &kernel);
 
-  static bool gaussianBlur(CImagePtr src, CImagePtr &dst, double bx, double by, int nx=0, int ny=0);
+  //--
 
-  bool gaussianBlur(double bx, double by, int nx=0, int ny=0);
+  static bool gaussianBlur(CImagePtr src, CImagePtr &dst,
+                           double bx=1, double by=1, int nx=0, int ny=0);
 
-  bool gaussianBlur(CImagePtr &dst, double bx, double by, int nx=0, int ny=0);
+  bool gaussianBlur(double bx=1, double by=1, int nx=0, int ny=0);
+
+  bool gaussianBlur(CImagePtr &dst, double bx=1, double by=1, int nx=0, int ny=0);
+
+  //--
 
   void turbulence(bool fractal, double baseFreq, int numOctaves, int seed);
 

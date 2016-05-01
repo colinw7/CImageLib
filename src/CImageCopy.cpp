@@ -345,11 +345,19 @@ copyAlpha(CImagePtr image, int x, int y)
     for (int x = x1; x <= x2; ++x) {
       getRGBAPixel(x, y, rgba1);
 
-      image->getRGBAPixel(x, y, rgba2);
+      int xx = x - x1;
+      int yy = y - y1;
 
-      rgba1.setAlpha(rgba2.getAlpha());
+      if (image->validPixel(xx, yy)) {
+        image->getRGBAPixel(xx, yy, rgba2);
 
-      setRGBAPixel(x, y, rgba1);
+        //double a = rgba2.getGray()*rgba2.getAlpha();
+        double a = rgba2.getAlpha();
+
+        rgba1.setAlpha(rgba1.getAlpha()*a);
+
+        setRGBAPixel(x, y, rgba1);
+      }
     }
   }
 
