@@ -808,3 +808,60 @@ turbulence(bool fractal, double baseFreq, int numOctaves, int seed)
     }
   }
 }
+
+CImagePtr
+CImage::
+displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor, double scale)
+{
+  CImagePtr dst = CImageMgrInst->createImage();
+
+  dst->setDataSize(size_);
+
+  displacementMap(dispImage, xcolor, ycolor, scale, dst);
+
+  return dst;
+}
+
+void
+CImage::
+displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor,
+                double scale, CImagePtr dst)
+{
+  int wx1, wy1, wx2, wy2;
+
+  getWindow(&wx1, &wy1, &wx2, &wy2);
+
+  for (int y = wy1; y <= wy2; ++y) {
+    for (int x = wx1; x <= wx2; ++x) {
+      CRGBA rgba1(0,0,0,0);
+
+      // get displacement from dispImage color components
+      if (dispImage->validPixel(x, y)) {
+        CRGBA rgba2;
+
+        dispImage->getRGBAPixel(x, y, rgba2);
+
+        double rx = rgba2.getComponent(xcolor);
+        double ry = rgba2.getComponent(ycolor);
+
+        double x1 = x + scale*(rx - 0.5);
+        double y1 = y + scale*(ry - 0.5);
+
+        // TODO: interp pixel
+        int ix1 = int(x1 + 0.5);
+        int iy1 = int(y1 + 0.5);
+
+        if (validPixel(ix1, iy1))
+          getRGBAPixel(ix1, iy1, rgba1);
+        else {
+          //getRGBAPixel(x, y, rgba1);
+        }
+      }
+      else {
+        //getRGBAPixel(x, y, rgba1);
+      }
+
+      dst->setRGBAPixel(x, y, rgba1);
+    }
+  }
+}

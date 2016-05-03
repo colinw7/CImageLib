@@ -847,6 +847,12 @@ class CImage {
 
   void turbulence(bool fractal, double baseFreq, int numOctaves, int seed);
 
+  CImagePtr displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor,
+                            double scale);
+
+  void displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor,
+                       double scale, CImagePtr dst);
+
   //------
 
   // Flood Fill
