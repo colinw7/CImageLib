@@ -219,6 +219,8 @@ lookupImage(const CImageSrc &src)
   if (file != 0)
     return CImagePtr(file->getImage());
 
+  //---
+
   if      (src.isType(CImageSrc::DATA_SRC)) {
     const CImageDataSrc *data = dynamic_cast<const CImageDataSrc *>(&src);
 
@@ -275,7 +277,7 @@ CImageFile *
 CImageMgr::
 lookupFile(const CImageSrc &src)
 {
-  if (src.isType(CImageSrc::SIZED_FILE_SRC)) {
+  if      (src.isType(CImageSrc::SIZED_FILE_SRC)) {
     const CImageSizedFileSrc *sized_file =
       dynamic_cast<const CImageSizedFileSrc *>(&src);
 

@@ -12,13 +12,14 @@ BIN_DIR = ../bin
 all: $(LIB_DIR)/libCImageLib.a
 
 SRC = \
+CImage.cpp \
 CImageAnim.cpp \
 CImageBMP.cpp \
 CImageColorDef.cpp \
 CImageCombine.cpp \
 CImageConvert.cpp \
 CImageCopy.cpp \
-CImage.cpp \
+CImageDiff.cpp \
 CImageDraw.cpp \
 CImageFile.cpp \
 CImageFilter.cpp \

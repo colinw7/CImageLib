@@ -16,6 +16,8 @@ class CImageFile;
 class CImageSizedFile;
 class CImageFmt;
 
+//---
+
 class CImageSrc {
  public:
   enum Type {
@@ -28,9 +30,6 @@ class CImageSrc {
     XBM_SRC
   };
 
- private:
-  Type type_;
-
  protected:
   CImageSrc(Type type) :
    type_(type) {
@@ -42,7 +41,12 @@ class CImageSrc {
   bool isType(Type type) const { return (type_ == type); }
 
   virtual std::string getName() const = 0;
+
+ private:
+  Type type_;
 };
+
+//---
 
 class CImageNoSrc : public CImageSrc {
  public:
@@ -53,13 +57,9 @@ class CImageNoSrc : public CImageSrc {
   std::string getName() const { return ""; }
 };
 
-class CImageSizedFileSrc : public CImageSrc {
- private:
-  std::string filename_;
-  int         width_;
-  int         height_;
-  int         keep_aspect_;
+//---
 
+class CImageSizedFileSrc : public CImageSrc {
  public:
   CImageSizedFileSrc(const std::string &filename, int width, int height, bool keep_aspect) :
    CImageSrc(SIZED_FILE_SRC), filename_(filename),
@@ -83,12 +83,17 @@ class CImageSizedFileSrc : public CImageSrc {
   int getWidth     () const { return width_ ; }
   int getHeight    () const { return height_; }
   int getKeepAspect() const { return keep_aspect_; }
-};
 
-class CImageFileSrc : public CImageSrc {
  private:
   std::string filename_;
+  int         width_ { 0 };
+  int         height_ { 0 };
+  int         keep_aspect_ { 0 };
+};
 
+//---
+
+class CImageFileSrc : public CImageSrc {
  public:
   CImageFileSrc(const std::string &filename="") :
    CImageSrc(FILE_SRC), filename_(filename) {
@@ -101,13 +106,14 @@ class CImageFileSrc : public CImageSrc {
   const std::string &getFilename() const { return filename_; }
 
   std::string getName() const { return "file:" + getFilename(); }
+
+ private:
+  std::string filename_;
 };
 
-class CImageDataSrc : public CImageSrc {
- private:
-  const std::string data_;
-  int               id_;
+//---
 
+class CImageDataSrc : public CImageSrc {
  public:
   static uint getId() {
     static uint id = 1;
@@ -132,26 +138,29 @@ class CImageDataSrc : public CImageSrc {
   uint getDataLen() const { return data_.size(); }
 
   std::string getName() const { return "data:" + CStrUtil::toString(id_); }
+
+ private:
+  const std::string data_;
+  int               id_;
 };
 
-class CImageNameSrc : public CImageSrc {
- private:
-  const std::string name_;
+//---
 
+class CImageNameSrc : public CImageSrc {
  public:
   CImageNameSrc(const std::string &name) :
    CImageSrc(NAME_SRC), name_(name) {
   }
 
   std::string getName() const { return "name:" + name_; }
+
+ private:
+  const std::string name_;
 };
 
-class CImageXPMSrc : public CImageSrc {
- private:
-  const char **strs_;
-  uint         num_strs_;
-  int          id_;
+//---
 
+class CImageXPMSrc : public CImageSrc {
  public:
   static uint getId() {
     static uint id = 1;
@@ -176,15 +185,16 @@ class CImageXPMSrc : public CImageSrc {
 
  private:
   CImageXPMSrc &operator=(const CImageXPMSrc &rhs);
+
+ private:
+  const char **strs_;
+  uint         num_strs_;
+  int          id_;
 };
 
-class CImageXBMSrc : public CImageSrc {
- private:
-  uchar *data_;
-  int    width_;
-  int    height_;
-  int    id_;
+//---
 
+class CImageXBMSrc : public CImageSrc {
  public:
   static uint getId() {
     static uint id = 1;
@@ -206,26 +216,17 @@ class CImageXBMSrc : public CImageSrc {
  private:
   CImageXBMSrc(const CImageXBMSrc &rhs);
   CImageXBMSrc &operator=(const CImageXBMSrc &rhs);
+
+ private:
+  uchar *data_;
+  int    width_;
+  int    height_;
+  int    id_;
 };
 
+//---
+
 class CImageMgr {
- private:
-  typedef std::list<CImage *>                     ImageList;
-  typedef std::map<std::string,CImageFile *>      ImageFileMap;
-  typedef std::map<std::string,CImageSizedFile *> ImageSizedFileMap;
-  typedef std::map<CFileType,CImageFmt *>         TypeFmtMap;
-
-  ImageList         image_list_;
-  ImageFileMap      image_file_map_;
-  ImageSizedFileMap image_sized_file_map_;
-  TypeFmtMap        fmt_map_;
-  CImagePtr         prototype_;
-  bool              creating_;
-  bool              debug_;
-
-  friend class CImage;
-  friend class CImageFile;
-
  public:
   static CImageMgr *getInstance() {
     static CImageMgr *mgr;
@@ -292,18 +293,37 @@ class CImageMgr {
                                  bool keep_aspect);
 
   CImagePtr newImage();
+
+ private:
+  friend class CImage;
+  friend class CImageFile;
+
+  typedef std::list<CImage *>                     ImageList;
+  typedef std::map<std::string,CImageFile *>      ImageFileMap;
+  typedef std::map<std::string,CImageSizedFile *> ImageSizedFileMap;
+  typedef std::map<CFileType,CImageFmt *>         TypeFmtMap;
+
+  ImageList         image_list_;
+  ImageFileMap      image_file_map_;
+  ImageSizedFileMap image_sized_file_map_;
+  TypeFmtMap        fmt_map_;
+  CImagePtr         prototype_;
+  bool              creating_;
+  bool              debug_;
 };
 
-class CImageThumbnailMgr {
- private:
-  CISize2D  size_;
-  CImageMgr image_mgr_;
+//---
 
+class CImageThumbnailMgr {
  public:
   CImageThumbnailMgr(uint width, uint height);
  ~CImageThumbnailMgr();
 
   CImagePtr lookupImage(const std::string &name);
+
+ private:
+  CISize2D  size_;
+  CImageMgr image_mgr_;
 };
 
 #endif

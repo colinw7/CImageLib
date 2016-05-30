@@ -1126,6 +1126,13 @@ class CImage {
 
   //------
 
+  // Diff
+ public:
+  bool diffValue(const CImagePtr &image, double &d);
+  bool diffImage(const CImagePtr &image, CImagePtr &dest);
+
+  //------
+
   // Misc
   static void errorMsg(const std::string &msg);
   static void warnMsg (const std::string &msg);

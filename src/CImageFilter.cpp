@@ -1,4 +1,5 @@
 #include <CImageFilter.h>
+#include <CGaussianBlur.h>
 #include <cmath>
 
 void
@@ -484,6 +485,52 @@ gaussianBlur(CImagePtr &dst, double bx, double by, int nx, int ny)
 
   //---
 
+  class CImageWrapper {
+   public:
+    CImageWrapper(CImage *image) :
+     image_(image) {
+    }
+
+    void getPixelRange(int *x1, int *y1, int *x2, int *y2) const {
+      *x1 = 0;
+      *y1 = 0;
+      *x2 = image_->getWidth () - 1;
+      *y2 = image_->getHeight() - 1;
+    }
+
+    void getWindow(int *x1, int *y1, int *x2, int *y2) const {
+      image_->getWindow(x1, y1, x2, y2);
+    }
+
+    void getRGBA(int x, int y, double *r, double *g, double *b, double *a) const {
+      CRGBA rgba;
+
+      image_->getRGBAPixel(x, y, rgba);
+
+      *r = rgba.getRed  ();
+      *g = rgba.getGreen();
+      *b = rgba.getBlue ();
+      *a = rgba.getAlpha();
+    }
+
+    void setRGBA(int x, int y, double r, double g, double b, double a) {
+      image_->setRGBAPixel(x, y, CRGBA(r, g, b, a));
+    }
+
+   private:
+    CImage *image_;
+  };
+
+  //---
+
+  CGaussianBlur<CImageWrapper> blur;
+
+  CImageWrapper wsrc(this);
+  CImageWrapper wdst(dst.getPtr());
+
+  blur.blur(wsrc, wdst, bx, by, nx, ny);
+
+#if 0
   double minb = std::min(bx, by);
 
   if (minb <= 0)
@@ -523,21 +570,23 @@ gaussianBlur(CImagePtr &dst, double bx, double by, int nx, int ny)
   m.resize(nx);
 
   for (int i = 0; i < nx; ++i)
-    m[i].resize(nx);
+    m[i].resize(ny);
 
   double bxy  = bx*by;
   double bxy1 = 2*bxy;
-  double bxy2 = 1.0/(M_PI*bxy1);
+  double bxy2 = 1.0/sqrt(M_PI*bxy1);
 
-  int i2, j2;
+  double sm = 0.0;
 
   for (int i = 0, i1 = nx1; i < nx; ++i, ++i1) {
-    i2 = i1*i1;
+    int i2 = i1*i1;
 
     for (int j = 0, j1 = ny1; j < ny; ++j, ++j1) {
-      j2 = j1*j1;
+      int j2 = j1*j1;
 
       m[i][j] = bxy2*exp(-(i2 + j2)/bxy1);
+
+      sm += m[i][j];
     }
   }
 
@@ -548,10 +597,11 @@ gaussianBlur(CImagePtr &dst, double bx, double by, int nx, int ny)
 
   getWindow(&wx1, &wy1, &wx2, &wy2);
 
-  for (int y1 = ny1, y2 = wy1, y3 = ny2; y2 <= wy2; ++y1, ++y2, ++y3) {
-    for (int x1 = nx1, x2 = wx1, x3 = nx2; x2 <= wx2; ++x1, ++x2, ++x3) {
+  for (int y1 = wy1 + ny1, y2 = wy1, y3 = wy1 + ny2; y2 <= wy2; ++y1, ++y2, ++y3) {
+    for (int x1 = wx1 + nx1, x2 = wx1, x3 = wx1 + nx2; x2 <= wx2; ++x1, ++x2, ++x3) {
       CRGBA  rgba;
       double a = 0.0;
+      int    n = 0;
 
       for (int i = 0, x = x1; i < nx; ++i, ++x) {
         for (int j = 0, y = y1; j < ny; ++j, ++y) {
@@ -562,18 +612,21 @@ gaussianBlur(CImagePtr &dst, double bx, double by, int nx, int ny)
 
           getRGBAPixel(x, y, rgba1);
 
-          rgba += rgba1*m[i][j];
+          rgba += rgba1*m[i][j]/sm;
           a    += rgba1.getAlpha();
+
+          ++n;
         }
       }
 
       rgba.clamp();
 
-      rgba.setAlpha(a/(nx*ny));
+      rgba.setAlpha(a/n);
 
       dst->setRGBAPixel(x2, y2, rgba);
     }
   }
+#endif
 
   return true;
 }
