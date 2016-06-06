@@ -42,7 +42,7 @@ diffValue(const CImagePtr &image, double &d)
 
 bool
 CImage::
-diffImage(const CImagePtr &image, CImagePtr &dest)
+diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg)
 {
   dest = image->dup();
 
@@ -58,6 +58,8 @@ diffImage(const CImagePtr &image, CImagePtr &dest)
   if (wy21 - wy11 != wy22 - wy12)
     return false;
 
+  bool hasBg = (bg.getAlpha() > 0);
+
   int w = wx21 - wx11 + 1;
   int h = wy21 - wy11 + 1;
 
@@ -68,8 +70,14 @@ diffImage(const CImagePtr &image, CImagePtr &dest)
              getRGBAPixel(wx11 + x, wy11 + y, rgba1);
       image->getRGBAPixel(wx12 + x, wy12 + y, rgba2);
 
-      rgba1 = rgba1.normalized();
-      rgba2 = rgba2.normalized();
+      if (hasBg) {
+        rgba1 = bg.combined(rgba1);
+        rgba2 = bg.combined(rgba2);
+      }
+      else {
+        rgba1 = rgba1.normalized();
+        rgba2 = rgba2.normalized();
+      }
 
       double dr = std::abs(rgba1.getRed  () - rgba2.getRed  ());
       double dg = std::abs(rgba1.getGreen() - rgba2.getGreen());

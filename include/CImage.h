@@ -1129,7 +1129,7 @@ class CImage {
   // Diff
  public:
   bool diffValue(const CImagePtr &image, double &d);
-  bool diffImage(const CImagePtr &image, CImagePtr &dest);
+  bool diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg=CRGBA(0,0,0,0));
 
   //------
 
