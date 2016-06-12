@@ -79,12 +79,15 @@ diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg)
         rgba2 = rgba2.normalized();
       }
 
-      double dr = std::abs(rgba1.getRed  () - rgba2.getRed  ());
-      double dg = std::abs(rgba1.getGreen() - rgba2.getGreen());
-      double db = std::abs(rgba1.getBlue () - rgba2.getBlue ());
+      double dr = std::fabs(rgba1.getRed  () - rgba2.getRed  ());
+      double dg = std::fabs(rgba1.getGreen() - rgba2.getGreen());
+      double db = std::fabs(rgba1.getBlue () - rgba2.getBlue ());
 
-      if (dr > 1E-3 || dg > 1E-3 || db > 1E-3)
-        dest->setRGBAPixel(wx11 + x, wy11 + y, CRGBA(dr, dg, db));
+      if (dr > 1E-3 || dg > 1E-3 || db > 1E-3) {
+        double g = (dr + dg + db)/3;
+
+        dest->setRGBAPixel(wx11 + x, wy11 + y, CRGBA(0, 0, 0, g));
+      }
       else
         dest->setRGBAPixel(wx11 + x, wy11 + y, CRGBA(0, 0, 0, 0));
     }

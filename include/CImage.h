@@ -44,12 +44,29 @@ class CImagePixelIterator;
 //--------------------
 
 struct CImageTile {
-  CHAlignType halign;
-  CVAlignType valign;
+  CImageTile() { }
 
-  CImageTile(CHAlignType halign1=CHALIGN_TYPE_CENTER, CVAlignType valign1=CVALIGN_TYPE_CENTER) :
+  CImageTile(CHAlignType halign1, CVAlignType valign1) :
    halign(halign1), valign(valign1) {
   }
+
+  CHAlignType halign = CHALIGN_TYPE_CENTER;
+  CVAlignType valign = CVALIGN_TYPE_CENTER;
+};
+
+struct CImageConvolveData {
+  // TODO: edge mode
+
+  typedef std::vector<double> Kernel;
+
+  CImageConvolveData() { }
+
+  Kernel kernel;
+  int    xsize         = -1;
+  int    ysize         = -1;
+  double divisor       = -1;
+  double bias          = -1;
+  bool   preserveAlpha = false;
 };
 
 //--------------------
@@ -834,6 +851,15 @@ class CImage {
 
   void convolve(CImagePtr &dst, const std::vector<double> &kernel);
 
+  static void convolve(CImagePtr src, CImagePtr &dst, int xsize, int ysize,
+                       const std::vector<double> &kernel);
+
+  CImagePtr convolve(int xsize, int ysize, const std::vector<double> &kernel);
+
+  void convolve(CImagePtr &dst, int xsize, int ysize, const std::vector<double> &kernel);
+
+  void convolve(CImagePtr &dst, const CImageConvolveData &convolve);
+
   //--
 
   static bool gaussianBlur(CImagePtr src, CImagePtr &dst,
@@ -846,6 +872,7 @@ class CImage {
   //--
 
   void turbulence(bool fractal, double baseFreq, int numOctaves, int seed);
+  void turbulence(bool fractal, double baseFreqX, double baseFreqY, int numOctaves, int seed);
 
   CImagePtr displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor,
                             double scale);

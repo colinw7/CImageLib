@@ -43,7 +43,7 @@ unsharpMask(CImagePtr &dst, double strength)
                                   0,  8, 21,  8, 0,
                                   0,  0,  1,  0, 0 }};
 
-  convolve(dst, kernel);
+  convolve(dst, 5, 5, kernel);
 
   double gstrength = 1.0 - strength;
 
@@ -115,8 +115,8 @@ sobel(CImagePtr &dst, bool feldman)
     kernel2 = {{ 3,  0, -3, 10, 0, -10,  3,   0, -3 }};
   }
 
-  convolve(dst1, kernel1);
-  convolve(dst2, kernel2);
+  convolve(dst1, 3, 3, kernel1);
+  convolve(dst2, 3, 3, kernel2);
 
   int wx1, wy1, wx2, wy2;
 
@@ -342,36 +342,91 @@ void
 CImage::
 convolve(CImagePtr src, CImagePtr &dst, const std::vector<double> &kernel)
 {
-  return src->convolve(dst, kernel);
+  int size = sqrt(kernel.size());
+
+  return convolve(src, dst, size, size, kernel);
 }
 
 CImagePtr
 CImage::
 convolve(const std::vector<double> &kernel)
 {
-  CImagePtr image = CImageMgrInst->createImage();
+  int size = sqrt(kernel.size());
 
-  image->setDataSize(size_);
-
-  image->convolve(kernel);
-
-  return image;
+  return convolve(size, size, kernel);
 }
 
 void
 CImage::
 convolve(CImagePtr &dst, const std::vector<double> &kernel)
 {
-  int size   = sqrt(kernel.size());
-  int border = (size - 1)/2;
+  int size = sqrt(kernel.size());
 
-  double divisor = 0;
+  return convolve(dst, size, size, kernel);
+}
 
-  for (const auto &k : kernel)
-    divisor += k;
+void
+CImage::
+convolve(CImagePtr src, CImagePtr &dst, int xsize, int ysize, const std::vector<double> &kernel)
+{
+  return src->convolve(dst, xsize, ysize, kernel);
+}
 
-  if (divisor == 0)
-    divisor = 1;
+CImagePtr
+CImage::
+convolve(int xsize, int ysize, const std::vector<double> &kernel)
+{
+  CImagePtr image = CImageMgrInst->createImage();
+
+  image->setDataSize(size_);
+
+  image->convolve(xsize, ysize, kernel);
+
+  return image;
+}
+
+void
+CImage::
+convolve(CImagePtr &dst, int xsize, int ysize, const std::vector<double> &kernel)
+{
+  CImageConvolveData data;
+
+  data.xsize = xsize;
+  data.ysize = ysize;
+  data.kernel = kernel;
+
+  convolve(dst, data);
+}
+
+void
+CImage::
+convolve(CImagePtr &dst, const CImageConvolveData &data)
+{
+  int xsize = data.xsize;
+  int ysize = data.ysize;
+
+  if (xsize < 0)
+    xsize = sqrt(data.kernel.size());
+
+  if (ysize < 0)
+    ysize = sqrt(data.kernel.size());
+
+  //---
+
+  int xborder = (xsize - 1)/2;
+  int yborder = (ysize - 1)/2;
+
+  double divisor = data.divisor;
+
+  if (divisor < 0) {
+    divisor = 0;
+
+    for (const auto &k : data.kernel)
+      divisor += k;
+
+    if (divisor == 0)
+      divisor = 1;
+  }
 
   //---
 
@@ -381,10 +436,10 @@ convolve(CImagePtr &dst, const std::vector<double> &kernel)
 
   int y = wy1;
 
-  for ( ; y < border; ++y) {
+  for ( ; y < yborder; ++y) {
     int x = wx1;
 
-    for ( ; x <= wx2 - border; ++x) {
+    for ( ; x <= wx2 - xborder; ++x) {
       CRGBA rgba;
 
       getRGBAPixel(x, y, rgba);
@@ -393,10 +448,10 @@ convolve(CImagePtr &dst, const std::vector<double> &kernel)
     }
   }
 
-  for ( ; y <= wy2 - border; ++y) {
+  for ( ; y <= wy2 - yborder; ++y) {
     int x = wx1;
 
-    for ( ; x < border; ++x) {
+    for ( ; x < xborder; ++x) {
       CRGBA rgba;
 
       getRGBAPixel(x, y, rgba);
@@ -404,18 +459,18 @@ convolve(CImagePtr &dst, const std::vector<double> &kernel)
       dst->setRGBAPixel(x, y, rgba);
     }
 
-    for ( ; x <= wx2 - border; ++x) {
+    for ( ; x <= wx2 - xborder; ++x) {
       CRGBA sum;
 
       int k = 0;
 
-      for (int yk = -border; yk <= border; ++yk) {
-        for (int xk = -border; xk <= border; ++xk) {
+      for (int yk = -yborder; yk <= yborder; ++yk) {
+        for (int xk = -xborder; xk <= xborder; ++xk) {
           CRGBA rgba;
 
           getRGBAPixel(x + xk, y + yk, rgba);
 
-          sum += rgba*kernel[k];
+          sum += rgba*data.kernel[k];
 
           ++k;
         }
@@ -424,6 +479,14 @@ convolve(CImagePtr &dst, const std::vector<double> &kernel)
       sum /= divisor;
 
       sum.clamp();
+
+      if (data.preserveAlpha) {
+        CRGBA rgba;
+
+        getRGBAPixel(x, y, rgba);
+
+        sum.setAlpha(rgba.getAlpha());
+      }
 
       dst->setRGBAPixel(x, y, sum);
     }
@@ -787,26 +850,30 @@ class CTurbulenceUtil {
   // Returns 'turbFunctionResult'
 
  public:
-  double turbulence(int channelNum, double *point, double baseFreq, int numOctaves, bool fractal) {
+  double turbulence(int channelNum, double *point, double baseFreqX,
+                    double baseFreqY, int numOctaves, bool fractal) {
     double vec[2];
 
-    double sum       = 0;
-    double frequency = baseFreq;
+    double sum        = 0;
+    double frequencyX = baseFreqX;
+    double frequencyY = baseFreqY;
 
     for (int nOctave = 0; nOctave < numOctaves; nOctave++) {
-      vec[0] = frequency*point[0];
-      vec[1] = frequency*point[1];
+      vec[0] = frequencyX*point[0];
+      vec[1] = frequencyY*point[1];
 
-      double amplitude = baseFreq/frequency;
+      double amplitudeX = baseFreqX/frequencyX;
+    //double amplitudeY = baseFreqY/frequencyY;
 
-      double sum1 = noise2(channelNum, vec)*amplitude;
+      double sum1 = noise2(channelNum, vec)*amplitudeX;
 
       if (fractal)
         sum += sum1;
       else
         sum += fabs(sum1);
 
-      frequency *= 2;
+      frequencyX *= 2;
+    //frequencyY *= 2;
     }
 
     return sum;
@@ -816,6 +883,13 @@ class CTurbulenceUtil {
 void
 CImage::
 turbulence(bool fractal, double baseFreq, int numOctaves, int seed)
+{
+  turbulence(fractal, baseFreq, baseFreq, numOctaves, seed);
+}
+
+void
+CImage::
+turbulence(bool fractal, double baseFreqX, double baseFreqY, int numOctaves, int seed)
 {
   CTurbulenceUtil turbulence(seed);
 
@@ -840,10 +914,10 @@ turbulence(bool fractal, double baseFreq, int numOctaves, int seed)
       point[0] = x;
       point[1] = y;
 
-      r = turbulence.turbulence(0, point, baseFreq, numOctaves, fractal);
-      g = turbulence.turbulence(1, point, baseFreq, numOctaves, fractal);
-      b = turbulence.turbulence(2, point, baseFreq, numOctaves, fractal);
-      a = turbulence.turbulence(3, point, baseFreq, numOctaves, fractal);
+      r = turbulence.turbulence(0, point, baseFreqX, baseFreqY, numOctaves, fractal);
+      g = turbulence.turbulence(1, point, baseFreqX, baseFreqY, numOctaves, fractal);
+      b = turbulence.turbulence(2, point, baseFreqX, baseFreqY, numOctaves, fractal);
+      a = turbulence.turbulence(3, point, baseFreqX, baseFreqY, numOctaves, fractal);
 
       if (fractal) {
         r = (r + 1.0) / 2.0;
