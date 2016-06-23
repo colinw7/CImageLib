@@ -65,6 +65,7 @@ $(CDEBUG) \
 -std=c++11 \
 -I$(INC_DIR) \
 -I../../CFile/include \
+-I../../CFileUtil/include \
 -I../../CStrUtil/include \
 -I../../COS/include \
 -I../../CMath/include \

@@ -35,23 +35,27 @@ CPPFLAGS = \
 -I$(INC_DIR) \
 -I. \
 -I../../CImageLib/include \
+-I../../CFileUtil/include \
 -I../../CFile/include \
 -I../../CMath/include \
 -I../../CStrUtil/include \
+-I../../CRGBName/include \
 -I../../CUtil/include \
 
 LFLAGS = \
 -L$(LIB_DIR) \
 -L../../CImageLib/lib \
+-L../../CFileUtil/lib \
 -L../../CFile/lib \
 -L../../CStrUtil/lib \
+-L../../CRegExp/lib \
 -L../../COS/lib \
 -L../../CRGBName/lib \
 
 LIBS = \
--lCImageLib -lCFile -lCStrUtil \
--lCOS -lCRGBName \
--lpng -ljpeg
+-lCImageLib -lCFileUtil -lCFile -lCStrUtil \
+-lCRegExp -lCOS -lCRGBName \
+-lpng -ljpeg -ltre
 
 clean:
 	$(RM) -f *.o

@@ -30,13 +30,13 @@ combine(CImagePtr image, const CRGBACombineDef &def)
     return false;
   }
 
-  CRGBA rgba1, rgba2;
-
   int w = std::min(getWidth (), image->getWidth ());
   int h = std::min(getHeight(), image->getHeight());
 
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
+      CRGBA rgba1, rgba2;
+
              getRGBAPixel(x, y, rgba1);
       image->getRGBAPixel(x, y, rgba2);
 
@@ -104,8 +104,6 @@ combine(int x, int y, CImagePtr image)
     return false;
   }
 
-  CRGBA rgba1, rgba2;
-
   int w = std::min(getWidth (), image->getWidth ());
   int h = std::min(getHeight(), image->getHeight());
 
@@ -114,10 +112,14 @@ combine(int x, int y, CImagePtr image)
       if (! validPixel(x1 + x, y1 + y))
         continue;
 
+      CRGBA rgba1;
+
       image->getRGBAPixel(x1, y1, rgba1);
 
       if (! rgba1.getAlphaI())
         continue;
+
+      CRGBA rgba2;
 
       getRGBAPixel(x1 + x, y1 + y, rgba2);
 

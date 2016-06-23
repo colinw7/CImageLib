@@ -278,8 +278,7 @@ CImageMgr::
 lookupFile(const CImageSrc &src)
 {
   if      (src.isType(CImageSrc::SIZED_FILE_SRC)) {
-    const CImageSizedFileSrc *sized_file =
-      dynamic_cast<const CImageSizedFileSrc *>(&src);
+    const CImageSizedFileSrc *sized_file = dynamic_cast<const CImageSizedFileSrc *>(&src);
 
     const std::string &fileName = sized_file->getFilename();
 

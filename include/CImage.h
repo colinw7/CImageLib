@@ -297,7 +297,7 @@ class CImage {
   void setWindow(const CIBBox2D &bbox);
   void setWindow(int  left, int  bottom, int  right, int  top);
 
-  void getWindow(int *left, int *bottom, int *right, int *top) const;
+  bool getWindow(int *left, int *bottom, int *right, int *top) const;
 
   void resetWindow();
 
@@ -387,6 +387,9 @@ class CImage {
 
   virtual bool setRGBAPixel(int x, int y, const CRGBA &rgba);
   virtual bool setRGBAPixel(int pos, const CRGBA &rgba);
+
+  virtual bool clearRGBAPixel(int x, int y);
+  virtual bool clearRGBAPixel(int pos);
 
   bool setGrayPixel(int x, int y, double gray);
   bool setGrayPixel(int pos, double gray);
@@ -868,6 +871,8 @@ class CImage {
   bool gaussianBlur(double bx=1, double by=1, int nx=0, int ny=0);
 
   bool gaussianBlur(CImagePtr &dst, double bx=1, double by=1, int nx=0, int ny=0);
+
+  virtual bool gaussianBlurExec(CImagePtr &dst, double bx, double by, int nx, int ny);
 
   //--
 

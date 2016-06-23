@@ -297,7 +297,7 @@ setWindow(int left, int bottom, int right, int top)
   dataChanged();
 }
 
-void
+bool
 CImage::
 getWindow(int *left, int *bottom, int *right, int *top) const
 {
@@ -308,12 +308,16 @@ getWindow(int *left, int *bottom, int *right, int *top) const
     *bottom = std::min(std::max(*bottom, 0), size_.height - 1);
     *right  = std::min(std::max(*right , 0), size_.width  - 1);
     *top    = std::min(std::max(*top   , 0), size_.height - 1);
+
+    return true;
   }
   else {
     *left   = 0;
     *bottom = 0;
     *right  = size_.width  - 1;
     *top    = size_.height - 1;
+
+    return false;
   }
 }
 
@@ -568,6 +572,30 @@ CImage::
 setRGBAPixel(int x, int y, const CRGBA &rgba)
 {
   return setRGBAPixel(y*size_.width + x, rgba);
+}
+
+bool
+CImage::
+clearRGBAPixel(int x, int y)
+{
+  return clearRGBAPixel(y*size_.width + x);
+}
+
+bool
+CImage::
+clearRGBAPixel(int ind)
+{
+  if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index"))
+    return false;
+
+  if (! data_[ind])
+    return false;
+
+  data_[ind] = 0;
+
+  dataChanged();
+
+  return true;
 }
 
 bool

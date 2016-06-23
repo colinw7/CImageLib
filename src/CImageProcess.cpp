@@ -349,26 +349,33 @@ applyColorMatrix(const std::vector<double> &m)
 
   convertToRGB();
 
-  CRGBA rgba;
-
   int x1, y1, x2, y2;
 
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       double r, g, b, a;
 
       rgba.getRGBA(&r, &g, &b, &a);
 
-      double r1 = m[ 0]*r + m[ 1]*g + m[ 2]*b + m[ 3]*a + m[ 4];
-      double g1 = m[ 5]*r + m[ 6]*g + m[ 7]*b + m[ 8]*a + m[ 9];
-      double b1 = m[10]*r + m[11]*g + m[12]*b + m[13]*a + m[14];
       double a1 = m[15]*r + m[16]*g + m[17]*b + m[18]*a + m[19];
 
-      setRGBAPixel(x, y, CRGBA(r1, g1, b1, a1));
+      if (a1 > 0) {
+        double r1 = m[ 0]*r + m[ 1]*g + m[ 2]*b + m[ 3]*a + m[ 4];
+        double g1 = m[ 5]*r + m[ 6]*g + m[ 7]*b + m[ 8]*a + m[ 9];
+        double b1 = m[10]*r + m[11]*g + m[12]*b + m[13]*a + m[14];
+
+        CRGBA rgba1(r1, g1, b1, a1);
+
+        setRGBAPixel(x, y, rgba1);
+      }
+      else
+        clearRGBAPixel(x, y);
     }
   }
 }
@@ -379,17 +386,17 @@ rotateHue(double dh)
 {
   convertToRGB();
 
-  CRGBA rgba;
-
   int x1, y1, x2, y2;
 
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = rgba.toHSV();
+      CHSV hsv = CRGBUtil::RGBtoHSV(rgba.getRGB());
 
       double h = hsv.getHue();
 
@@ -400,7 +407,7 @@ rotateHue(double dh)
 
       hsv.setHue(h);
 
-      CRGB rgb = hsv.toRGB();
+      CRGB rgb = CRGBUtil::HSVtoRGB(hsv);
 
       setRGBAPixel(x, y, CRGBA(rgb, rgba.getAlpha()));
     }
@@ -413,17 +420,17 @@ saturate(double ds)
 {
   convertToRGB();
 
-  CRGBA rgba;
-
   int x1, y1, x2, y2;
 
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
-      CHSV hsv = rgba.toHSV();
+      CHSV hsv = CRGBUtil::RGBtoHSV(rgba.getRGB());
 
       double s = hsv.getSaturation();
 
@@ -431,7 +438,7 @@ saturate(double ds)
 
       hsv.setSaturation(s);
 
-      CRGB rgb = hsv.toRGB();
+      CRGB rgb = CRGBUtil::HSVtoRGB(hsv);
 
       setRGBAPixel(x, y, CRGBA(rgb, rgba.getAlpha()));
     }
@@ -444,17 +451,17 @@ luminanceToAlpha()
 {
   convertToRGB();
 
-  CRGBA rgba;
-
   int x1, y1, x2, y2;
 
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
-      //CHSV hsv = rgba.toHSV();
+      //CHSV hsv = CRGBUtil::RGBtoHSV(rgba.getRGB()();
       //double a1 = hsv.getValue();
       //double a1 = rgba.getGray();
       double a = 0.2125*rgba.getRed() + 0.7154*rgba.getGreen() + 0.0721*rgba.getBlue();
@@ -475,14 +482,14 @@ linearFunc(CColorComponent component, double scale, double offset)
 {
   convertToRGB();
 
-  CRGBA rgba;
-
   int x1, y1, x2, y2;
 
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       double value = rgba.getComponent(component);
@@ -502,14 +509,14 @@ gammaFunc(CColorComponent component, double amplitude, double exponent, double o
 {
   convertToRGB();
 
-  CRGBA rgba;
-
   int x1, y1, x2, y2;
 
   getWindow(&x1, &y1, &x2, &y2);
 
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      CRGBA rgba;
+
       getRGBAPixel(x, y, rgba);
 
       double value = rgba.getComponent(component);

@@ -309,14 +309,14 @@ reshapeNearest(CImagePtr &new_image) const
   double y1 = 0.0;
 
   if (! hasColormap()) {
-    double r, g, b, a;
-
     for (int y = 0; y < height2; ++y, y1 += dy) {
       double x1 = 0.0;
 
       for (int x = 0; x < width2; ++x, x1 += dx) {
         int x2 = std::min(std::max(int(x1), 0), width1  - 1);
         int y2 = std::min(std::max(int(y1), 0), height1 - 1);
+
+        double r, g, b, a;
 
         getRGBAPixel(x2, y2, &r, &g, &b, &a);
 

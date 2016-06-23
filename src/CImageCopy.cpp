@@ -105,8 +105,6 @@ subCopyFrom(CImagePtr src, int src_x, int src_y, int width, int height, int dst_
   if (dst_x +  width1 > dst_width )  width1 = dst_width  - dst_x;
   if (dst_y + height1 > dst_height) height1 = dst_height - dst_y;
 
-  uint xs, ys, xd, yd;
-
   if (src->hasColormap()) {
     convertToColorIndex();
 
@@ -127,21 +125,20 @@ subCopyFrom(CImagePtr src, int src_x, int src_y, int width, int height, int dst_
       colorMap[i] = ind;
     }
 
-    int pixel;
-
-    ys = src_y; yd = dst_y;
+    int ys = src_y, yd = dst_y;
 
     for (int y = 0; y < height1; ++y, ++ys, ++yd) {
-      xs = src_x; xd = dst_x;
+      int xs = src_x, xd = dst_x;
 
       for (int x = 0; x < width1; ++x, ++xs, ++xd) {
+        int pixel;
+
         if (src->validPixel(xs, ys))
           pixel = src->getColorIndexPixel(xs, ys);
         else
           pixel = 0;
 
-        if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT &&
-            src->isTransparentColor(pixel))
+        if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && src->isTransparentColor(pixel))
           continue;
 
         if (validPixel(xd, yd))
@@ -150,25 +147,21 @@ subCopyFrom(CImagePtr src, int src_x, int src_y, int width, int height, int dst_
     }
   }
   else {
-    CRGBA rgba;
+    int ys = src_y, yd = dst_y;
 
-    ys = src_y; yd = dst_y;
+    for (int y = 0; y < height1; ++y, ++ys, ++yd) {
+      int xs = src_x, xd = dst_x;
 
-    for (int y = 0; y < height1; ++y) {
-      xs = src_x; xd = dst_x;
-
-      for (int x = 0; x < width1; ++x) {
+      for (int x = 0; x < width1; ++x, ++xs, ++xd) {
         if (src->validPixel(xs, ys) && ! src->isTransparent(xs, ys)) {
+          CRGBA rgba;
+
           src->getRGBAPixel(xs, ys, rgba);
 
           if (validPixel(xd, yd))
             setRGBAPixel(xd, yd, rgba);
         }
-
-        ++xs; ++xd;
       }
-
-      ++ys; ++yd;
     }
   }
 }
@@ -194,8 +187,6 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
   if (dst_x +  width1 > dst_width )  width1 = dst_width  - dst_x;
   if (dst_y + height1 > dst_height) height1 = dst_height - dst_y;
 
-  uint xs, ys, xd, yd;
-
   if (hasColormap()) {
     dst->convertToColorIndex();
 
@@ -204,8 +195,7 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
     int num_colors = getNumColors();
 
     for (int i = 0; i < num_colors; ++i) {
-      if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT &&
-          isTransparentColor(i))
+      if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && isTransparentColor(i))
         continue;
 
       int ind = dst->findColor(getColor(i));
@@ -216,21 +206,22 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
       colorMap[i] = ind;
     }
 
-    int pixel;
-
-    ys = src_y; yd = dst_y;
+    int ys = src_y;
+    int yd = dst_y;
 
     for (int y = 0; y < height1; ++y, ++ys, ++yd) {
-      xs = src_x; xd = dst_x;
+      int xs = src_x;
+      int xd = dst_x;
 
       for (int x = 0; x < width1; ++x, ++xs, ++xd) {
+        int pixel;
+
         if (validPixel(xs, ys))
           pixel = getColorIndexPixel(xs, ys);
         else
           pixel = 0;
 
-        if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT &&
-            isTransparentColor(pixel))
+        if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && isTransparentColor(pixel))
           continue;
 
         if (dst->validPixel(xd, yd))
@@ -239,14 +230,15 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
     }
   }
   else {
-    CRGBA rgba;
+    int ys = src_y;
+    int yd = dst_y;
 
-    ys = src_y; yd = dst_y;
+    for (int y = 0; y < height1; ++y, ++ys, ++yd) {
+      int xs = src_x;
+      int xd = dst_x;
 
-    for (int y = 0; y < height1; ++y) {
-      xs = src_x; xd = dst_x;
-
-      for (int x = 0; x < width1; ++x) {
+      for (int x = 0; x < width1; ++x, ++xs, ++xd) {
+        CRGBA rgba;
 
         if (validPixel(xs, ys))
           getRGBAPixel(xs, ys, rgba);
@@ -255,11 +247,7 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
 
         if (dst->validPixel(xd, yd))
           dst->setRGBAPixel(xd, yd, rgba);
-
-        ++xs; ++xd;
       }
-
-      ++ys; ++yd;
     }
   }
 }
@@ -334,21 +322,22 @@ copyAlpha(CImagePtr image, int x, int y)
   int y1 = y;
   int y2 = std::min(y + iheight1 - 1, iheight - 1);
 
-  CRGBA rgba1, rgba2;
-
   if (hasColormap())
     convertToRGB();
 
-  // image is mask, get alpha from rgba of mask
-  // set alpha of image pixel from mask
+  // image is mask, get alpha from rgba of mask set alpha of image pixel from mask
   for (int y = y1; y <= y2; ++y) {
     for (int x = x1; x <= x2; ++x) {
+      CRGBA rgba1;
+
       getRGBAPixel(x, y, rgba1);
 
       int xx = x - x1;
       int yy = y - y1;
 
       if (image->validPixel(xx, yy)) {
+        CRGBA rgba2;
+
         image->getRGBAPixel(xx, yy, rgba2);
 
         //double a = rgba2.getGray()*rgba2.getAlpha();

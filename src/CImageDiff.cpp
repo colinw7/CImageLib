@@ -52,16 +52,18 @@ diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg)
          getWindow(&wx11, &wy11, &wx21, &wy21);
   image->getWindow(&wx12, &wy12, &wx22, &wy22);
 
+  bool rc = true;
+
   if (wx21 - wx11 != wx22 - wx12)
-    return false;
+    rc = false;
 
   if (wy21 - wy11 != wy22 - wy12)
-    return false;
+    rc = false;
 
   bool hasBg = (bg.getAlpha() > 0);
 
-  int w = wx21 - wx11 + 1;
-  int h = wy21 - wy11 + 1;
+  int w = std::min(wx21 - wx11 + 1, wx22 - wx12 + 1);
+  int h = std::min(wy21 - wy11 + 1, wy22 - wy12 + 1);
 
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
@@ -93,5 +95,5 @@ diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg)
     }
   }
 
-  return true;
+  return rc;
 }
