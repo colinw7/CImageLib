@@ -42,8 +42,10 @@ diffValue(const CImagePtr &image, double &d)
 
 bool
 CImage::
-diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg)
+diffImage(const CImagePtr &image, CImagePtr &dest, CImageDiffData &diffData)
 {
+  diffData.diff = 0.0;
+
   dest = image->dup();
 
   int wx11, wy11, wx21, wy21;
@@ -60,7 +62,7 @@ diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg)
   if (wy21 - wy11 != wy22 - wy12)
     rc = false;
 
-  bool hasBg = (bg.getAlpha() > 0);
+  bool hasBg = (diffData.bg.getAlpha() > 0);
 
   int w = std::min(wx21 - wx11 + 1, wx22 - wx12 + 1);
   int h = std::min(wy21 - wy11 + 1, wy22 - wy12 + 1);
@@ -73,8 +75,8 @@ diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg)
       image->getRGBAPixel(wx12 + x, wy12 + y, rgba2);
 
       if (hasBg) {
-        rgba1 = bg.combined(rgba1);
-        rgba2 = bg.combined(rgba2);
+        rgba1 = diffData.bg.combined(rgba1);
+        rgba2 = diffData.bg.combined(rgba2);
       }
       else {
         rgba1 = rgba1.normalized();
@@ -84,11 +86,18 @@ diffImage(const CImagePtr &image, CImagePtr &dest, const CRGBA &bg)
       double dr = std::fabs(rgba1.getRed  () - rgba2.getRed  ());
       double dg = std::fabs(rgba1.getGreen() - rgba2.getGreen());
       double db = std::fabs(rgba1.getBlue () - rgba2.getBlue ());
+      double da = std::abs(rgba1.getAlpha() - rgba2.getAlpha());
+
+      diffData.diff += (dr + dg + db + da);
 
       if (dr > 1E-3 || dg > 1E-3 || db > 1E-3) {
-        double g = (dr + dg + db)/3;
+        if (diffData.grayScale) {
+          double g = (dr + dg + db)/3;
 
-        dest->setRGBAPixel(wx11 + x, wy11 + y, CRGBA(0, 0, 0, g));
+          dest->setRGBAPixel(wx11 + x, wy11 + y, CRGBA(0, 0, 0, g));
+        }
+        else
+          dest->setRGBAPixel(wx11 + x, wy11 + y, diffData.fg);
       }
       else
         dest->setRGBAPixel(wx11 + x, wy11 + y, CRGBA(0, 0, 0, 0));
