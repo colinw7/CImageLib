@@ -7,7 +7,6 @@ CDEBUG = -g
 INC_DIR = ../include
 OBJ_DIR = ../obj
 LIB_DIR = ../lib
-BIN_DIR = ../bin
 
 all: $(LIB_DIR)/libCImageLib.a
 
@@ -72,8 +71,6 @@ $(CDEBUG) \
 -I../../CUtil/include \
 -I../../CUtil/include \
 -I. \
-
-LFLAGS = -L$(LIB_DIR)
 
 clean:
 	$(RM) -f $(OBJ_DIR)/*.o
