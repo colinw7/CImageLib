@@ -239,7 +239,7 @@ class CImage {
   // Create
  protected:
   CImage();
-  CImage(const CISize2DT<int> &size);
+  CImage(const CISize2D &size);
   CImage(int width, int height);
   CImage(const CImage &image, int x, int y, int width, int height);
 
