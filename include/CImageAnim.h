@@ -1,12 +1,9 @@
-class CImageFrame {
- private:
-  CImagePtr image_;
-  int       delay_;      // hundreds of a second
-  int       dispose_;    // 0=unknown, 1=no, 2=background, 4=previous
-  bool      user_input_; // click for next frame
+#ifndef CImageAnim_H
+#define CImageAnim_H
 
+class CImageFrame {
  public:
-  CImageFrame(CImagePtr image);
+  explicit CImageFrame(CImagePtr image);
  ~CImageFrame();
 
   CImagePtr getImage() const { return image_; }
@@ -19,17 +16,21 @@ class CImageFrame {
 
   void setUserInput(bool user_input) { user_input_ = user_input; }
   bool getUserInput() const { return user_input_; }
+
+ private:
+  CImagePtr image_;
+  int       delay_;      // hundreds of a second
+  int       dispose_;    // 0=unknown, 1=no, 2=background, 4=previous
+  bool      user_input_; // click for next frame
 };
 
+//---
+
 class CImageAnim {
- private:
-  typedef std::vector<CImageFrame *> FrameList;
-
-  FrameList frames_;
-
  public:
-  typedef FrameList::iterator       iterator;
-  typedef FrameList::const_iterator const_iterator;
+  typedef std::vector<CImageFrame *> FrameList;
+  typedef FrameList::iterator        iterator;
+  typedef FrameList::const_iterator  const_iterator;
 
   CImageAnim();
  ~CImageAnim();
@@ -42,4 +43,9 @@ class CImageAnim {
   int size() const { return frames_.size(); }
 
   CImageFrame *operator[](int pos) { return frames_[pos]; }
+
+ private:
+  FrameList frames_;
 };
+
+#endif

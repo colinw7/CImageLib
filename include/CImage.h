@@ -239,7 +239,7 @@ class CImage {
   // Create
  protected:
   CImage();
-  CImage(const CISize2D &size);
+  explicit CImage(const CISize2D &size);
   CImage(int width, int height);
   CImage(const CImage &image, int x, int y, int width, int height);
 
@@ -1074,6 +1074,19 @@ class CImage {
   bool readSGIHeader(CFile *file);
 
   bool writeSGI(CFile *file);
+
+  //------
+
+  // SIX
+ protected:
+  static CImagePtr createSIX(CFile *file);
+  //static CImagePtr createSIXHeader(CFile *file);
+
+ public:
+  bool readSIX(CFile *file);
+  //bool readSIXHeader(CFile *file);
+
+  bool writeSIX(CFile *file);
 
   //------
 

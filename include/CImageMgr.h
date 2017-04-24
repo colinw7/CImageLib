@@ -31,7 +31,7 @@ class CImageSrc {
   };
 
  protected:
-  CImageSrc(Type type) :
+  explicit CImageSrc(Type type) :
    type_(type) {
   }
 
@@ -95,11 +95,11 @@ class CImageSizedFileSrc : public CImageSrc {
 
 class CImageFileSrc : public CImageSrc {
  public:
-  CImageFileSrc(const std::string &filename="") :
+  explicit CImageFileSrc(const std::string &filename="") :
    CImageSrc(FILE_SRC), filename_(filename) {
   }
 
-  CImageFileSrc(const CFile &file) :
+  explicit CImageFileSrc(const CFile &file) :
    CImageSrc(FILE_SRC), filename_(file.getPath()) {
   }
 
@@ -121,7 +121,7 @@ class CImageDataSrc : public CImageSrc {
     return id++;
   }
 
-  CImageDataSrc(const std::string &data) :
+  explicit CImageDataSrc(const std::string &data) :
    CImageSrc(DATA_SRC), data_(data), id_(0) {
     id_ = getId();
   }
@@ -148,7 +148,7 @@ class CImageDataSrc : public CImageSrc {
 
 class CImageNameSrc : public CImageSrc {
  public:
-  CImageNameSrc(const std::string &name) :
+  explicit CImageNameSrc(const std::string &name) :
    CImageSrc(NAME_SRC), name_(name) {
   }
 

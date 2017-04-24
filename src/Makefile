@@ -44,6 +44,7 @@ CImagePSP.cpp \
 CImageResize.cpp \
 CImageRotate.cpp \
 CImageScroll.cpp \
+CImageSIX.cpp \
 CImageSGI.cpp \
 CImageState.cpp \
 CImageTGA.cpp \

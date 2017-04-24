@@ -152,6 +152,13 @@ createSGI(CFile *file)
 
 CImagePtr
 CImage::
+createSIX(CFile *file)
+{
+  return create(file, CFILE_TYPE_IMAGE_SIX);
+}
+
+CImagePtr
+CImage::
 createSVG(CFile *file)
 {
   return create(file, CFILE_TYPE_IMAGE_SVG);
@@ -572,6 +579,13 @@ readSGI(CFile *file)
 
 bool
 CImage::
+readSIX(CFile *file)
+{
+  return read(file, CFILE_TYPE_IMAGE_SIX);
+}
+
+bool
+CImage::
 readSVG(CFile *file)
 {
   return read(file, CFILE_TYPE_IMAGE_SVG);
@@ -959,6 +973,13 @@ CImage::
 writeSGI(CFile *file)
 {
   return write(file, CFILE_TYPE_IMAGE_SGI);
+}
+
+bool
+CImage::
+writeSIX(CFile *file)
+{
+  return write(file, CFILE_TYPE_IMAGE_SIX);
 }
 
 bool

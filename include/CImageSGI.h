@@ -26,7 +26,7 @@ class CImageSGI : public CImageFmt {
 
  private:
   CImageSGI() :
-   CImageFmt(CFILE_TYPE_IMAGE_BMP) {
+   CImageFmt(CFILE_TYPE_IMAGE_SGI) {
   }
 
  ~CImageSGI() { }

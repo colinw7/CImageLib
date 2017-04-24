@@ -12,6 +12,7 @@
 #include <CImagePPM.h>
 #include <CImagePSP.h>
 #include <CImageSGI.h>
+#include <CImageSIX.h>
 #include <CImageTGA.h>
 #include <CImageTIF.h>
 #include <CImageXBM.h>
@@ -55,6 +56,7 @@ CImageMgr() :
   addFmt(CFILE_TYPE_IMAGE_PPM, CImagePPMInst);
   addFmt(CFILE_TYPE_IMAGE_PSP, CImagePSPInst);
   addFmt(CFILE_TYPE_IMAGE_SGI, CImageSGIInst);
+  addFmt(CFILE_TYPE_IMAGE_SIX, CImageSIXInst);
   addFmt(CFILE_TYPE_IMAGE_TGA, CImageTGAInst);
   addFmt(CFILE_TYPE_IMAGE_TIF, CImageTIFInst);
   addFmt(CFILE_TYPE_IMAGE_XBM, CImageXBMInst);
