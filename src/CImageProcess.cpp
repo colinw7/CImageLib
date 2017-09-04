@@ -1,4 +1,5 @@
 #include <CImageProcess.h>
+#include <CRGBUtil.h>
 
 void
 CImage::

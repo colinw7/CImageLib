@@ -1,5 +1,5 @@
 #include <CImageResize.h>
-#include <CMathGen.h>
+#include <CMathRound.h>
 
 #include <cstring>
 
@@ -372,15 +372,15 @@ reshapeAverage(CImagePtr &new_image) const
   double y2 = dy;
 
   for (int y = 0; y < height2; ++y, y1 = y2, y2 += dy) {
-    yy1 = std::min(std::max(CMathGen::Round(y1), 0), height1 - 1);
-    yy2 = std::min(std::max(CMathGen::Round(y2), 0), height1 - 1);
+    yy1 = std::min(std::max(CMathRound::Round(y1), 0), height1 - 1);
+    yy2 = std::min(std::max(CMathRound::Round(y2), 0), height1 - 1);
 
     double x1 = 0.0;
     double x2 = dx;
 
     for (int x = 0; x < width2; ++x, x1 = x2, x2 += dx) {
-      xx1 = std::min(std::max(CMathGen::Round(x1), 0), width1 - 1);
-      xx2 = std::min(std::max(CMathGen::Round(x2), 0), width1 - 1);
+      xx1 = std::min(std::max(CMathRound::Round(x1), 0), width1 - 1);
+      xx2 = std::min(std::max(CMathRound::Round(x2), 0), width1 - 1);
 
       double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
 
@@ -419,10 +419,10 @@ getAverageRGBAPixel(double x1, double x2, double y1, double y1) const
   int width1  = getWidth ();
   int height1 = getHeight();
 
-  int yy1 = std::min(std::max(CMathGen::Round(y1), 0), height1 - 1);
-  int yy2 = std::min(std::max(CMathGen::Round(y2), 0), height1 - 1);
-  int xx1 = std::min(std::max(CMathGen::Round(x1), 0), width1 - 1);
-  int xx2 = std::min(std::max(CMathGen::Round(x2), 0), width1 - 1);
+  int yy1 = std::min(std::max(CMathRound::Round(y1), 0), height1 - 1);
+  int yy2 = std::min(std::max(CMathRound::Round(y2), 0), height1 - 1);
+  int xx1 = std::min(std::max(CMathRound::Round(x1), 0), width1 - 1);
+  int xx2 = std::min(std::max(CMathRound::Round(x2), 0), width1 - 1);
 
   for (int yy = yy1; yy <= yy2; ++yy) {
     for (int xx = xx1; xx <= xx2; ++xx) {
@@ -482,14 +482,14 @@ reshapeBilinear(CImagePtr &new_image) const
   for (int y = 0; y < height2; ++y, yy += iy) {
     double xx = 0.0;
 
-    int y1 = CMathGen::RoundDown(yy);
-    int y2 = CMathGen::RoundUp  (yy);
+    int y1 = CMathRound::RoundDown(yy);
+    int y2 = CMathRound::RoundUp  (yy);
 
     if (y2 >= height1) y2 = height1 - 1;
 
     for (int x = 0; x < width2; ++x, xx += ix) {
-      int x1 = CMathGen::RoundDown(xx);
-      int x2 = CMathGen::RoundUp  (xx);
+      int x1 = CMathRound::RoundDown(xx);
+      int x2 = CMathRound::RoundUp  (xx);
 
       if (x2 >= width1) x2 = width1 - 1;
 
@@ -507,14 +507,14 @@ getBilinearRGBAPixel(double xx, double yy) const
   int width1  = getWidth ();
   int height1 = getHeight();
 
-  int x1 = CMathGen::RoundDown(xx);
-  int x2 = CMathGen::RoundUp  (xx);
+  int x1 = CMathRound::RoundDown(xx);
+  int x2 = CMathRound::RoundUp  (xx);
 
   if (x1 <  0     ) x1 = 0;
   if (x2 >= width1) x2 = width1 - 1;
 
-  int y1 = CMathGen::RoundDown(yy);
-  int y2 = CMathGen::RoundUp  (yy);
+  int y1 = CMathRound::RoundDown(yy);
+  int y2 = CMathRound::RoundUp  (yy);
 
   if (y1 <  0      ) y2 = 0;
   if (y2 >= height1) y2 = height1 - 1;
@@ -579,8 +579,8 @@ void
 CImage::
 sampleNearest(double x, double y, CRGBA &rgba) const
 {
-  int px = CMathGen::Round(x*(getWidth () - 1));
-  int py = CMathGen::Round(y*(getHeight() - 1));
+  int px = CMathRound::Round(x*(getWidth () - 1));
+  int py = CMathRound::Round(y*(getHeight() - 1));
 
   getRGBAPixel(px, py, rgba);
 }
@@ -592,10 +592,10 @@ sampleBilinear(double x, double y, CRGBA &rgba) const
   double x1 = x*(getWidth () - 1);
   double y1 = y*(getHeight() - 1);
 
-  int px1 = CMathGen::RoundDown(x1);
-  int py1 = CMathGen::RoundDown(y1);
-  int px2 = CMathGen::RoundUp  (x1);
-  int py2 = CMathGen::RoundUp  (y1);
+  int px1 = CMathRound::RoundDown(x1);
+  int py1 = CMathRound::RoundDown(y1);
+  int px2 = CMathRound::RoundUp  (x1);
+  int py2 = CMathRound::RoundUp  (y1);
 
   if (px1 != px2 || py1 != py2) {
     CRGBA rgba1, rgba2, rgba3, rgba4;

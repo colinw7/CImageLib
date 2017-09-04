@@ -1,5 +1,5 @@
 #include <CImageRotate.h>
-#include <CMathGen.h>
+#include <CMathRound.h>
 #include <CMathMacros.h>
 #include <cmath>
 
@@ -70,8 +70,8 @@ rotate(double angle)
   if (hasColormap()) {
     for (int y = 0; y < height1; ++y) {
       for (int x = 0; x < width1; ++x) {
-        int x1 = CMathGen::Round((x - x_offset)*c - (y - y_offset)*s) + left;
-        int y1 = CMathGen::Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
+        int x1 = CMathRound::Round((x - x_offset)*c - (y - y_offset)*s) + left;
+        int y1 = CMathRound::Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
 
         x1 = std::min(std::max(x1, left  ), right);
         y1 = std::min(std::max(y1, bottom), top  );
@@ -87,8 +87,8 @@ rotate(double angle)
 
     for (int y = 0; y < height1; ++y) {
       for (int x = 0; x < width1; ++x) {
-        int x1 = CMathGen::Round((x - x_offset)*c - (y - y_offset)*s) + left;
-        int y1 = CMathGen::Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
+        int x1 = CMathRound::Round((x - x_offset)*c - (y - y_offset)*s) + left;
+        int y1 = CMathRound::Round((x - x_offset)*s + (y - y_offset)*c) + bottom;
 
         x1 = std::min(std::max(x1, left  ), right);
         y1 = std::min(std::max(y1, bottom), top  );
