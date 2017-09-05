@@ -8,7 +8,11 @@ INC_DIR = ../include
 OBJ_DIR = ../obj
 LIB_DIR = ../lib
 
-all: $(LIB_DIR)/libCImageLib.a
+all: dirs $(LIB_DIR)/libCImageLib.a
+
+dirs:
+	@if [ ! -e ../obj ]; then mkdir ../obj; fi
+	@if [ ! -e ../bin ]; then mkdir ../bin; fi
 
 SRC = \
 CImage.cpp \
