@@ -760,7 +760,7 @@ turbulence(bool fractal, double baseFreqX, double baseFreqY, int numOctaves, int
 
 CImagePtr
 CImage::
-displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor, double scale)
+displacementMap(CImagePtr dispImage, CRGBAComponent xcolor, CRGBAComponent ycolor, double scale)
 {
   CImagePtr dst = CImageMgrInst->createImage();
 
@@ -773,7 +773,7 @@ displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent yco
 
 void
 CImage::
-displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor,
+displacementMap(CImagePtr dispImage, CRGBAComponent xcolor, CRGBAComponent ycolor,
                 double scale, CImagePtr dst)
 {
   int wx1, wy1, wx2, wy2;

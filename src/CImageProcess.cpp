@@ -479,7 +479,7 @@ luminanceToAlpha()
 
 void
 CImage::
-linearFunc(CColorComponent component, double scale, double offset)
+linearFunc(CRGBAComponent component, double scale, double offset)
 {
   convertToRGB();
 
@@ -506,7 +506,7 @@ linearFunc(CColorComponent component, double scale, double offset)
 
 void
 CImage::
-gammaFunc(CColorComponent component, double amplitude, double exponent, double offset)
+gammaFunc(CRGBAComponent component, double amplitude, double exponent, double offset)
 {
   convertToRGB();
 
@@ -533,7 +533,7 @@ gammaFunc(CColorComponent component, double amplitude, double exponent, double o
 
 void
 CImage::
-tableFunc(CColorComponent component, const std::vector<double> &values)
+tableFunc(CRGBAComponent component, const std::vector<double> &values)
 {
   int num_ranges = values.size() - 1;
 
@@ -584,7 +584,7 @@ tableFunc(CColorComponent component, const std::vector<double> &values)
 
 void
 CImage::
-discreteFunc(CColorComponent component, const std::vector<double> &values)
+discreteFunc(CRGBAComponent component, const std::vector<double> &values)
 {
   uint num_ranges = values.size();
 

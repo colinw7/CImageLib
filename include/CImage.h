@@ -9,7 +9,6 @@
 #include <CIBBox2D.h>
 #include <CFileType.h>
 #include <COptVal.h>
-#include <CColorComponent.h>
 #include <CImagePtr.h>
 
 #include <cstddef>
@@ -805,13 +804,13 @@ class CImage {
 
   void luminanceToAlpha();
 
-  void linearFunc(CColorComponent component, double scale, double offset);
+  void linearFunc(CRGBAComponent component, double scale, double offset);
 
-  void gammaFunc(CColorComponent component, double amplitude, double exponent, double offset);
+  void gammaFunc(CRGBAComponent component, double amplitude, double exponent, double offset);
 
-  void tableFunc(CColorComponent component, const std::vector<double> &values);
+  void tableFunc(CRGBAComponent component, const std::vector<double> &values);
 
-  void discreteFunc(CColorComponent component, const std::vector<double> &values);
+  void discreteFunc(CRGBAComponent component, const std::vector<double> &values);
 
   CImagePtr erode(int r=1, bool isAlpha=false) const;
   CImagePtr erode(const std::vector<int> &mask, bool isAlpha=false) const;
@@ -886,10 +885,10 @@ class CImage {
   void turbulence(bool fractal, double baseFreq, int numOctaves, int seed);
   void turbulence(bool fractal, double baseFreqX, double baseFreqY, int numOctaves, int seed);
 
-  CImagePtr displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor,
+  CImagePtr displacementMap(CImagePtr dispImage, CRGBAComponent xcolor, CRGBAComponent ycolor,
                             double scale);
 
-  void displacementMap(CImagePtr dispImage, CColorComponent xcolor, CColorComponent ycolor,
+  void displacementMap(CImagePtr dispImage, CRGBAComponent xcolor, CRGBAComponent ycolor,
                        double scale, CImagePtr dst);
 
   //------
