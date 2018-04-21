@@ -8,27 +8,14 @@ bool            CImage::combine_enabled_  = true;
 CRGBACombineDef CImage::combine_def_;
 
 CImage::
-CImage() :
- type_  (CFILE_TYPE_NONE),
- size_  (0, 0),
- border_(),
- data_  (0),
- colors_(),
- window_(),
- bg_    (0,0,0)
+CImage()
 {
   CImageMgrInst->addImage(this);
 }
 
 CImage::
 CImage(int width, int height) :
- type_  (CFILE_TYPE_NONE),
- size_  (width, height),
- border_(),
- data_  (0),
- colors_(),
- window_(),
- bg_    (0,0,0)
+ size_(width, height)
 {
   int size = size_.area();
 
@@ -43,13 +30,7 @@ CImage(int width, int height) :
 
 CImage::
 CImage(const CISize2D &size) :
- type_  (CFILE_TYPE_NONE),
- size_  (size),
- border_(),
- data_  (0),
- colors_(),
- window_(),
- bg_    (0,0,0)
+ size_(size)
 {
   int dsize = size_.area();
 
@@ -67,14 +48,16 @@ CImage(const CImage &image) :
  type_  (image.type_),
  size_  (image.size_),
  border_(image.border_),
- data_  (0),
+ data_  (nullptr),
  colors_(),
  window_(image.window_),
  bg_    (image.bg_)
 {
   int size = size_.area();
 
-  if (size > 0 && image.data_ != 0) {
+  if (size > 0 && image.data_) {
+    const_cast<CImage &>(image).updateData();
+
     data_ = new uint [size];
 
     memcpy(data_, image.data_, size*sizeof(uint));
@@ -90,13 +73,7 @@ CImage(const CImage &image) :
 
 CImage::
 CImage(const CImage &image, int x, int y, int width, int height) :
- type_  (CFILE_TYPE_NONE),
- size_  (width, height),
- border_(),
- data_  (0),
- colors_(),
- window_(),
- bg_    (0, 0, 0)
+ size_(width, height)
 {
   int size = size_.area();
 
@@ -109,9 +86,12 @@ CImage(const CImage &image, int x, int y, int width, int height) :
     addColor(image.colors_[i]);
 
   if (x + width  <= 0 || x >= image.size_.width  ||
-      y + height <= 0 || y >= image.size_.height)
+      y + height <= 0 || y >= image.size_.height) {
     memset(data_, 0, size*sizeof(uint));
+  }
   else {
+    const_cast<CImage &>(image).updateData();
+
     uint *ps = &image.data_[0];
     uint *pe = &image.data_[image.size_.area() - 1];
 
@@ -165,7 +145,9 @@ operator=(const CImage &image)
 
   int size = size_.area();
 
-  if (size > 0 && image.data_ != 0) {
+  if (size > 0 && image.data_) {
+    const_cast<CImage &>(image).updateData();
+
     data_ = new uint [size];
 
     memcpy(data_, image.data_, size*sizeof(uint));
@@ -400,6 +382,8 @@ void
 CImage::
 setColorIndexData(uint pixel, int left, int bottom, int right, int top)
 {
+  updateData();
+
   uint *p1 = data_ + bottom*size_.width;
 
   for (int y = bottom; y <= top; ++y) {
@@ -418,6 +402,8 @@ getColorIndexPixel(int ind) const
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index"))
     return 0;
+
+  const_cast<CImage *>(this)->updateData();
 
   uint pixel = data_[ind];
 
@@ -443,6 +429,8 @@ setColorIndexPixel(int ind, uint pixel)
 
   if (! CASSERT(pixel < colors_.size(), "Invalid Color Ind"))
     return false;
+
+  updateData();
 
   if (data_[ind] == pixel)
     return false;
@@ -509,6 +497,8 @@ void
 CImage::
 setRGBAData(const CRGBA &rgba, int left, int bottom, int right, int top)
 {
+  updateData();
+
   uint pixel = rgbaToPixel(rgba);
 
   uint *p1 = data_ + bottom*size_.width;
@@ -547,6 +537,8 @@ setRGBAPixel(int ind, const CRGBA &rgba)
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index"))
     return false;
+
+  updateData();
 
   uint pixel = rgbaToPixel(rgba);
 
@@ -587,6 +579,8 @@ clearRGBAPixel(int ind)
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index"))
     return false;
+
+  updateData();
 
   if (! data_[ind])
     return false;
@@ -634,6 +628,8 @@ getRGBAPixel(int ind, double *r, double *g, double *b, double *a) const
     return;
   }
 
+  const_cast<CImage *>(this)->updateData();
+
   if (hasColormap()) {
     uint pixel = data_[ind];
 
@@ -651,8 +647,9 @@ getRGBAPixel(int ind, double *r, double *g, double *b, double *a) const
     if (b != 0) *b = colors_[pixel].getBlue ();
     if (a != 0) *a = colors_[pixel].getAlpha();
   }
-  else
+  else {
     pixelToRGBA(data_[ind], r, g, b, a);
+  }
 }
 
 void
@@ -661,6 +658,8 @@ getRGBAPixel(int ind, CRGBA &rgba) const
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index"))
     return;
+
+  const_cast<CImage *>(this)->updateData();
 
   if (hasColormap()) {
     uint pixel = data_[ind];
@@ -672,8 +671,9 @@ getRGBAPixel(int ind, CRGBA &rgba) const
       rgba = CRGBA(0,0,0);
     }
   }
-  else
+  else {
     pixelToRGBA(data_[ind], rgba);
+  }
 }
 
 void
@@ -703,6 +703,8 @@ getRGBAPixelI(int ind, uint *r, uint *g, uint *b, uint *a) const
     return;
   }
 
+  const_cast<CImage *>(this)->updateData();
+
   if (hasColormap()) {
     uint pixel = data_[ind];
 
@@ -720,8 +722,9 @@ getRGBAPixelI(int ind, uint *r, uint *g, uint *b, uint *a) const
     if (b != 0) *b = colors_[pixel].getBlueI ();
     if (a != 0) *a = colors_[pixel].getAlphaI();
   }
-  else
+  else {
     pixelToRGBAI(data_[ind], r, g, b, a);
+  }
 }
 
 void
@@ -913,6 +916,8 @@ getNumColors() const
   if (hasColormap())
     return colors_.size();
   else {
+    const_cast<CImage *>(this)->updateData();
+
     std::map<uint, bool> used;
 
     int size = size_.area();
@@ -967,6 +972,8 @@ setTransparentColor(const CRGBA &rgba)
       }
   }
   else {
+    updateData();
+
     uint pixel = rgbaToPixel(rgba);
 
     int i = 0;
@@ -1082,6 +1089,8 @@ double
 CImage::
 getAlpha(int pos) const
 {
+  const_cast<CImage *>(this)->updateData();
+
   uint pixel = data_[pos];
 
   if (hasColormap()) {
@@ -1113,6 +1122,8 @@ uint
 CImage::
 getAlphaI(int pos) const
 {
+  const_cast<CImage *>(this)->updateData();
+
   uint pixel = data_[pos];
 
   if (hasColormap()) {
@@ -1301,6 +1312,8 @@ setAlphaGray(double gray)
   if (hasColormap())
     convertToRGB();
 
+  updateData();
+
   int i = 0;
 
   for (int y = 0; y < size_.height; ++y) {
@@ -1320,6 +1333,8 @@ setAlpha(double a)
 {
   if (hasColormap())
     convertToRGB();
+
+  updateData();
 
   int i = 0;
 
@@ -1345,6 +1360,8 @@ setAlphaByGray(bool positive)
       colors_[i].setAlphaByGray(positive);
   }
   else {
+    updateData();
+
     int i = 0;
 
     for (int y = 0; y < size_.height; ++y) {
@@ -1375,6 +1392,8 @@ setGrayByAlpha(bool positive)
       colors_[i].setGrayByAlpha(positive);
   }
   else {
+    updateData();
+
     int i = 0;
 
     for (int y = 0; y < size_.height; ++y) {
@@ -1403,6 +1422,8 @@ setAlphaByColor(const CRGB &rgb, double a)
       colors_[i].setAlphaByColor(rgb);
   }
   else {
+    updateData();
+
     CRGBA rgba(rgb);
 
     rgba.setAlpha(a);
@@ -1431,6 +1452,8 @@ setAlphaByImage(CImagePtr image)
 
   if (image->hasColormap())
     image->convertToRGB();
+
+  updateData();
 
   CRGBA rgba1, rgba2;
 
@@ -1462,6 +1485,8 @@ scaleAlpha(double a)
       colors_[i].setAlpha(a*colors_[i].getAlpha());
   }
   else {
+    updateData();
+
     int i = 0;
 
     for (int y = 0; y < size_.height; ++y) {

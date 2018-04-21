@@ -41,10 +41,29 @@ lookupImage(const std::string &name)
 
 //--------------
 
+static CImageMgr *s_instance;
+
+CImageMgr *
 CImageMgr::
-CImageMgr() :
- image_list_(), image_file_map_(), image_sized_file_map_(), fmt_map_(),
- prototype_(), creating_(false), debug_(false)
+instance()
+{
+  if (! s_instance)
+    s_instance = new CImageMgr;
+
+  return s_instance;
+}
+
+void
+CImageMgr::
+release()
+{
+  delete s_instance;
+
+  s_instance = nullptr;
+}
+
+CImageMgr::
+CImageMgr()
 {
   addFmt(CFILE_TYPE_IMAGE_BMP, CImageBMPInst);
   addFmt(CFILE_TYPE_IMAGE_GIF, CImageGIFInst);
@@ -67,11 +86,9 @@ CImageMgr() :
 CImageMgr::
 ~CImageMgr()
 {
-  auto p1 = image_file_map_.begin();
-  auto p2 = image_file_map_.end  ();
+  clearFmts();
 
-  for ( ; p1 != p2; ++p1)
-    delete (*p1).second;
+  clearFileMap();
 }
 
 bool
@@ -94,9 +111,19 @@ getFmt(CFileType type, CImageFmt **fmt)
   if (p == fmt_map_.end())
     return false;
 
-  *fmt = fmt_map_[type];
+  *fmt = (*p).second;
 
   return true;
+}
+
+void
+CImageMgr::
+clearFmts()
+{
+  for (auto &fmt_map : fmt_map_)
+    delete fmt_map.second;
+
+  fmt_map_.clear();
 }
 
 CImagePtr
@@ -360,6 +387,16 @@ removeFile(const std::string &fileName)
   image_file_map_[fileName] = 0;
 
   return true;
+}
+
+void
+CImageMgr::
+clearFileMap()
+{
+  for (auto &image_file : image_file_map_)
+    delete image_file.second;
+
+  image_file_map_.clear();
 }
 
 CImageSizedFile *

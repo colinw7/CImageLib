@@ -111,13 +111,13 @@ class CImage {
   static bool            combine_enabled_;
   static CRGBACombineDef combine_def_;
 
-  CFileType  type_;
-  CISize2D   size_;
+  CFileType  type_ { CFILE_TYPE_NONE };
+  CISize2D   size_ { 0, 0 };
   Border     border_;
-  uint      *data_;
+  uint      *data_ { nullptr };
   ColorList  colors_;
   CIBBox2D   window_;
-  CRGBA      bg_;
+  CRGBA      bg_   { 0, 0, 0 };
 
   friend class CImageMgr;
 
@@ -165,10 +165,29 @@ class CImage {
         cur_.pos1 = cur_.pos2;
     }
 
-    uint       *operator->()       { return &cur_.image->data_[cur_.pos1]; }
-    const uint *operator->() const { return &cur_.image->data_[cur_.pos1]; }
-    uint       *operator* ()       { return &cur_.image->data_[cur_.pos1]; }
-    const uint *operator* () const { return &cur_.image->data_[cur_.pos1]; }
+    uint *operator->() {
+      const_cast<CImage *>(cur_.image)->updateData();
+
+      return &cur_.image->data_[cur_.pos1];
+    }
+
+    const uint *operator->() const {
+      const_cast<CImage *>(cur_.image)->updateData();
+
+      return &cur_.image->data_[cur_.pos1];
+    }
+
+    uint *operator* () {
+      const_cast<CImage *>(cur_.image)->updateData();
+
+      return &cur_.image->data_[cur_.pos1];
+    }
+
+    const uint *operator* () const {
+      const_cast<CImage *>(cur_.image)->updateData();
+
+      return &cur_.image->data_[cur_.pos1];
+    }
 
     PixelIterator &operator++() {
       cur_.inc();
@@ -511,23 +530,35 @@ class CImage {
   //----
 
  public:
+  virtual void updateData() { }
+
   uint *getData() const {
+    const_cast<CImage *>(this)->updateData();
+
     return data_;
   }
 
   uint getData(int ind) const {
+    const_cast<CImage *>(this)->updateData();
+
     return data_[ind];
   }
 
   uint getData(int x, int y) const {
+    const_cast<CImage *>(this)->updateData();
+
     return data_[y*size_.width + x];
   }
 
-  void setData(int ind, uint data) const {
+  void setData(int ind, uint data) {
+    updateData();
+
     data_[ind] = data;
   }
 
-  void setData(int x, int y, uint data) const {
+  void setData(int x, int y, uint data) {
+    updateData();
+
     data_[y*size_.width + x] = data;
   }
 

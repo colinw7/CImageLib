@@ -1,8 +1,6 @@
 #ifndef CIMAGE_MGR_H
 #define CIMAGE_MGR_H
 
-#define CImageMgrInst CImageMgr::getInstance()
-
 #include <CFileType.h>
 #include <CFile.h>
 #include <CISize2D.h>
@@ -43,7 +41,7 @@ class CImageSrc {
   virtual std::string getName() const = 0;
 
  private:
-  Type type_;
+  Type type_ { NO_SRC };
 };
 
 //---
@@ -122,12 +120,12 @@ class CImageDataSrc : public CImageSrc {
   }
 
   explicit CImageDataSrc(const std::string &data) :
-   CImageSrc(DATA_SRC), data_(data), id_(0) {
+   CImageSrc(DATA_SRC), data_(data) {
     id_ = getId();
   }
 
   CImageDataSrc(const uchar *data, uint len) :
-   CImageSrc(DATA_SRC), data_((const char *) data, len), id_(0) {
+   CImageSrc(DATA_SRC), data_((const char *) data, len) {
     id_ = getId();
   }
 
@@ -141,7 +139,7 @@ class CImageDataSrc : public CImageSrc {
 
  private:
   const std::string data_;
-  int               id_;
+  int               id_ { 0 };
 };
 
 //---
@@ -169,7 +167,7 @@ class CImageXPMSrc : public CImageSrc {
   }
 
   CImageXPMSrc(const char **strs, uint num_strs) :
-   CImageSrc(XPM_SRC), strs_(strs), num_strs_(num_strs), id_(0) {
+   CImageSrc(XPM_SRC), strs_(strs), num_strs_(num_strs) {
     id_ = getId();
   }
 
@@ -187,9 +185,9 @@ class CImageXPMSrc : public CImageSrc {
   CImageXPMSrc &operator=(const CImageXPMSrc &rhs);
 
  private:
-  const char **strs_;
-  uint         num_strs_;
-  int          id_;
+  const char **strs_ { nullptr };
+  uint         num_strs_ { 0 };
+  int          id_ { 0 };
 };
 
 //---
@@ -203,7 +201,7 @@ class CImageXBMSrc : public CImageSrc {
   }
 
   CImageXBMSrc(uchar *data, int width, int height) :
-   CImageSrc(XBM_SRC), data_(data), width_(width), height_(height), id_(0) {
+   CImageSrc(XBM_SRC), data_(data), width_(width), height_(height) {
     id_ = getId();
   }
 
@@ -218,24 +216,21 @@ class CImageXBMSrc : public CImageSrc {
   CImageXBMSrc &operator=(const CImageXBMSrc &rhs);
 
  private:
-  uchar *data_;
-  int    width_;
-  int    height_;
-  int    id_;
+  uchar *data_   { nullptr };
+  int    width_  { 0 };
+  int    height_ { 0 };
+  int    id_     { 0 };
 };
 
 //---
 
+#define CImageMgrInst CImageMgr::instance()
+
 class CImageMgr {
  public:
-  static CImageMgr *getInstance() {
-    static CImageMgr *mgr;
+  static CImageMgr *instance();
 
-    if (mgr == NULL)
-      mgr = new CImageMgr;
-
-    return mgr;
-  }
+  static void release();
 
   CImageMgr();
 
@@ -243,6 +238,10 @@ class CImageMgr {
 
   bool addFmt(CFileType type, CImageFmt *fmt);
   bool getFmt(CFileType type, CImageFmt **fmt);
+
+  void clearFmts();
+
+  void clearFileMap();
 
  public:
   void setPrototype(CImagePtr ptr) { prototype_ = ptr; }
@@ -308,8 +307,8 @@ class CImageMgr {
   ImageSizedFileMap image_sized_file_map_;
   TypeFmtMap        fmt_map_;
   CImagePtr         prototype_;
-  bool              creating_;
-  bool              debug_;
+  bool              creating_ { false };
+  bool              debug_ { false };
 };
 
 //---
