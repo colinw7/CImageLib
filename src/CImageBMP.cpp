@@ -580,7 +580,7 @@ write(CFile *file, CImagePtr image)
     int line_width  = 3*width;
     int line_width1 = width;
 
-    int num_data = line_width1*height;
+    int num_data1 = line_width1*height;
 
     std::vector<uchar> buffer;
 
@@ -588,7 +588,7 @@ write(CFile *file, CImagePtr image)
 
     int pad = (4 - (line_width % 4)) & 0x03;
 
-    int j = num_data;
+    int j = num_data1;
 
     for (uint i = 0; i < height; ++i) {
       j -= line_width1;

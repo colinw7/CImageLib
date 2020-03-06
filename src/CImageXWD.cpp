@@ -490,7 +490,7 @@ write(CFile *file, CImagePtr image)
 
   file->write((uchar *) header, sizeof(XWDFileHeader));
 
-  delete [] header;
+  delete header;
 
   if (header->ncolors > 0) {
     XWDColor *xcolors = new XWDColor [header->ncolors];

@@ -236,7 +236,7 @@ gray()
       colors_[i].toGray();
   }
   else {
-    CRGBA rgba;
+    CRGBA rgba1;
 
     int x1, y1, x2, y2;
 
@@ -244,11 +244,11 @@ gray()
 
     for (int y = y1; y <= y2; ++y) {
       for (int x = x1; x <= x2; ++x) {
-        getRGBAPixel(x, y, rgba);
+        getRGBAPixel(x, y, rgba1);
 
-        rgba.toGray();
+        rgba1.toGray();
 
-        setRGBAPixel(x, y, rgba);
+        setRGBAPixel(x, y, rgba1);
       }
     }
   }
@@ -267,7 +267,7 @@ sepia()
       colors_[i].toSepia();
   }
   else {
-    CRGBA rgba;
+    CRGBA rgba1;
 
     int x1, y1, x2, y2;
 
@@ -275,11 +275,11 @@ sepia()
 
     for (int y = y1; y <= y2; ++y) {
       for (int x = x1; x <= x2; ++x) {
-        getRGBAPixel(x, y, rgba);
+        getRGBAPixel(x, y, rgba1);
 
-        rgba.toSepia();
+        rgba1.toSepia();
 
-        setRGBAPixel(x, y, rgba);
+        setRGBAPixel(x, y, rgba1);
       }
     }
   }
@@ -296,11 +296,7 @@ void
 CImage::
 twoColor(const CRGBA &bg, const CRGBA &fg)
 {
-  CRGBA rgba;
-
   if (hasColormap()) {
-    CRGBA rgba;
-
     int x1, y1, x2, y2;
 
     getWindow(&x1, &y1, &x2, &y2);
@@ -643,9 +639,9 @@ erode(int r, bool isAlpha) const
 
   for (int i = 0, iy = -r; iy <= r; ++iy) {
     for (int ix = -r; ix <= r; ++ix, ++i) {
-      double r1 = hypot(ix, iy);
+      double rxy = hypot(ix, iy);
 
-      mask[i] = (r1 <= r ? 1 : 0);
+      mask[i] = (rxy <= r ? 1 : 0);
     }
   }
 
@@ -672,9 +668,9 @@ dilate(int r, bool isAlpha) const
 
   for (int i = 0, iy = -r; iy <= r; ++iy) {
     for (int ix = -r; ix <= r; ++ix, ++i) {
-      double r1 = hypot(ix, iy);
+      double rxy = hypot(ix, iy);
 
-      mask[i] = (r1 <= r ? 1 : 0);
+      mask[i] = (rxy <= r ? 1 : 0);
     }
   }
 
@@ -738,23 +734,23 @@ erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const
           isSet = (hits > 0);
       }
 
-      int x2 = x - x1;
-      int y2 = y - y1;
+      int xx2 = x - x1;
+      int yy2 = y - y1;
 
       if (isAlpha) {
         if (isSet) {
           rgba /= num_hits;
 
-          image->setRGBAPixel(x2, y2, rgba);
+          image->setRGBAPixel(xx2, yy2, rgba);
         }
         else
-          image->setRGBAPixel(x2, y2, CRGBA(0, 0, 0, 0));
+          image->setRGBAPixel(xx2, yy2, CRGBA(0, 0, 0, 0));
       }
       else {
         if (isSet)
-          image->setRGBAPixel(x2, y2, CRGBA(1, 1, 1));
+          image->setRGBAPixel(xx2, yy2, CRGBA(1, 1, 1));
         else
-          image->setRGBAPixel(x2, y2, CRGBA(0, 0, 0));
+          image->setRGBAPixel(xx2, yy2, CRGBA(0, 0, 0));
       }
     }
   }

@@ -119,12 +119,12 @@ read(CFile *file, CImagePtr &image)
 
       double iscale = 1.0/num_colors;
 
-      double g;
+      double g1;
 
       for (int i = 0; i < num_colors; ++i) {
-        g = i*iscale;
+        g1 = i*iscale;
 
-        colors[i].setRGBA(g, g, g, 1.0);
+        colors[i].setRGBA(g1, g1, g1, 1.0);
       }
     }
   }

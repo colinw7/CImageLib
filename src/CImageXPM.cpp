@@ -151,8 +151,8 @@ read(CFile *file, CImagePtr &image)
     image->setDataSize(xpm_data.width, xpm_data.height);
 
     if (xpm_data.num_colors <= 256) {
-      for (int i = 0; i < xpm_data.num_colors; ++i)
-        image->addColor(colors[i]);
+      for (int ii = 0; ii < xpm_data.num_colors; ++ii)
+        image->addColor(colors[ii]);
 
       image->setColorIndexData(xpm_data.data);
 
@@ -273,8 +273,8 @@ read(const char **strings, uint num_strings, CImagePtr &image)
     image->setDataSize(xpm_data.width, xpm_data.height);
 
     if (xpm_data.num_colors <= 256) {
-      for (int i = 0; i < xpm_data.num_colors; ++i)
-        image->addColor(colors[i]);
+      for (int ii = 0; ii < xpm_data.num_colors; ++ii)
+        image->addColor(colors[ii]);
 
       image->setColorIndexData(xpm_data.data);
 
@@ -1116,7 +1116,7 @@ write(CFile *file, CImagePtr image)
   for (uint i = 0; i < image1->getHeight(); ++i) {
     file->write("  \"");
 
-    for (uint j = 0; j < image1->getWidth(); ++j, ++k) {
+    for (uint jj = 0; jj < image1->getWidth(); ++jj, ++k) {
       int pixel = image1->getColorIndexPixel(k);
 
       file->write(pixelToSymbol(pixel_map[pixel]));
@@ -1144,10 +1144,10 @@ getColorUsage(CImagePtr image, char **used, int *num_used)
   *used     = new char [image->getNumColors()];
   *num_used = 0;
 
-  int i = 0;
+  for (int ii = 0; ii < image->getNumColors(); ++ii)
+    (*used)[ii] = 0;
 
-  for (int i = 0; i < image->getNumColors(); ++i)
-    (*used)[i] = 0;
+  int i = 0;
 
   for (uint y = 0; y < image->getHeight(); ++y)
     for (uint x = 0; x < image->getWidth(); ++x, ++i) {

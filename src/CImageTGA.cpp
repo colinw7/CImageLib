@@ -82,7 +82,7 @@ read(CFile *file, CImagePtr &image)
       return false;
   }
 
-  assert(type != -1);
+  assert(int(type) != -1);
 
   uint pixel_size = (header.depth >> 3);
 

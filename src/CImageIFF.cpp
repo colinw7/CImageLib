@@ -861,7 +861,7 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
 
     p1 = screen_memory1;
 
-    for (uint i = 0; i < size; ++i) {
+    for (uint ii = 0; ii < size; ++ii) {
       IFF_UBYTE r = *p1++;
       IFF_UBYTE g = *p1++;
       IFF_UBYTE b = *p1++;
@@ -978,7 +978,7 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
   p  = screen_memory1;
   p1 = screen_memory2;
 
-  for (uint i = 0; i < size; ++i) {
+  for (uint ii = 0; ii < size; ++ii) {
     IFF_UBYTE r = *p++;
     IFF_UBYTE g = *p++;
     IFF_UBYTE b = *p++;

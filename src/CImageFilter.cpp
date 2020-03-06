@@ -159,11 +159,11 @@ CImage::
 sobelGradient(CImagePtr &dst)
 {
   if (hasColormap()) {
-    CImagePtr dst = dup();
+    CImagePtr dst1 = dup();
 
-    dst->convertToRGB();
+    dst1->convertToRGB();
 
-    return sobelGradient(dst);
+    return sobelGradient(dst1);
   }
 
   //---
@@ -381,7 +381,7 @@ convolve(int xsize, int ysize, const std::vector<double> &kernel)
 
   image->setDataSize(size_);
 
-  image->convolve(xsize, ysize, kernel);
+  convolve(image, xsize, ysize, kernel);
 
   return image;
 }

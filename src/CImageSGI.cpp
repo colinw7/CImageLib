@@ -243,9 +243,9 @@ convertDataBW(uchar *data, SGIImage *sgi_image, uint **data1,
     for (int j = 0; j < sgi_image->x_size; ++j) {
       p += 3;
 
-      uchar g = *p++;
+      uchar g1 = *p++;
 
-      *p1++ = c_flags[g];
+      *p1++ = c_flags[g1];
     }
   }
 

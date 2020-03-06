@@ -109,26 +109,26 @@ read(CFile *file, CImagePtr &image)
     if      (parse.isChar('\"')) {
       parse.skipChar();
 
-      std::vector<int> parameters;
+      std::vector<int> parameters1;
 
-      readParameters(parse, parameters);
+      readParameters(parse, parameters1);
 
-      if (parameters.size() == 4) {
-        w = parameters[2];
-        h = parameters[3];
+      if (parameters1.size() == 4) {
+        w = parameters1[2];
+        h = parameters1[3];
       }
     }
     else if (parse.isChar('#')) {
       parse.skipChar();
 
-      std::vector<int> parameters;
+      std::vector<int> parameters1;
 
-      readParameters(parse, parameters);
+      readParameters(parse, parameters1);
 
-      if (parameters.size() == 5) {
-        int r = parameters[2];
-        int g = parameters[3];
-        int b = parameters[4];
+      if (parameters1.size() == 5) {
+        int r = parameters1[2];
+        int g = parameters1[3];
+        int b = parameters1[4];
 
         colors.push_back(CRGBA(r/255.0, g/255.0, b/255.0));
       }
@@ -181,10 +181,10 @@ read(CFile *file, CImagePtr &image)
         break;
 
       for (int i = 0; i < parameter; ++i) {
-        for (int i = 0; i < 6; ++i) {
-          bool b = d & (1<<i);
+        for (int i1 = 0; i1 < 6; ++i1) {
+          bool b = d & (1<<i1);
 
-          if (b) data[x + (y + i)*w] = c;
+          if (b) data[x + (y + i1)*w] = c;
         }
 
         ++x;

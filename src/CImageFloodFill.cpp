@@ -247,9 +247,9 @@ fillLargestRect(int x, int y, int pixel)
 
   LargestRect::Rect r = rect.largestRect(fg);
 
-  for (int y = 0; y < r.height; ++y)
-    for (int x = 0; x < r.width; ++x)
-      setColorIndexPixel(r.left + x, r.top + y, pixel);
+  for (int yy = 0; yy < r.height; ++yy)
+    for (int xx = 0; xx < r.width; ++xx)
+      setColorIndexPixel(r.left + xx, r.top + yy, pixel);
 }
 
 void
@@ -270,9 +270,9 @@ fillLargestRect(int x, int y, const CRGBA &rgba)
 
   LargestRect::Rect r = rect.largestRect(fg);
 
-  for (int y = 0; y < r.height; ++y)
-    for (int x = 0; x < r.width; ++x)
-      setRGBAPixel(r.left + x, r.top + y, rgba);
+  for (int yy = 0; yy < r.height; ++yy)
+    for (int xx = 0; xx < r.width; ++xx)
+      setRGBAPixel(r.left + xx, r.top + yy, rgba);
 }
 
 #endif

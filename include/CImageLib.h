@@ -1,7 +1,6 @@
 #ifndef CIMAGE_LIB_H
 #define CIMAGE_LIB_H
 
-#include <CFile.h>
 #include <CAlignType.h>
 #include <CRGBA.h>
 

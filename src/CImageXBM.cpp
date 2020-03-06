@@ -185,8 +185,8 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
       hex_string[2] = '\0';
 
-      for (uint j = 0; j < *height; ++j) {
-        int l = j*(*width);
+      for (uint jj = 0; jj < *height; ++jj) {
+        int l = jj*(*width);
 
         for (int k = 0; k < width1; ++k) {
           while (ptext[i] != '\0' &&

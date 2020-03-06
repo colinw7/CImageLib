@@ -673,30 +673,30 @@ write(CFile *file, CImagePtr image)
   if (depth <= 8) {
     ushort *colors = new ushort [3*num_colors];
 
-    double r, g, b, a;
+    double r1, g1, b1, a1;
 
     int i = 0;
 
-    for (int j = 0; j < image->getNumColors(); ++j) {
-      image->getColorRGBA(j, &r, &g, &b, &a);
+    for (int jj = 0; jj < image->getNumColors(); ++jj) {
+      image->getColorRGBA(jj, &r1, &g1, &b1, &a1);
 
-      colors[i++] = (int) (r*65535);
+      colors[i++] = (int) (r1*65535);
     }
 
     i = num_colors;
 
-    for (int j = 0; j < image->getNumColors(); ++j) {
-      image->getColorRGBA(j, &r, &g, &b, &a);
+    for (int jj = 0; jj < image->getNumColors(); ++jj) {
+      image->getColorRGBA(jj, &r1, &g1, &b1, &a1);
 
-      colors[i++] = (int) (g*65535);
+      colors[i++] = (int) (g1*65535);
     }
 
     i = 2*num_colors;
 
-    for (int j = 0; j < image->getNumColors(); ++j) {
-      image->getColorRGBA(j, &r, &g, &b, &a);
+    for (int jj = 0; jj < image->getNumColors(); ++jj) {
+      image->getColorRGBA(jj, &r1, &g1, &b1, &a1);
 
-      colors[i++] = (int) (b*65535);
+      colors[i++] = (int) (b1*65535);
     }
 
     for (i = 0; i < 3*num_colors; ++i)

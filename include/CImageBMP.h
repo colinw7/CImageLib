@@ -5,7 +5,7 @@
 
 #define CImageBMPInst CImageBMP::getInstance()
 
-class CImageBMPHeader;
+struct CImageBMPHeader;
 
 class CImageBMP : public CImageFmt {
  public:

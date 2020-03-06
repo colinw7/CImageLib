@@ -82,13 +82,13 @@ convertToNColors(uint ncolors, ConvertMethod method)
       continue;
     }
 
-    int ind = pc.first;
+    int ind1 = pc.first;
 
-    int r = (ind >> 16) & 0xFF;
-    int g = (ind >>  8) & 0xFF;
-    int b = (ind >>  0) & 0xFF;
+    int r1 = (ind1 >> 16) & 0xFF;
+    int g1 = (ind1 >>  8) & 0xFF;
+    int b1 = (ind1 >>  0) & 0xFF;
 
-    addColor(r*f, g*f, b*f, 1);
+    addColor(r1*f, g1*f, b1*f, 1);
 
     pc.second = color_num++;
   }
@@ -129,11 +129,11 @@ convertToNColors(uint ncolors, ConvertMethod method)
         if ((*pc1).second < 0)
           continue;
 
-        int ind = (*pc1).first;
+        int ind1 = (*pc1).first;
 
-        int r1 = (ind >> 16) & 0xFF;
-        int g1 = (ind >>  8) & 0xFF;
-        int b1 = (ind >>  0) & 0xFF;
+        int r1 = (ind1 >> 16) & 0xFF;
+        int g1 = (ind1 >>  8) & 0xFF;
+        int b1 = (ind1 >>  0) & 0xFF;
 
         int d = (r - r1)*(r - r1) + (g - g1)*(g - g1) + (b - b1)*(b - b1);
 
@@ -188,10 +188,10 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
         ind = ((r & 0xFF) << 16) | ((g & 0xFF) <<  8) | ((b & 0xFF) <<  0);
 
-        auto pc = color_map.find(ind);
+        auto pc1 = color_map.find(ind);
 
-        if ((*pc).second >= 0) {
-          current = (*pc).second;
+        if ((*pc1).second >= 0) {
+          current = (*pc1).second;
           *p1     = current;
 
           for (uint *p = pt; p < p1; ++p)

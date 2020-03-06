@@ -883,21 +883,21 @@ writeAnim(CFile *file, const std::vector<CImagePtr> &images, int delay)
 
     compress_data.color_table_bits = color_table_bits;
 
-    CImagePtr image1 = images1[i];
+    CImagePtr iimage1 = images1[i];
 
-    writeGraphicsBlock(file, image1, delay);
+    writeGraphicsBlock(file, iimage1, delay);
 
     writeByte(file, IMAGE_ID);
 
     int left, right, top, bottom;
 
-    image1->getBorder(&left, &bottom, &right, &top);
+    iimage1->getBorder(&left, &bottom, &right, &top);
 
     writeShort(file, left);
     writeShort(file, top );
 
-    writeShort(file, image1->getWidth ());
-    writeShort(file, image1->getHeight());
+    writeShort(file, iimage1->getWidth ());
+    writeShort(file, iimage1->getHeight());
 
     uint color_table   = 0;
     uint color_bits    = 0;
@@ -920,7 +920,7 @@ writeAnim(CFile *file, const std::vector<CImagePtr> &images, int delay)
 
     writeByte(file, compress_data.code_size);
 
-    writeData(file, image1);
+    writeData(file, iimage1);
     writeByte(file, 0);
   }
 

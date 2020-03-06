@@ -270,11 +270,11 @@ copy(CImagePtr image, int x, int y)
   if (hasColormap() && image->hasColormap()) {
     int color_ind;
 
-    for (int y = y1; y <= y2; ++y) {
-      for (int x = x1; x <= x2; ++x) {
-        color_ind = image->getColorIndexPixel(x, y);
+    for (int yy = y1; yy <= y2; ++yy) {
+      for (int xx = x1; xx <= x2; ++xx) {
+        color_ind = image->getColorIndexPixel(xx, yy);
 
-        drawColorIndexPoint(x, y, color_ind);
+        drawColorIndexPoint(xx, yy, color_ind);
       }
     }
   }
@@ -284,11 +284,11 @@ copy(CImagePtr image, int x, int y)
     if (hasColormap())
       convertToRGB();
 
-    for (int y = y1; y <= y2; ++y) {
-      for (int x = x1; x <= x2; ++x) {
-        image->getRGBAPixel(x, y, rgba);
+    for (int yy = y1; yy <= y2; ++yy) {
+      for (int xx = x1; xx <= x2; ++xx) {
+        image->getRGBAPixel(xx, yy, rgba);
 
-        drawRGBAPoint(x, y, rgba);
+        drawRGBAPoint(xx, yy, rgba);
       }
     }
   }
@@ -326,26 +326,26 @@ copyAlpha(CImagePtr image, int x, int y)
     convertToRGB();
 
   // image is mask, get alpha from rgba of mask set alpha of image pixel from mask
-  for (int y = y1; y <= y2; ++y) {
-    for (int x = x1; x <= x2; ++x) {
+  for (int yy = y1; yy <= y2; ++yy) {
+    for (int xx = x1; xx <= x2; ++xx) {
       CRGBA rgba1;
 
-      getRGBAPixel(x, y, rgba1);
+      getRGBAPixel(xx, yy, rgba1);
 
-      int xx = x - x1;
-      int yy = y - y1;
+      int xx1 = xx - x1;
+      int yy1 = yy - y1;
 
-      if (image->validPixel(xx, yy)) {
+      if (image->validPixel(xx1, yy1)) {
         CRGBA rgba2;
 
-        image->getRGBAPixel(xx, yy, rgba2);
+        image->getRGBAPixel(xx1, yy1, rgba2);
 
         //double a = rgba2.getGray()*rgba2.getAlpha();
         double a = rgba2.getAlpha();
 
         rgba1.setAlpha(rgba1.getAlpha()*a);
 
-        setRGBAPixel(x, y, rgba1);
+        setRGBAPixel(xx, yy, rgba1);
       }
     }
   }

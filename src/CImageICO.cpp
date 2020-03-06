@@ -202,15 +202,15 @@ read(CFile *file, CImagePtr &image)
 
       buffer1.resize(width2);
 
-      int j = cursor_width*cursor_height;
+      int j1 = cursor_width*cursor_height;
 
       for (k = 0; k < cursor_height; ++k) {
-        j -= cursor_width;
+        j1 -= cursor_width;
 
         file->read(&buffer1[0], width2);
 
         uint k1 = 0;
-        uint k2 = j;
+        uint k2 = j1;
 
         for ( ; k1 < uint(cursor_width/8); k1++) {
           data[k2++] = buffer1[k1] & 0x80;
@@ -243,8 +243,8 @@ read(CFile *file, CImagePtr &image)
     image->setDataSize(cursor_width, cursor_height);
 
     if (num_colors > 0) {
-      for (int k = 0; k < num_colors; ++k)
-        image->addColorI(colors[k].r, colors[k].g, colors[k].b);
+      for (int k1 = 0; k1 < num_colors; ++k1)
+        image->addColorI(colors[k1].r, colors[k1].g, colors[k1].b);
 
       image->setColorIndexData(data);
     }
