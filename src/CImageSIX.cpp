@@ -68,6 +68,8 @@ read(CFile *file, CImagePtr &image)
 
   CFileParse parse(file);
 
+  parse.setStream(true);
+
   if (! parse.isChar('\033'))
     return false;
 

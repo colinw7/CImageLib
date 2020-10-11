@@ -47,13 +47,14 @@ LFLAGS = \
 -L../../CImageLib/lib \
 -L../../CFileUtil/lib \
 -L../../CFile/lib \
+-L../../CMath/lib \
 -L../../CStrUtil/lib \
 -L../../CRegExp/lib \
 -L../../COS/lib \
 -L../../CRGBName/lib \
 
 LIBS = \
--lCImageLib -lCFileUtil -lCFile -lCStrUtil \
+-lCImageLib -lCFileUtil -lCFile -lCMath -lCStrUtil \
 -lCRegExp -lCOS -lCRGBName \
 -lpng -ljpeg -ltre
 
