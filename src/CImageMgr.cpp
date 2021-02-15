@@ -126,6 +126,13 @@ clearFmts()
   fmt_map_.clear();
 }
 
+void
+CImageMgr::
+setPrototype(CImagePtr ptr)
+{
+  prototype_ = ptr;
+}
+
 CImagePtr
 CImageMgr::
 createImageI()

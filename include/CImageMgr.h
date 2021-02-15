@@ -244,9 +244,8 @@ class CImageMgr {
   void clearFileMap();
 
  public:
-  void setPrototype(CImagePtr ptr) { prototype_ = ptr; }
-
   CImagePtr getPrototype() const { return prototype_; }
+  void setPrototype(CImagePtr ptr);
 
   CImagePtr lookupImage(const std::string &fileName);
 
