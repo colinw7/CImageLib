@@ -28,9 +28,9 @@ class CImageFrame {
 
 class CImageAnim {
  public:
-  typedef std::vector<CImageFrame *> FrameList;
-  typedef FrameList::iterator        iterator;
-  typedef FrameList::const_iterator  const_iterator;
+  using FrameList      = std::vector<CImageFrame *>;
+  using iterator       = FrameList::iterator;
+  using const_iterator = FrameList::const_iterator;
 
   CImageAnim();
  ~CImageAnim();

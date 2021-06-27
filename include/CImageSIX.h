@@ -31,7 +31,7 @@ class CImageSIX : public CImageFmt {
 
   CImageSIX(const CImageSIX &six);
 
-  const CImageSIX &operator=(const CImageSIX &six);
+  CImageSIX &operator=(const CImageSIX &six);
 };
 
 #endif

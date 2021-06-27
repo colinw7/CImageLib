@@ -14,19 +14,15 @@
 #include <cstddef>
 #include <vector>
 
-typedef unsigned char uchar;
+using uchar = unsigned char;
 
 //--------------------
 
-typedef uint   CIMAGE_INT32;
-typedef ushort CIMAGE_INT16;
-typedef uchar  CIMAGE_INT8;
+using CIMAGE_INT32 = uint;
+using CIMAGE_INT16 = ushort;
+using CIMAGE_INT8  = uchar;
 
-enum CImageResizeType {
-  CIMAGE_RESIZE_NEAREST,
-  CIMAGE_RESIZE_AVERAGE,
-  CIMAGE_RESIZE_BILINEAR
-};
+#include <CImageResizeType.h>
 
 enum CImageCopyType {
   CIMAGE_COPY_ALL              = 0,
@@ -42,31 +38,8 @@ class CImagePixelIterator;
 
 //--------------------
 
-struct CImageTile {
-  CImageTile() { }
-
-  CImageTile(CHAlignType halign1, CVAlignType valign1) :
-   halign(halign1), valign(valign1) {
-  }
-
-  CHAlignType halign = CHALIGN_TYPE_CENTER;
-  CVAlignType valign = CVALIGN_TYPE_CENTER;
-};
-
-struct CImageConvolveData {
-  // TODO: edge mode
-
-  typedef std::vector<double> Kernel;
-
-  CImageConvolveData() { }
-
-  Kernel kernel;
-  int    xsize         = -1;
-  int    ysize         = -1;
-  double divisor       = -1;
-  double bias          = -1;
-  bool   preserveAlpha = false;
-};
+#include <CImageConvolveData.h>
+#include <CImageTileData.h>
 
 struct CImageDiffData {
   CRGBA  bg        { 0, 0, 0, 0};
@@ -105,8 +78,8 @@ class CImage {
     int getTop   () const { return top_   ; }
   };
 
-  typedef std::vector<CRGBA>     ColorList;
-  typedef std::vector<CImagePtr> ImagePtrList;
+  using ColorList    = std::vector<CRGBA>;
+  using ImagePtrList = std::vector<CImagePtr>;
 
   static bool            combine_enabled_;
   static CRGBACombineDef combine_def_;
@@ -124,11 +97,11 @@ class CImage {
  public:
   class PixelIterator {
    public:
-    typedef std::forward_iterator_tag iterator_category;
-    typedef uint                      value_type;
-    typedef ptrdiff_t                 difference_type;
-    typedef uint *                    pointer;
-    typedef uint &                    reference;
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = uint;
+    using difference_type   = ptrdiff_t;
+    using pointer           = uint *;
+    using reference         = uint &;
 
    private:
     struct current {
@@ -573,7 +546,7 @@ class CImage {
   //------
 
  public:
-  typedef PixelIterator pixel_iterator;
+  using pixel_iterator = PixelIterator;
 
   pixel_iterator       pixel_begin();
   const pixel_iterator pixel_begin() const;
@@ -671,7 +644,7 @@ class CImage {
 
   // Tile
  public:
-  CImagePtr tile(int width, int height, const CImageTile &tile=CImageTile());
+  CImagePtr tile(int width, int height, const CImageTileData &tile=CImageTileData());
 
   //------
 

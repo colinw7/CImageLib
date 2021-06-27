@@ -2,7 +2,7 @@
 
 CImageFile::
 CImageFile(const std::string &fileName) :
- fileName_(fileName), image_(), loaded_(false), sized_file_list_()
+ fileName_(fileName)
 {
 }
 

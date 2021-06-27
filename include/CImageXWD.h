@@ -32,7 +32,7 @@ class CImageXWD : public CImageFmt {
 
   CImageXWD(const CImageXWD &xwd);
 
-  const CImageXWD &operator=(const CImageXWD &xwd);
+  CImageXWD &operator=(const CImageXWD &xwd);
 
  private:
   bool readHeader(CFile *file, CImagePtr &image, XWDFileHeader *hdr, bool *swap_flag);

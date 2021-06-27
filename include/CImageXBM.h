@@ -33,7 +33,7 @@ class CImageXBM : public CImageFmt {
 
   CImageXBM(const CImageXBM &xbm);
 
-  const CImageXBM &operator=(const CImageXBM &xbm);
+  CImageXBM &operator=(const CImageXBM &xbm);
 
  private:
   bool readBitmap(CFile *file, uint *width, uint *height,

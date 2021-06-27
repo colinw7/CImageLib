@@ -5,11 +5,11 @@
 
 #define CImageIFFInst CImageIFF::getInstance()
 
-typedef uchar  IFF_UBYTE;
-typedef short  IFF_WORD;
-typedef ushort IFF_UWORD;
-typedef int    IFF_LONG;
-typedef uint   IFF_ULONG;
+using IFF_UBYTE = uchar;
+using IFF_WORD  = short;
+using IFF_UWORD = ushort;
+using IFF_LONG  = int;
+using IFF_ULONG = uint;
 
 struct IFFBitMapHeader;
 struct IFFColorRegister;
@@ -42,7 +42,7 @@ class CImageIFF : public CImageFmt {
 
   CImageIFF(const CImageIFF &iff);
 
-  const CImageIFF &operator=(const CImageIFF &iff);
+  CImageIFF &operator=(const CImageIFF &iff);
 
  private:
   bool readFORM(CFile *file);

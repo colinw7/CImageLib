@@ -30,7 +30,7 @@ class CImagePNG : public CImageFmt {
 
   CImagePNG(const CImagePNG &png);
 
-  const CImagePNG &operator=(const CImagePNG &png);
+  CImagePNG &operator=(const CImagePNG &png);
 };
 
 #endif

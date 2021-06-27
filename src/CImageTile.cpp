@@ -2,7 +2,7 @@
 
 CImagePtr
 CImage::
-tile(int width, int height, const CImageTile &tile)
+tile(int width, int height, const CImageTileData &tile)
 {
   CImagePtr image = CImageMgrInst->createImage();
 

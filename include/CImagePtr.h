@@ -5,6 +5,6 @@
 
 class CImage;
 
-typedef CRefPtr<CImage> CImagePtr;
+using CImagePtr = CRefPtr<CImage>;
 
 #endif

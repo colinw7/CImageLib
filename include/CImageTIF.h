@@ -31,7 +31,7 @@ class CImageTIF : public CImageFmt {
 
   CImageTIF(const CImageTIF &tif);
 
-  const CImageTIF &operator=(const CImageTIF &tif);
+  CImageTIF &operator=(const CImageTIF &tif);
 
  private:
   void setInteger(int tag_id, int value);

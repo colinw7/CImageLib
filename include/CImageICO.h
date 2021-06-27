@@ -30,7 +30,7 @@ class CImageICO : public CImageFmt {
 
   CImageICO(const CImageICO &ico);
 
-  const CImageICO &operator=(const CImageICO &ico);
+  CImageICO &operator=(const CImageICO &ico);
 
  private:
   void writeInteger(CFile *file, int data);

@@ -30,7 +30,7 @@ class CImagePPM : public CImageFmt {
 
   CImagePPM(const CImagePPM &ppm);
 
-  const CImagePPM &operator=(const CImagePPM &ppm);
+  CImagePPM &operator=(const CImagePPM &ppm);
 
  private:
   bool readV3(CFile *file, CImagePtr &image);

@@ -33,7 +33,7 @@ class CImageTGA : public CImageFmt {
 
   CImageTGA(const CImageTGA &pcx);
 
-  const CImageTGA &operator=(const CImageTGA &pcx);
+  CImageTGA &operator=(const CImageTGA &pcx);
 
  private:
   bool readHeader(CFile *file, CImagePtr &image, TGAHeader *header);

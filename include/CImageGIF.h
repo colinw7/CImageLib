@@ -42,7 +42,7 @@ class CImageGIF : public CImageFmt {
 
   CImageGIF(const CImageGIF &gif);
 
-  const CImageGIF &operator=(const CImageGIF &gif);
+  CImageGIF &operator=(const CImageGIF &gif);
 
  public:
   static CImageAnim *createAnim(CFile *file);

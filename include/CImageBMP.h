@@ -33,7 +33,7 @@ class CImageBMP : public CImageFmt {
 
   CImageBMP(const CImageBMP &bmp);
 
-  const CImageBMP &operator=(const CImageBMP &bmp);
+  CImageBMP &operator=(const CImageBMP &bmp);
 
  private:
   bool readHeader(CFile *file, CImageBMPHeader *header);

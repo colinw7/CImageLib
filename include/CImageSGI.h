@@ -33,7 +33,7 @@ class CImageSGI : public CImageFmt {
 
   CImageSGI(const CImageSGI &sgi);
 
-  const CImageSGI &operator=(const CImageSGI &sgi);
+  CImageSGI &operator=(const CImageSGI &sgi);
 
  private:
   void convertDataBW(uchar *data, SGIImage *sgi_image,

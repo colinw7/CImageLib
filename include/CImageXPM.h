@@ -39,7 +39,7 @@ class CImageXPM : public CImageFmt {
 
   CImageXPM(const CImageXPM &xpm);
 
-  const CImageXPM &operator=(const CImageXPM &xpm);
+  CImageXPM &operator=(const CImageXPM &xpm);
 
  private:
   bool readHeader(const char *data, int *i);

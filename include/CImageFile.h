@@ -24,11 +24,11 @@ class CImageFile {
   bool removeSizedFile(int width, int height, bool keep_aspect=true);
 
  private:
-  typedef std::list<CImageSizedFile *> SizedFileList;
+  using SizedFileList = std::list<CImageSizedFile *>;
 
   std::string   fileName_;
   CImagePtr     image_;
-  bool          loaded_;
+  bool          loaded_ { false };
   SizedFileList sized_file_list_;
 };
 
@@ -36,8 +36,7 @@ class CImageFile {
 
 class CImageSizedFile : public CImageFile {
  public:
-  CImageSizedFile(CImageFile *file, int width, int height,
-                  bool keep_aspect=false);
+  CImageSizedFile(CImageFile *file, int width, int height, bool keep_aspect=false);
  ~CImageSizedFile();
 
   std::string getFilename() const;
@@ -53,11 +52,11 @@ class CImageSizedFile : public CImageFile {
   CImageSizedFile &operator=(const CImageSizedFile &rhs);
 
  private:
-  CImageFile *file_;
+  CImageFile *file_ { nullptr };
   CISize2D    size_;
-  bool        keep_aspect_;
+  bool        keep_aspect_ { false };
   CImagePtr   image_;
-  bool        loaded_;
+  bool        loaded_ { false };
 };
 
 #endif

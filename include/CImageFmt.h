@@ -7,9 +7,6 @@
 class CFile;
 
 class CImageFmt {
- private:
-  CFileType type_;
-
  public:
   CImageFmt(CFileType type) : type_(type) { }
 
@@ -21,6 +18,9 @@ class CImageFmt {
   virtual bool readHeader(CFile *, CImagePtr &) = 0;
 
   virtual bool write(CFile *, CImagePtr) = 0;
+
+ private:
+  CFileType type_;
 };
 
 #endif

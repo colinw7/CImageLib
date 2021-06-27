@@ -31,7 +31,7 @@ class CImagePSP : public CImageFmt {
 
   CImagePSP(const CImagePSP &psp);
 
-  const CImagePSP &operator=(const CImagePSP &psp);
+  CImagePSP &operator=(const CImagePSP &psp);
 
  private:
   bool readImageBlock(uchar *buffer, int *width, int *height,

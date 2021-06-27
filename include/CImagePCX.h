@@ -33,7 +33,7 @@ class CImagePCX : public CImageFmt {
 
   CImagePCX(const CImagePCX &pcx);
 
-  const CImagePCX &operator=(const CImagePCX &pcx);
+  CImagePCX &operator=(const CImagePCX &pcx);
 
  private:
   bool readHeader(CFile *file, CImagePtr &image, PCXHeader *header);

@@ -78,15 +78,16 @@ class CImageSizedFileSrc : public CImageSrc {
 
   const std::string &getFilename() const { return filename_; }
 
-  int getWidth     () const { return width_ ; }
-  int getHeight    () const { return height_; }
-  int getKeepAspect() const { return keep_aspect_; }
+  int getWidth () const { return width_ ; }
+  int getHeight() const { return height_; }
+
+  bool getKeepAspect() const { return keep_aspect_; }
 
  private:
   std::string filename_;
-  int         width_ { 0 };
-  int         height_ { 0 };
-  int         keep_aspect_ { 0 };
+  int         width_       { 0 };
+  int         height_      { 0 };
+  bool        keep_aspect_ { false };
 };
 
 //---
@@ -185,9 +186,9 @@ class CImageXPMSrc : public CImageSrc {
   CImageXPMSrc &operator=(const CImageXPMSrc &rhs);
 
  private:
-  const char **strs_ { nullptr };
+  const char **strs_     { nullptr };
   uint         num_strs_ { 0 };
-  int          id_ { 0 };
+  int          id_       { 0 };
 };
 
 //---
@@ -296,10 +297,10 @@ class CImageMgr {
   friend class CImage;
   friend class CImageFile;
 
-  typedef std::list<CImage *>                     ImageList;
-  typedef std::map<std::string,CImageFile *>      ImageFileMap;
-  typedef std::map<std::string,CImageSizedFile *> ImageSizedFileMap;
-  typedef std::map<CFileType,CImageFmt *>         TypeFmtMap;
+  using ImageList         = std::list<CImage *>;
+  using ImageFileMap      = std::map<std::string,CImageFile *>;
+  using ImageSizedFileMap = std::map<std::string,CImageSizedFile *>;
+  using TypeFmtMap        = std::map<CFileType,CImageFmt *>;
 
   ImageList         image_list_;
   ImageFileMap      image_file_map_;
@@ -307,7 +308,7 @@ class CImageMgr {
   TypeFmtMap        fmt_map_;
   CImagePtr         prototype_;
   bool              creating_ { false };
-  bool              debug_ { false };
+  bool              debug_    { false };
 };
 
 //---

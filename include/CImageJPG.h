@@ -30,7 +30,7 @@ class CImageJPG : public CImageFmt {
 
   CImageJPG(const CImageJPG &jpg);
 
-  const CImageJPG &operator=(const CImageJPG &jpg);
+  CImageJPG &operator=(const CImageJPG &jpg);
 
  private:
 #ifdef IMAGE_JPEG
