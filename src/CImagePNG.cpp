@@ -5,7 +5,9 @@
 # include <png.h>
 #endif
 
+#ifdef IMAGE_PNG
 static void pngWriteErrorHandler(png_structp png_ptr, png_const_charp msg);
+#endif
 
 bool
 CImagePNG::
@@ -45,7 +47,7 @@ read(CFile *file, CImagePtr &image)
     return false;
   }
 
-  if (setjmp(png_ptr->jmpbuf)) {
+  if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
     return false;
   }
@@ -239,7 +241,7 @@ readHeader(CFile *file, CImagePtr &image)
     return false;
   }
 
-  if (setjmp(png_ptr->jmpbuf)) {
+  if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
     return false;
   }
@@ -302,7 +304,7 @@ write(CFile *file, CImagePtr image)
     return false;
   }
 
-  if (setjmp(png_ptr->jmpbuf)) {
+  if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
     return false;
   }
@@ -357,10 +359,12 @@ write(CFile *file, CImagePtr image)
 #endif
 }
 
+#ifdef IMAGE_PNG
 static void
 pngWriteErrorHandler(png_structp png_ptr, png_const_charp msg)
 {
   fprintf(stderr, "PNG write %s\n", msg);
 
-  longjmp(png_ptr->jmpbuf, 1);
+  longjmp(png_jmpbuf(png_ptr), 1);
 }
+#endif
