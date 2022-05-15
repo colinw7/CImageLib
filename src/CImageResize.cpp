@@ -76,9 +76,9 @@ resizeMax(int size) const
     aspect = (1.0*size_.width)/size_.height;
 
   if (size_.width > size_.height)
-    return resize(size, (int) (size/aspect));
+    return resize(size, int(size/aspect));
   else
-    return resize((int) (size*aspect), size);
+    return resize(int(size*aspect), size);
 }
 
 CImagePtr
@@ -91,9 +91,9 @@ resizeMin(int size) const
     aspect = (1.0*size_.width)/size_.height;
 
   if (size_.width < size_.height)
-    return resize(size, (int) (size/aspect));
+    return resize(size, int(size/aspect));
   else
-    return resize((int) (size*aspect), size);
+    return resize(int(size*aspect), size);
 }
 
 CImagePtr
@@ -145,12 +145,12 @@ resize(int width, int height) const
     int num_colors = getNumColors();
 
     for (int i = 0; i < num_colors; ++i)
-      image->addColor(getColor(i));
+      image->addColor(getColor(uint(i)));
 
     //------
 
     if (isTransparent())
-      image->setTransparentColor(getTransparentColor());
+      image->setTransparentColor(uint(getTransparentColor()));
   }
 
   //------
@@ -207,9 +207,9 @@ reshapeMax(int size)
   double aspect = (1.0*size_.width)/size_.height;
 
   if (size_.width > size_.height)
-    return reshape(size, (int) (size/aspect));
+    return reshape(size, int(size/aspect));
   else
-    return reshape((int) (size*aspect), size);
+    return reshape(int(size*aspect), size);
 }
 
 bool
@@ -222,9 +222,9 @@ reshapeMin(int size)
   double aspect = (1.0*size_.width)/size_.height;
 
   if (size_.width < size_.height)
-    return reshape(size, (int) (size/aspect));
+    return reshape(size, int(size/aspect));
   else
-    return reshape((int) (size*aspect), size);
+    return reshape(int(size*aspect), size);
 }
 
 bool
@@ -291,14 +291,14 @@ void
 CImage::
 reshapeNearest(CImagePtr &new_image) const
 {
-  int width1  = getWidth ();
-  int height1 = getHeight();
+  auto width1  = getWidth ();
+  auto height1 = getHeight();
 
   if (width1 <= 0 || height1 <= 0)
     return;
 
-  int width2  = new_image->getWidth ();
-  int height2 = new_image->getHeight();
+  auto width2  = new_image->getWidth ();
+  auto height2 = new_image->getHeight();
 
   if (width2 <= 0 || height2 <= 0)
     return;
@@ -309,12 +309,12 @@ reshapeNearest(CImagePtr &new_image) const
   double y1 = 0.0;
 
   if (! hasColormap()) {
-    for (int y = 0; y < height2; ++y, y1 += dy) {
+    for (int y = 0; y < int(height2); ++y, y1 += dy) {
       double x1 = 0.0;
 
-      for (int x = 0; x < width2; ++x, x1 += dx) {
-        int x2 = std::min(std::max(int(x1), 0), width1  - 1);
-        int y2 = std::min(std::max(int(y1), 0), height1 - 1);
+      for (int x = 0; x < int(width2); ++x, x1 += dx) {
+        int x2 = std::min(std::max(int(x1), 0), int(width1  - 1));
+        int y2 = std::min(std::max(int(y1), 0), int(height1 - 1));
 
         double r, g, b, a;
 
@@ -325,16 +325,16 @@ reshapeNearest(CImagePtr &new_image) const
     }
   }
   else {
-    for (int y = 0; y < height2; ++y, y1 += dy) {
+    for (int y = 0; y < int(height2); ++y, y1 += dy) {
       double x1 = 0.0;
 
-      for (int x = 0; x < width2; ++x, x1 += dx) {
-        int x2 = std::min(std::max(int(x1), 0), width1  - 1);
-        int y2 = std::min(std::max(int(y1), 0), height1 - 1);
+      for (int x = 0; x < int(width2); ++x, x1 += dx) {
+        int x2 = std::min(std::max(int(x1), 0), int(width1  - 1));
+        int y2 = std::min(std::max(int(y1), 0), int(height1 - 1));
 
         int pixel = getColorIndexPixel(x2, y2);
 
-        new_image->setColorIndexPixel(x, y, pixel);
+        new_image->setColorIndexPixel(x, y, uint(pixel));
       }
     }
   }
@@ -354,11 +354,11 @@ reshapeAverage(CImagePtr &new_image) const
   if (hasColormap())
     return reshapeNearest(new_image);
 
-  int width1  = getWidth ();
-  int height1 = getHeight();
+  auto width1  = getWidth ();
+  auto height1 = getHeight();
 
-  int width2  = new_image->getWidth ();
-  int height2 = new_image->getHeight();
+  auto width2  = new_image->getWidth ();
+  auto height2 = new_image->getHeight();
 
   if (width2 <= 0 || height2 <= 0)
     return;
@@ -371,16 +371,16 @@ reshapeAverage(CImagePtr &new_image) const
   double y1 = 0.0;
   double y2 = dy;
 
-  for (int y = 0; y < height2; ++y, y1 = y2, y2 += dy) {
-    yy1 = std::min(std::max(CMathRound::Round(y1), 0), height1 - 1);
-    yy2 = std::min(std::max(CMathRound::Round(y2), 0), height1 - 1);
+  for (int y = 0; y < int(height2); ++y, y1 = y2, y2 += dy) {
+    yy1 = std::min(std::max(CMathRound::Round(y1), 0), int(height1 - 1));
+    yy2 = std::min(std::max(CMathRound::Round(y2), 0), int(height1 - 1));
 
     double x1 = 0.0;
     double x2 = dx;
 
-    for (int x = 0; x < width2; ++x, x1 = x2, x2 += dx) {
-      xx1 = std::min(std::max(CMathRound::Round(x1), 0), width1 - 1);
-      xx2 = std::min(std::max(CMathRound::Round(x2), 0), width1 - 1);
+    for (int x = 0; x < int(width2); ++x, x1 = x2, x2 += dx) {
+      xx1 = std::min(std::max(CMathRound::Round(x1), 0), int(width1 - 1));
+      xx2 = std::min(std::max(CMathRound::Round(x2), 0), int(width1 - 1));
 
       double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
 
@@ -465,11 +465,11 @@ reshapeBilinear(CImagePtr &new_image) const
     return;
   }
 
-  int width1  = getWidth ();
-  int height1 = getHeight();
+  auto width1  = getWidth ();
+  auto height1 = getHeight();
 
-  int width2  = new_image->getWidth ();
-  int height2 = new_image->getHeight();
+  auto width2  = new_image->getWidth ();
+  auto height2 = new_image->getHeight();
 
   if (width2 <= 0 || height2 <= 0)
     return;
@@ -479,19 +479,19 @@ reshapeBilinear(CImagePtr &new_image) const
 
   double yy = 0.0;
 
-  for (int y = 0; y < height2; ++y, yy += iy) {
+  for (int y = 0; y < int(height2); ++y, yy += iy) {
     double xx = 0.0;
 
     int y1 = CMathRound::RoundDown(yy);
     int y2 = CMathRound::RoundUp  (yy);
 
-    if (y2 >= height1) y2 = height1 - 1;
+    if (y2 >= int(height1)) y2 = int(height1) - 1;
 
-    for (int x = 0; x < width2; ++x, xx += ix) {
+    for (int x = 0; x < int(width2); ++x, xx += ix) {
       int x1 = CMathRound::RoundDown(xx);
       int x2 = CMathRound::RoundUp  (xx);
 
-      if (x2 >= width1) x2 = width1 - 1;
+      if (x2 >= int(width1)) x2 = int(width1) - 1;
 
       CRGBA c = getBilinearRGBAPixel(xx, x1, x2, yy, y1, y2);
 
@@ -504,20 +504,20 @@ CRGBA
 CImage::
 getBilinearRGBAPixel(double xx, double yy) const
 {
-  int width1  = getWidth ();
-  int height1 = getHeight();
+  auto width1  = getWidth ();
+  auto height1 = getHeight();
 
   int x1 = CMathRound::RoundDown(xx);
   int x2 = CMathRound::RoundUp  (xx);
 
-  if (x1 <  0     ) x1 = 0;
-  if (x2 >= width1) x2 = width1 - 1;
+  if (x1 <  0          ) x1 = 0;
+  if (x2 >= int(width1)) x2 = int(width1) - 1;
 
   int y1 = CMathRound::RoundDown(yy);
   int y2 = CMathRound::RoundUp  (yy);
 
-  if (y1 <  0      ) y2 = 0;
-  if (y2 >= height1) y2 = height1 - 1;
+  if (y1 <  0           ) y2 = 0;
+  if (y2 >= int(height1)) y2 = int(height1) - 1;
 
   return getBilinearRGBAPixel(xx, x1, x2, yy, y1, y2);
 }

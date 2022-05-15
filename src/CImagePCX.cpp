@@ -3,7 +3,7 @@
 
 #include <cstring>
 
-#define ENCODE_SHORT(a) (((a)[0]) + ((a)[1] << 8))
+#define ENCODE_SHORT(a) ushort(((a)[0]) + ((a)[1] << 8))
 
 struct PCXHeader {
   uchar  identifier;
@@ -32,7 +32,7 @@ read(CFile *file, CImagePtr &image)
 {
   PCXHeader header;
 
-  //int file_size = file->getSize();
+  //auto file_size = file->getSize();
 
   file->rewind();
 
@@ -46,17 +46,17 @@ read(CFile *file, CImagePtr &image)
 
   //------
 
-  int num_data = ysize*header.num_bit_planes*header.bytes_per_line;
+  auto num_data = size_t(ysize*header.num_bit_planes*header.bytes_per_line);
 
   //if (num_data < 0 || num_data > file_size)
   //  return false;
 
   //------
 
-  uint *data = new uint [num_data];
+  auto *data = new uint [num_data];
 
-  int icount = sizeof(PCXHeader);
-  int ocount = 0;
+  size_t icount = sizeof(PCXHeader);
+  size_t ocount = 0;
 
   while (true) {
     int c = file->getC();
@@ -66,7 +66,7 @@ read(CFile *file, CImagePtr &image)
 
     ++icount;
 
-    int len = 1;
+    size_t len = 1;
 
     if ((c & 0xC0) == 0xC0) {
       len = c & 0x3F;
@@ -79,8 +79,8 @@ read(CFile *file, CImagePtr &image)
       ++icount;
     }
 
-    for (int i = 0; i < len && ocount < num_data; ++i)
-      data[ocount++] = c;
+    for (size_t i = 0; i < len && ocount < num_data; ++i)
+      data[ocount++] = uint(c);
 
     if (ocount == num_data)
       break;
@@ -88,12 +88,12 @@ read(CFile *file, CImagePtr &image)
 
   //------
 
-  int num_colors = 1 << (header.num_bit_planes*header.bits_per_pixel);
+  auto num_colors = size_t(1 << (header.num_bit_planes*header.bits_per_pixel));
 
-  CRGBA *colors = new CRGBA [num_colors];
+  auto *colors = new CRGBA [num_colors];
 
   if (num_colors <= 16) {
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       colors[i].setRGBAI(header.palette[3*i + 0],
                          header.palette[3*i + 1],
                          header.palette[3*i + 2]);
@@ -106,23 +106,23 @@ read(CFile *file, CImagePtr &image)
 
     int r, g, b;
 
-    for (int i = 0; i < num_colors; ++i) {
+    for (size_t i = 0; i < num_colors; ++i) {
       r = file->getC();
       g = file->getC();
       b = file->getC();
 
-      colors[i].setRGBAI(r, g, b);
+      colors[i].setRGBAI(uint(r), uint(g), uint(b));
     }
 
     if (file->eof()) {
       // Gray scale
 
-      double iscale = 1.0/num_colors;
+      double iscale = 1.0/double(num_colors);
 
       double g1;
 
-      for (int i = 0; i < num_colors; ++i) {
-        g1 = i*iscale;
+      for (size_t i = 0; i < num_colors; ++i) {
+        g1 = double(i)*iscale;
 
         colors[i].setRGBA(g1, g1, g1, 1.0);
       }
@@ -138,7 +138,7 @@ read(CFile *file, CImagePtr &image)
   if (header.bits_per_pixel <= 8) {
     image->setColorIndexData(data);
 
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       image->addColor(colors[i]);
 
     delete [] colors;

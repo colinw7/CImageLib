@@ -27,17 +27,17 @@ void
 CImage::
 alphaMask(CImagePtr mask, int xo, int yo)
 {
-  int mask_width  = mask->getWidth ();
-  int mask_height = mask->getHeight();
+  auto mask_width  = mask->getWidth ();
+  auto mask_height = mask->getHeight();
 
   if (hasColormap()) {
-    int num_colors = colors_.size();
+    auto num_colors = colors_.size();
 
     int transparent_ind = -1;
 
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       if (colors_[i].isTransparent()) {
-        transparent_ind = i;
+        transparent_ind = int(i);
         break;
       }
 
@@ -45,27 +45,27 @@ alphaMask(CImagePtr mask, int xo, int yo)
       if (num_colors < 256) {
         addColor(0, 0, 0, 0);
 
-        transparent_ind = num_colors;
+        transparent_ind = int(num_colors);
       }
     }
 
     if (transparent_ind == -1)
       transparent_ind = 255;
 
-    for (int mask_y = 0, y = yo; mask_y < mask_height; ++mask_y, ++y) {
-      for (int mask_x = 0, x = xo; mask_x < mask_width; ++mask_x, ++x) {
+    for (int mask_y = 0, y = yo; mask_y < int(mask_height); ++mask_y, ++y) {
+      for (int mask_x = 0, x = xo; mask_x < int(mask_width); ++mask_x, ++x) {
         if (! validPixel(x, y)) continue;
 
         if (mask->isTransparent(mask_x, mask_y))
-          setColorIndexPixel(x, y, transparent_ind);
+          setColorIndexPixel(x, y, uint(transparent_ind));
       }
     }
   }
   else {
     double r, g, b, a;
 
-    for (int mask_y = 0, y = yo; mask_y < mask_height; ++mask_y, ++y) {
-      for (int mask_x = 0, x = xo; mask_x < mask_width; ++mask_x, ++x) {
+    for (int mask_y = 0, y = yo; mask_y < int(mask_height); ++mask_y, ++y) {
+      for (int mask_x = 0, x = xo; mask_x < int(mask_width); ++mask_x, ++x) {
         if (! validPixel(x, y)) continue;
 
         getRGBAPixel(x, y, &r, &g, &b, &a);
@@ -86,14 +86,14 @@ void
 CImage::
 alphaMaskRGBA(CImagePtr mask, const CRGBA &rgba, int xo, int yo)
 {
-  int mask_width  = mask->getWidth ();
-  int mask_height = mask->getHeight();
+  auto mask_width  = mask->getWidth ();
+  auto mask_height = mask->getHeight();
 
   if (hasColormap())
     convertToRGB();
 
-  for (int mask_y = 0, y = yo; mask_y < mask_height; ++mask_y, ++y) {
-    for (int mask_x = 0, x = xo; mask_x < mask_width; ++mask_x, ++x) {
+  for (int mask_y = 0, y = yo; mask_y < int(mask_height); ++mask_y, ++y) {
+    for (int mask_x = 0, x = xo; mask_x < int(mask_width); ++mask_x, ++x) {
       if (! validPixel(x, y)) continue;
 
       double a = mask->getAlpha(mask_x, mask_y);

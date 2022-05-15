@@ -149,7 +149,7 @@ read(CFile *file, CImagePtr &image)
   for (const auto &color : colors)
     image->addColor(color);
 
-  uint *data = new uint [w*h];
+  uint *data = new uint [size_t(w*h)];
 
   //---
 
@@ -186,7 +186,7 @@ read(CFile *file, CImagePtr &image)
         for (int i1 = 0; i1 < 6; ++i1) {
           bool b = d & (1<<i1);
 
-          if (b) data[x + (y + i1)*w] = c;
+          if (b) data[x + (y + i1)*w] = uint(c);
         }
 
         ++x;
@@ -227,7 +227,7 @@ read(CFile *file, CImagePtr &image)
       for (int i = 0; i < 6; ++i) {
         bool b = d & (1<<i);
 
-        if (b) data[x + (y + i)*w] = c;
+        if (b) data[x + (y + i)*w] = uint(c);
       }
 
       ++x;

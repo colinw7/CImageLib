@@ -22,7 +22,7 @@ scrollX(int offset)
 
   std::vector<uint> buffer;
 
-  buffer.resize(width);
+  buffer.resize(size_t(width));
 
   while (offset < 0)
     offset += width;
@@ -34,12 +34,12 @@ scrollX(int offset)
     p1 = data_ + y*size_.width + left;
 
     for (int x = left, i = offset; x <= right; ++x, ++i, p1++)
-      buffer[i % width] = *p1;
+      buffer[size_t(i % width)] = *p1;
 
     p1 = data_ + y*size_.width + left;
 
     for (int x = left, i = 0; x <= right; ++x, ++i, p1++)
-      *p1 = buffer[i];
+      *p1 = buffer[size_t(i)];
   }
 }
 
@@ -57,7 +57,7 @@ scrollY(int offset)
 
   std::vector<uint> buffer;
 
-  buffer.resize(height);
+  buffer.resize(size_t(height));
 
   while (offset < 0)
     offset += height;
@@ -69,11 +69,11 @@ scrollY(int offset)
     p1 = data_ + bottom*size_.width + x;
 
     for (int y = bottom, i = offset; y <= top; ++y, ++i, p1 += size_.width)
-      buffer[i % height] = *p1;
+      buffer[size_t(i % height)] = *p1;
 
     p1 = data_ + bottom*size_.width + x;
 
     for (int y = bottom, i = 0; y <= top; ++y, ++i, p1 += size_.width)
-      *p1 = buffer[i];
+      *p1 = buffer[size_t(i)];
   }
 }

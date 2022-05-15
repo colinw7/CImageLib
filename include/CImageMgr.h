@@ -126,7 +126,7 @@ class CImageDataSrc : public CImageSrc {
   }
 
   CImageDataSrc(const uchar *data, uint len) :
-   CImageSrc(DATA_SRC), data_((const char *) data, len) {
+   CImageSrc(DATA_SRC), data_(reinterpret_cast<const char *>(data), len) {
     id_ = getId();
   }
 
@@ -134,13 +134,13 @@ class CImageDataSrc : public CImageSrc {
 
   const char *getDataP() const { return data_.c_str(); }
 
-  uint getDataLen() const { return data_.size(); }
+  uint getDataLen() const { return uint(data_.size()); }
 
   std::string getName() const { return "data:" + CStrUtil::toString(id_); }
 
  private:
   const std::string data_;
-  int               id_ { 0 };
+  uint              id_ { 0 };
 };
 
 //---
@@ -174,7 +174,7 @@ class CImageXPMSrc : public CImageSrc {
 
   CImageXPMSrc(const CImageXPMSrc &rhs) :
    CImageSrc(XPM_SRC), strs_(rhs.strs_), num_strs_(rhs.num_strs_), id_(0) {
-   id_ = getId();
+    id_ = getId();
   }
 
   const char **getStrs   () const { return strs_; }
@@ -188,7 +188,7 @@ class CImageXPMSrc : public CImageSrc {
  private:
   const char **strs_     { nullptr };
   uint         num_strs_ { 0 };
-  int          id_       { 0 };
+  uint         id_       { 0 };
 };
 
 //---
@@ -220,7 +220,7 @@ class CImageXBMSrc : public CImageSrc {
   uchar *data_   { nullptr };
   int    width_  { 0 };
   int    height_ { 0 };
-  int    id_     { 0 };
+  uint   id_     { 0 };
 };
 
 //---

@@ -30,19 +30,19 @@ combine(CImagePtr image, const CRGBACombineDef &def)
     return false;
   }
 
-  int w = std::min(getWidth (), image->getWidth ());
-  int h = std::min(getHeight(), image->getHeight());
+  auto w = std::min(getWidth (), image->getWidth ());
+  auto h = std::min(getHeight(), image->getHeight());
 
-  for (int y = 0; y < h; ++y) {
-    for (int x = 0; x < w; ++x) {
+  for (size_t y = 0; y < h; ++y) {
+    for (size_t x = 0; x < w; ++x) {
       CRGBA rgba1, rgba2;
 
-             getRGBAPixel(x, y, rgba1);
-      image->getRGBAPixel(x, y, rgba2);
+             getRGBAPixel(int(x), int(y), rgba1);
+      image->getRGBAPixel(int(x), int(y), rgba2);
 
       CRGBA rgba = def.combine(rgba1, rgba2);
 
-      setRGBAPixel(x, y, rgba.clamp());
+      setRGBAPixel(int(x), int(y), rgba.clamp());
     }
   }
 
@@ -62,17 +62,17 @@ combine(CImagePtr image, CRGBABlendMode mode)
 
   CRGBA rgba1, rgba2;
 
-  int w = std::min(getWidth (), image->getWidth ());
-  int h = std::min(getHeight(), image->getHeight());
+  auto w = std::min(getWidth (), image->getWidth ());
+  auto h = std::min(getHeight(), image->getHeight());
 
-  for (int y = 0; y < h; ++y) {
-    for (int x = 0; x < w; ++x) {
-             getRGBAPixel(x, y, rgba1);
-      image->getRGBAPixel(x, y, rgba2);
+  for (size_t y = 0; y < h; ++y) {
+    for (size_t x = 0; x < w; ++x) {
+             getRGBAPixel(int(x), int(y), rgba1);
+      image->getRGBAPixel(int(x), int(y), rgba2);
 
       CRGBA rgba = CRGBA::blendCombine(rgba1, rgba2, mode);
 
-      setRGBAPixel(x, y, rgba.clamp());
+      setRGBAPixel(int(x), int(y), rgba.clamp());
     }
   }
 
@@ -104,28 +104,28 @@ combine(int x, int y, CImagePtr image)
     return false;
   }
 
-  int w = std::min(getWidth (), image->getWidth ());
-  int h = std::min(getHeight(), image->getHeight());
+  auto w = std::min(getWidth (), image->getWidth ());
+  auto h = std::min(getHeight(), image->getHeight());
 
-  for (int y1 = 0; y1 < h; ++y1) {
-    for (int x1 = 0; x1 < w; ++x1) {
-      if (! validPixel(x1 + x, y1 + y))
+  for (size_t y1 = 0; y1 < h; ++y1) {
+    for (size_t x1 = 0; x1 < w; ++x1) {
+      if (! validPixel(int(x1) + x, int(y1) + y))
         continue;
 
       CRGBA rgba1;
 
-      image->getRGBAPixel(x1, y1, rgba1);
+      image->getRGBAPixel(int(x1), int(y1), rgba1);
 
       if (! rgba1.getAlphaI())
         continue;
 
       CRGBA rgba2;
 
-      getRGBAPixel(x1 + x, y1 + y, rgba2);
+      getRGBAPixel(int(x1) + x, int(y1) + y, rgba2);
 
       CRGBA rgba = rgba2.combined(rgba1);
 
-      setRGBAPixel(x1 + x, y1 + y, rgba);
+      setRGBAPixel(int(x1) + x, int(y1) + y, rgba);
     }
   }
 

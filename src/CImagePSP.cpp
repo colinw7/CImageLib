@@ -35,7 +35,7 @@ read(CFile *file, CImagePtr &image)
 
   file->read(buffer, 32);
 
-  if (strncmp((char *) buffer, "Paint Shop Pro Image File", 25) != 0) {
+  if (strncmp(reinterpret_cast<char *>(buffer), "Paint Shop Pro Image File", 25) != 0) {
     CImage::errorMsg("Invalid Paint Shop Pro Image File");
     return false;
   }
@@ -82,23 +82,21 @@ read(CFile *file, CImagePtr &image)
     getInteger(&buffer[6 ], &len1);
     getInteger(&buffer[10], &len2);
 
-    uchar *buffer1 = new uchar [len2];
+    auto *buffer1 = new uchar [size_t(len2)];
 
-    file->read(buffer1, len2);
+    file->read(buffer1, uint(len2));
 
     bool flag;
 
     if      (id == PSP_IMAGE_BLOCK) {
       int grey_scale;
 
-      flag = readImageBlock(buffer1, &width, &height, &depth,
-                            &compression, &grey_scale);
+      flag = readImageBlock(buffer1, &width, &height, &depth, &compression, &grey_scale);
     }
     else if (id == PSP_COLOR_BLOCK)
       flag = readColorBlock(buffer1, &colors, &num_colors);
     else if (id == PSP_LAYER_START_BLOCK)
-      flag = readLayerStartBlock(buffer1, compression,
-                                 &layers, &layer_sizes);
+      flag = readLayerStartBlock(buffer1, compression, &layers, &layer_sizes);
     else
       flag = true;
 
@@ -143,7 +141,7 @@ read(CFile *file, CImagePtr &image)
 
   /*------*/
 
-  uint *data = new uint [width*height];
+  auto *data = new uint [size_t(width*height)];
 
   if      (depth == 1) {
     int j = 0;
@@ -173,9 +171,7 @@ read(CFile *file, CImagePtr &image)
   }
   else if (depth == 24) {
     for (int i = 0; i < width*height; ++i)
-      data[i] = image->rgbaToPixelI(layers[0][i],
-                                    layers[1][i],
-                                    layers[2][i]);
+      data[i] = image->rgbaToPixelI(layers[0][i], layers[1][i], layers[2][i]);
   }
 
   /*------*/
@@ -243,16 +239,16 @@ readColorBlock(uchar *buffer, CRGBA **colors, int *num_colors)
   if (CImageState::getDebug())
     CImage::infoMsg("Num Colors = " + std::to_string(*num_colors));
 
-  *colors = new CRGBA [*num_colors];
+  *colors = new CRGBA [size_t(*num_colors)];
 
   int r, g, b;
 
-  for (int i = 0; i < *num_colors; ++i) {
+  for (size_t i = 0; i < size_t(*num_colors); ++i) {
     getByte(&buffer[4*(i + 1) + 2], &r);
     getByte(&buffer[4*(i + 1) + 1], &g);
     getByte(&buffer[4*(i + 1) + 0], &b);
 
-    (*colors)[i].setRGBAI(r, g, b);
+    (*colors)[i].setRGBAI(uint(r), uint(g), uint(b));
 
     if (CImageState::getDebug())
       CImage::infoMsg("Colors[" + std::to_string(i + 1) + "] = " +
@@ -303,11 +299,9 @@ readLayerStartBlock(uchar *buffer, int compression,
     uchar *block_data;
     int    block_size1;
 
-    readLayerChannelSubBlock(&buffer[pos], &block_data,
-                             &block_size1, &block_size2, &block_len);
+    readLayerChannelSubBlock(&buffer[pos], &block_data, &block_size1, &block_size2, &block_len);
 
-    bool flag = uncompressData(compression, block_data, block_size1,
-                               block_size2, &block_data1);
+    bool flag = uncompressData(compression, block_data, block_size1, block_size2, &block_data1);
 
     delete [] block_data;
 
@@ -335,8 +329,7 @@ readLayerInformationChunk(uchar *buffer, int *num_channels)
 bool
 CImagePSP::
 readLayerChannelSubBlock(uchar *buffer, uchar **block_data,
-                            int *block_size1, int *block_size2,
-                            int *block_len)
+                            int *block_size1, int *block_size2, int *block_len)
 {
   if (! isBlockID(&buffer[0])) {
     CImage::errorMsg("Invalid Paint Shop Pro Image File");
@@ -361,9 +354,9 @@ readLayerChannelSubBlock(uchar *buffer, uchar **block_data,
   getInteger(&buffer[14], block_size1);
   getInteger(&buffer[18], block_size2);
 
-  *block_data = new uchar [*block_size1];
+  *block_data = new uchar [size_t(*block_size1)];
 
-  memcpy(*block_data, &buffer[26], *block_size1);
+  memcpy(*block_data, &buffer[26], size_t(*block_size1));
 
   *block_len = len2 + 14;
 
@@ -373,10 +366,9 @@ readLayerChannelSubBlock(uchar *buffer, uchar **block_data,
 bool
 CImagePSP::
 uncompressData(int compression, uchar *block_data,
-                  int block_size1, int block_size2,
-                  uchar **block_data1)
+                  int block_size1, int block_size2, uchar **block_data1)
 {
-  *block_data1 = new uchar [block_size2];
+  *block_data1 = new uchar [size_t(block_size2)];
 
   if (compression == PSP_COMP_NONE) {
     for (int j = 0; j < block_size1; ++j)
@@ -388,10 +380,10 @@ uncompressData(int compression, uchar *block_data,
   if (compression == PSP_COMP_LZ77)
     return false;
 
-  int i1 = 0;
-  int i2 = 0;
+  size_t i1 = 0;
+  size_t i2 = 0;
 
-  while (i1 < block_size1) {
+  while (i1 < size_t(block_size1)) {
     int count = block_data[i1++];
 
     if      (count > 128) {
@@ -400,7 +392,7 @@ uncompressData(int compression, uchar *block_data,
       int byte = block_data[i1++];
 
       for (int j = 0; j < count; ++j)
-        (*block_data1)[i2++] = byte;
+        (*block_data1)[i2++] = uchar(byte);
     }
     else if (count < 128) {
       if (count == 0)

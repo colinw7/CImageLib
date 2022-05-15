@@ -129,8 +129,8 @@ class CImage {
      cur_() {
       cur_.image = image;
 
-      cur_.pos2  = cur_.image->size_.area();
-      cur_.width = cur_.image->size_.width;
+      cur_.pos2  = uint(cur_.image->size_.area());
+      cur_.width = uint(cur_.image->size_.width);
 
       if (! is_end)
         cur_.pos1 = 0;
@@ -177,7 +177,7 @@ class CImage {
     }
 
     void getRGBPixel(CRGB &rgb) const {
-      return cur_.image->getRGBPixel(cur_.pos1, rgb);
+      return cur_.image->getRGBPixel(int(cur_.pos1), rgb);
     }
 
     bool operator==(const PixelIterator &i) const {
@@ -268,8 +268,8 @@ class CImage {
 
   virtual void setDataSizeV(int width, int height);
 
-  uint getWidth () const { return size_.width ; }
-  uint getHeight() const { return size_.height; }
+  uint getWidth () const { return uint(size_.width ); }
+  uint getHeight() const { return uint(size_.height); }
 
   void getSize(CISize2D &size) const {
     size = size_;
@@ -536,7 +536,7 @@ class CImage {
   }
 
   uint getDataSize() const {
-    return size_.width*size_.height;
+    return uint(size_.width)*uint(size_.height);
   }
 
   //------

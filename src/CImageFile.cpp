@@ -55,7 +55,7 @@ CImageFile::
 lookupSizedFile(int width, int height, bool keep_aspect)
 {
   for (auto &p : sized_file_list_)
-    if (p->match(width, height, keep_aspect))
+    if (p->match(uint(width), uint(height), keep_aspect))
       return p;
 
   return 0;
@@ -65,8 +65,7 @@ CImageSizedFile *
 CImageFile::
 addSizedFile(int width, int height, bool keep_aspect)
 {
-  CImageSizedFile *data =
-    new CImageSizedFile(this, width, height, keep_aspect);
+  auto *data = new CImageSizedFile(this, width, height, keep_aspect);
 
   sized_file_list_.push_back(data);
 
@@ -115,8 +114,8 @@ getImage() const
     CImagePtr image = file_->getImage();
 
     if (image.isValid()) {
-      if (size_.width  != (int) image->getWidth () ||
-          size_.height != (int) image->getHeight()) {
+      if (size_.width  != int(image->getWidth ()) ||
+          size_.height != int(image->getHeight())) {
         if (keep_aspect_)
           th->image_ = image->resizeKeepAspect(size_.width, size_.height);
         else
@@ -151,7 +150,7 @@ bool
 CImageSizedFile::
 match(uint width, uint height, bool keep_aspect) const
 {
-  return ((int) width  == size_.width  &&
-          (int) height == size_.height &&
+  return (int(width ) == size_.width  &&
+          int(height) == size_.height &&
           keep_aspect  == keep_aspect_);
 }

@@ -103,15 +103,11 @@ read(CFile *file, CImagePtr &image)
     if (depth == 24) {
       if (cinfo.jpeg_color_space == JCS_GRAYSCALE) {
         for (uint k = 0; k < cinfo.output_width; ++k)
-          data[j++] = image->rgbaToPixelI(buffer[k],
-                                          buffer[k],
-                                          buffer[k]);
+          data[j++] = image->rgbaToPixelI(buffer[k], buffer[k], buffer[k]);
       }
       else {
         for (uint k = 0; k < 3*cinfo.output_width; k += 3)
-          data[j++] = image->rgbaToPixelI(buffer[k + 0],
-                                          buffer[k + 1],
-                                          buffer[k + 2]);
+          data[j++] = image->rgbaToPixelI(buffer[k + 0], buffer[k + 1], buffer[k + 2]);
       }
     }
     else {
@@ -126,16 +122,14 @@ read(CFile *file, CImagePtr &image)
 
   image->setType(CFILE_TYPE_IMAGE_JPG);
 
-  image->setDataSize(cinfo.output_width, cinfo.output_height);
+  image->setDataSize(int(cinfo.output_width), int(cinfo.output_height));
 
   if (depth != 24) {
     if (cinfo.out_color_space == JCS_RGB) {
-      int r, g, b;
-
       for (int i = 0; i < cinfo.actual_number_of_colors; ++i) {
-        b = cinfo.colormap[0][i];
-        g = cinfo.colormap[1][i];
-        r = cinfo.colormap[2][i];
+        uint b = cinfo.colormap[0][i];
+        uint g = cinfo.colormap[1][i];
+        uint r = cinfo.colormap[2][i];
 
         image->addColorI(r, g, b);
 
@@ -144,10 +138,8 @@ read(CFile *file, CImagePtr &image)
       }
     }
     else {
-      int g;
-
       for (int i = 0; i < cinfo.actual_number_of_colors; ++i) {
-        g = cinfo.colormap[0][i];
+        uint g = cinfo.colormap[0][i];
 
         image->addColorI(g, g, g);
 
@@ -223,7 +215,7 @@ readHeader(CFile *file, CImagePtr &image)
 
   image->setType(CFILE_TYPE_IMAGE_JPG);
 
-  image->setSize(cinfo.image_width, cinfo.image_height);
+  image->setSize(int(cinfo.image_width), int(cinfo.image_height));
 
   //------
 
@@ -329,14 +321,14 @@ write(CFile *file, CImagePtr image)
   uint r, g, b, a;
 
   while (cinfo.next_scanline < cinfo.image_height) {
-    int j = 0;
+    size_t j = 0;
 
     for (uint i = 0; i < image->getWidth(); ++i, j += 3, ++k) {
       image->getRGBAPixelI(k, &r, &g, &b, &a);
 
-      data[j + 2] = b;
-      data[j + 1] = g;
-      data[j + 0] = r;
+      data[j + 2] = uchar(b);
+      data[j + 1] = uchar(g);
+      data[j + 0] = uchar(r);
     }
 
     jpeg_write_scanlines(&cinfo, row_pointer, 1);

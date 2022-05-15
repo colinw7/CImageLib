@@ -7,26 +7,29 @@ removeSinglePixels()
 {
   uint data[9];
 
-  int width  = getWidth ();
-  int height = getHeight();
+  auto width  = getWidth ();
+  auto height = getHeight();
 
-  for (int y = 1; y < height - 1; ++y) {
-    for (int x = 1; x < width - 1; ++x) {
-      data[0] = getData(x - 1, y - 1);
-      data[1] = getData(x    , y - 1);
-      data[2] = getData(x + 1, y - 1);
-      data[3] = getData(x - 1, y    );
-      data[4] = getData(x    , y    );
-      data[5] = getData(x + 1, y    );
-      data[6] = getData(x - 1, y + 1);
-      data[7] = getData(x    , y + 1);
-      data[8] = getData(x + 1, y + 1);
+  if (width < 2 || height < 2)
+    return;
+
+  for (size_t y = 1; y < height - 1; ++y) {
+    for (size_t x = 1; x < width - 1; ++x) {
+      data[0] = getData(int(x - 1), int(y - 1));
+      data[1] = getData(int(x    ), int(y - 1));
+      data[2] = getData(int(x + 1), int(y - 1));
+      data[3] = getData(int(x - 1), int(y    ));
+      data[4] = getData(int(x    ), int(y    ));
+      data[5] = getData(int(x + 1), int(y    ));
+      data[6] = getData(int(x - 1), int(y + 1));
+      data[7] = getData(int(x    ), int(y + 1));
+      data[8] = getData(int(x + 1), int(y + 1));
 
       if (data[0] == data[1] && data[0] == data[2] &&
           data[0] == data[3] && data[0] != data[4] &&
           data[0] == data[5] && data[0] == data[6] &&
           data[0] == data[7] && data[0] == data[8])
-        setData(x, y, data[0]);
+        setData(int(x), int(y), data[0]);
     }
   }
 }
@@ -37,13 +40,13 @@ colorSplit()
 {
   std::map<uint, bool> used;
 
-  int width  = getWidth ();
-  int height = getHeight();
+  auto width  = getWidth ();
+  auto height = getHeight();
 
-  int size = width*height;
+  auto size = width*height;
 
-  for (int i = 0; i < size; ++i) {
-    uint data = getData(i);
+  for (size_t i = 0; i < size; ++i) {
+    uint data = getData(int(i));
 
     if (used.find(data) == used.end())
       used[data] = true;
@@ -63,21 +66,21 @@ colorSplit(int color_num)
 {
   std::map<uint, bool> used;
 
-  int width  = getWidth ();
-  int height = getHeight();
+  auto width  = getWidth ();
+  auto height = getHeight();
 
-  int size = width*height;
+  auto size = width*height;
 
-  for (int i = 0; i < size; ++i) {
-    uint data = getData(i);
+  for (size_t i = 0; i < size; ++i) {
+    uint data = getData(int(i));
 
     if (used.find(data) == used.end())
       used[data] = true;
   }
 
-  int num_colors = used.size();
+  auto num_colors = used.size();
 
-  if (color_num < 0 || color_num >= num_colors)
+  if (color_num < 0 || color_num >= int(num_colors))
     CImage::warnMsg("Bad Color Number " + std::to_string(color_num));
 
   ImagePtrList images;
@@ -108,27 +111,27 @@ colorSplitByData(uint data)
   if (rgba.getGray() <= 0.5)
     rgba1 = CRGBA(1, 1, 1);
 
-  int width  = getWidth ();
-  int height = getHeight();
+  auto width  = getWidth ();
+  auto height = getHeight();
 
   CImagePtr image = CImageMgrInst->createImage();
 
-  image->setDataSize(width, height);
+  image->setDataSize(int(width), int(height));
 
   image->addColor(rgba);
   image->addColor(rgba1);
 
   image->setTransparentColor(1);
 
-  int size = width*height;
+  auto size = width*height;
 
-  for (int i = 0; i < size; ++i) {
-    uint data2 = getData(i);
+  for (size_t i = 0; i < size; ++i) {
+    uint data2 = getData(int(i));
 
     if (data2 == data)
-      image->setData(i, 0);
+      image->setData(int(i), 0);
     else
-      image->setData(i, 1);
+      image->setData(int(i), 1);
   }
 
   return image;
@@ -140,9 +143,9 @@ setNumColors(int num_colors)
 {
   convertToColorIndex();
 
-  int num_colors1 = colors_.size();
+  auto num_colors1 = colors_.size();
 
-  while (num_colors1 > num_colors) {
+  while (int(num_colors1) > num_colors) {
     int i1, i2;
 
     getClosestColors(i1, i2);
@@ -159,9 +162,9 @@ getClosestColors(int &i1, int &i2)
 {
   double min_d = 1E50;
 
-  int num_colors = colors_.size();
+  auto num_colors = colors_.size();
 
-  for (int i = 0; i < num_colors; ++i) {
+  for (size_t i = 0; i < num_colors; ++i) {
     double min_d1 = 1E50;
     int    min_i1 = 0;
 
@@ -169,7 +172,7 @@ getClosestColors(int &i1, int &i2)
     double g1 = colors_[i].getGreen();
     double b1 = colors_[i].getBlue ();
 
-    for (int j = 0; j < num_colors; ++j) {
+    for (size_t j = 0; j < num_colors; ++j) {
       if (i == j) continue;
 
       double r2 = colors_[j].getRed  ();
@@ -180,13 +183,13 @@ getClosestColors(int &i1, int &i2)
 
       if (d < min_d1) {
         min_d1 = d;
-        min_i1 = j;
+        min_i1 = int(j);
       }
     }
 
     if (min_d1 < min_d) {
       min_d = min_d1;
-      i1    = i;
+      i1    = int(i);
       i2    = min_i1;
     }
   }
@@ -196,30 +199,30 @@ void
 CImage::
 replaceColor(int i1, int i2)
 {
-  double r = (colors_[i1].getRed  () + colors_[i2].getRed  ())/2.0;
-  double g = (colors_[i1].getGreen() + colors_[i2].getGreen())/2.0;
-  double b = (colors_[i1].getBlue () + colors_[i2].getBlue ())/2.0;
+  double r = (colors_[uint(i1)].getRed  () + colors_[uint(i2)].getRed  ())/2.0;
+  double g = (colors_[uint(i1)].getGreen() + colors_[uint(i2)].getGreen())/2.0;
+  double b = (colors_[uint(i1)].getBlue () + colors_[uint(i2)].getBlue ())/2.0;
 
-  colors_[i1].setRed  (r);
-  colors_[i1].setGreen(g);
-  colors_[i1].setBlue (b);
+  colors_[uint(i1)].setRed  (r);
+  colors_[uint(i1)].setGreen(g);
+  colors_[uint(i1)].setBlue (b);
 
-  int num_colors = colors_.size();
+  auto num_colors = colors_.size();
 
-  for (int i = i2 + 1; i < num_colors; ++i)
-    colors_[i - 1] = colors_[i];
+  for (int i = i2 + 1; i < int(num_colors); ++i)
+    colors_[uint(i - 1)] = colors_[uint(i)];
 
   colors_.resize(num_colors - 1);
 
   int size = size_.area();
 
   for (int i = 0; i < size; ++i) {
-    int pixel = getData(i);
+    auto pixel = getData(i);
 
-    if      (pixel == i2)
-      setData(i, i1);
-    else if (pixel > i2)
-      setData(i, pixel - 1);
+    if      (pixel == uint(i2))
+      setData(int(i), uint(i1));
+    else if (pixel > uint(i2))
+      setData(int(i), uint(pixel - 1));
   }
 }
 
@@ -230,9 +233,9 @@ gray()
   CRGBA rgba;
 
   if (hasColormap()) {
-    int num_colors = colors_.size();
+    auto num_colors = colors_.size();
 
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       colors_[i].toGray();
   }
   else {
@@ -261,9 +264,9 @@ sepia()
   CRGBA rgba;
 
   if (hasColormap()) {
-    int num_colors = colors_.size();
+    auto num_colors = colors_.size();
 
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       colors_[i].toSepia();
   }
   else {
@@ -303,10 +306,9 @@ twoColor(const CRGBA &bg, const CRGBA &fg)
 
     for (int y = y1; y <= y2; ++y) {
       for (int x = x1; x <= x2; ++x) {
-        int ind = getColorIndexPixel(x, y);
+        auto ind = uint(getColorIndexPixel(x, y));
 
-        if (colors_[ind].getAlpha() < 0.5 ||
-            colors_[ind].getGray () > 0.5)
+        if (colors_[ind].getAlpha() < 0.5 || colors_[ind].getGray () > 0.5)
           setColorIndexPixel(x, y, 0);
         else
           setColorIndexPixel(x, y, 1);
@@ -518,7 +520,7 @@ gammaFunc(CRGBAComponent component, double amplitude, double exponent, double of
 
       double value = rgba.getComponent(component);
 
-      value = amplitude*pow(value, exponent) + offset,
+      value = amplitude*pow(value, exponent) + offset;
 
       rgba.setComponent(component, value);
 
@@ -531,11 +533,11 @@ void
 CImage::
 tableFunc(CRGBAComponent component, const std::vector<double> &values)
 {
-  int num_ranges = values.size() - 1;
+  auto num_ranges = size_t(values.size() - 1);
 
   if (num_ranges < 1) return;
 
-  double delta = 1.0/num_ranges;
+  double delta = 1.0/double(num_ranges);
 
   convertToRGB();
 
@@ -553,11 +555,11 @@ tableFunc(CRGBAComponent component, const std::vector<double> &values)
       double value = rgba.getComponent(component);
 
       // get associated range index
-      int    i = 0;
+      size_t i = 0;
       double value1, value2;
 
       for ( ; i < num_ranges; ++i) {
-        value1 = i*delta;
+        value1 = double(i)*delta;
         value2 = value1 + delta;
 
         if (value >= value1 && value < value2) break;
@@ -582,11 +584,10 @@ void
 CImage::
 discreteFunc(CRGBAComponent component, const std::vector<double> &values)
 {
-  uint num_ranges = values.size();
-
+  auto num_ranges = values.size();
   if (num_ranges < 1) return;
 
-  double delta = 1.0/num_ranges;
+  double delta = 1.0/double(num_ranges);
 
   convertToRGB();
 
@@ -630,8 +631,8 @@ CImagePtr
 CImage::
 erode(int r, bool isAlpha) const
 {
-  int r1 = 2*r + 1;
-  int r2 = r1*r1;
+  int  r1 = 2*r + 1;
+  auto r2 = size_t(r1*r1);
 
   std::vector<int> mask;
 
@@ -641,7 +642,7 @@ erode(int r, bool isAlpha) const
     for (int ix = -r; ix <= r; ++ix, ++i) {
       double rxy = hypot(ix, iy);
 
-      mask[i] = (rxy <= r ? 1 : 0);
+      mask[uint(i)] = (rxy <= r ? 1 : 0);
     }
   }
 
@@ -659,8 +660,8 @@ CImagePtr
 CImage::
 dilate(int r, bool isAlpha) const
 {
-  int r1 = 2*r + 1;
-  int r2 = r1*r1;
+  int  r1 = 2*r + 1;
+  auto r2 = size_t(r1*r1);
 
   std::vector<int> mask;
 
@@ -670,7 +671,7 @@ dilate(int r, bool isAlpha) const
     for (int ix = -r; ix <= r; ++ix, ++i) {
       double rxy = hypot(ix, iy);
 
-      mask[i] = (rxy <= r ? 1 : 0);
+      mask[uint(i)] = (rxy <= r ? 1 : 0);
     }
   }
 
@@ -688,7 +689,7 @@ CImagePtr
 CImage::
 erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const
 {
-  int r = (sqrt(mask.size()) - 1)/2;
+  int r = int((sqrt(double(mask.size()) - 1))/2.0);
 
   // count mask bits
   int num_hits = 0;
@@ -698,12 +699,12 @@ erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const
 
   //---
 
-  int width  = getWidth ();
-  int height = getHeight();
+  auto width  = getWidth ();
+  auto height = getHeight();
 
   CImagePtr image = CImageMgrInst->createImage();
 
-  image->setDataSize(width, height);
+  image->setDataSize(int(width), int(height));
 
   int x1, y1, x2, y2;
 
@@ -725,7 +726,7 @@ erodeDilate(const std::vector<int> &mask, bool isAlpha, bool isErode) const
 
         for (int i = 0, ix = -r; ix <= r; ++ix)
           for (int iy = -r; iy <= r; ++iy, ++i)
-            if (mask[i] && isErodePixel(x + ix, y + iy, isAlpha, rgba))
+            if (mask[uint(i)] && isErodePixel(x + ix, y + iy, isAlpha, rgba))
               ++hits;
 
         if (isErode)

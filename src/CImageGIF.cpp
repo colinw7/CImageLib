@@ -17,7 +17,7 @@
 #define CONTROL_COMMENT_ID 0xFE
 #define CONTROL_LABEL_ID   0xF9
 
-#define UNUSED_CODE ((uint) -1)
+#define UNUSED_CODE uint(-1)
 
 struct CImageGIFHeader;
 struct CImageGIFColorTable;
@@ -137,7 +137,7 @@ CImageAnim *
 CImageGIF::
 createAnim(CFile *file)
 {
-  CImageAnim *image_anim = new CImageAnim();
+  auto *image_anim = new CImageAnim();
 
   //------
 
@@ -145,7 +145,7 @@ createAnim(CFile *file)
 
   //------
 
-  CImageGIFData *gif_data = new CImageGIFData;
+  auto *gif_data = new CImageGIFData;
 
   gif_data->header = new CImageGIFHeader;
 
@@ -199,18 +199,18 @@ readHeader(CFile *file, CImagePtr &, CImageGIFHeader *header)
   uchar byte1;
   uchar byte2;
 
-  file->read((uchar *) header->signature, 3);
-  file->read((uchar *) header->version  , 3);
+  file->read(reinterpret_cast<uchar *>(header->signature), 3);
+  file->read(reinterpret_cast<uchar *>(header->version  ), 3);
 
   file->read(&byte1, 1);
   file->read(&byte2, 1);
 
-  header->width = (byte2 << 8) | byte1;
+  header->width = ushort((byte2 << 8) | byte1);
 
   file->read(&byte1, 1);
   file->read(&byte2, 1);
 
-  header->height = (byte2 << 8) | byte1;
+  header->height = ushort((byte2 << 8) | byte1);
 
   file->read(&header->flags     , 1);
   file->read(&header->background, 1);
@@ -231,11 +231,11 @@ readHeader(CFile *file, CImagePtr &, CImageGIFHeader *header)
     CImage::infoMsg("Width         " + std::to_string(header->width));
     CImage::infoMsg("Height        " + std::to_string(header->height));
     CImage::infoMsg("Num Colors    " + std::to_string((1 << (header->color_bits + 1))));
-    CImage::infoMsg("Colors Sorted " + std::to_string((int) header->colors_sorted));
+    CImage::infoMsg("Colors Sorted " + std::to_string(int(header->colors_sorted)));
     CImage::infoMsg("Max Colors    " + std::to_string((1 << (header->max_color_bits + 1))));
-    CImage::infoMsg("Global Colors " + std::to_string((int) header->global_color_table));
-    CImage::infoMsg("Background    " + std::to_string((int) header->background));
-    CImage::infoMsg("Aspect        " + std::to_string((int) header->aspect));
+    CImage::infoMsg("Global Colors " + std::to_string(int(header->global_color_table)));
+    CImage::infoMsg("Background    " + std::to_string(int(header->background)));
+    CImage::infoMsg("Aspect        " + std::to_string(int(header->aspect)));
   }
 
   if (strncmp(header->signature, "GIF", 3) != 0) {
@@ -266,20 +266,20 @@ readGlobalColors(CFile *file, CImageGIFData *gif_data)
   if (gif_data->header->global_color_table) {
     gif_data->num_global_colors = 1 << (gif_data->header->color_bits + 1);
 
-    gif_data->global_colors = new CImageGIFColorTable [gif_data->num_global_colors];
+    gif_data->global_colors = new CImageGIFColorTable [size_t(gif_data->num_global_colors)];
 
     for (int i = 0; i < gif_data->num_global_colors; ++i)
-      file->read((uchar *) &gif_data->global_colors[i], 3);
+      file->read(reinterpret_cast<uchar *>(&gif_data->global_colors[i]), 3);
   }
 
-  compress_data.bit_mask = gif_data->num_global_colors - 1;
+  compress_data.bit_mask = uchar(gif_data->num_global_colors - 1);
 
   if (CImageState::getDebug()) {
     for (int i = 0; i < gif_data->num_global_colors; ++i)
       CImage::infoMsg("Color: " + std::to_string(i) + " " +
-                      std::to_string((int) gif_data->global_colors[i].r) + " " +
-                      std::to_string((int) gif_data->global_colors[i].g) + " " +
-                      std::to_string((int) gif_data->global_colors[i].b));
+                      std::to_string(int(gif_data->global_colors[i].r)) + " " +
+                      std::to_string(int(gif_data->global_colors[i].g)) + " " +
+                      std::to_string(int(gif_data->global_colors[i].b)));
   }
 }
 
@@ -294,7 +294,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
   int  dispose           = 0;
   int  user_input        = 0;
 
-  uint file_size = file->getSize();
+  auto file_size = file->getSize();
 
   while (true) {
     uchar id;
@@ -313,7 +313,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
       if (CImageState::getDebug())
         CImage::infoMsg("Image Id");
 
-      CImageGIFImageHeader *image_header = new CImageGIFImageHeader;
+      auto *image_header = new CImageGIFImageHeader;
 
       try {
         uchar byte1;
@@ -322,22 +322,22 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
         file->read(&byte1, 1);
         file->read(&byte2, 1);
 
-        image_header->left = (byte2 << 8) | byte1;
+        image_header->left = ushort((byte2 << 8) | byte1);
 
         file->read(&byte1, 1);
         file->read(&byte2, 1);
 
-        image_header->top = (byte2 << 8) | byte1;
+        image_header->top = ushort((byte2 << 8) | byte1);
 
         file->read(&byte1, 1);
         file->read(&byte2, 1);
 
-        image_header->width = (byte2 << 8) | byte1;
+        image_header->width = ushort((byte2 << 8) | byte1);
 
         file->read(&byte1, 1);
         file->read(&byte2, 1);
 
-        image_header->height = (byte2 << 8) | byte1;
+        image_header->height = ushort((byte2 << 8) | byte1);
 
         file->read(&image_header->flags, 1);
 
@@ -361,10 +361,10 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
             image_header->color_bits > 0) {
           gif_data->num_local_colors = 1 << (image_header->color_bits + 1);
 
-          gif_data->local_colors = new CImageGIFColorTable [gif_data->num_local_colors];
+          gif_data->local_colors = new CImageGIFColorTable [size_t(gif_data->num_local_colors)];
 
           for (int i = 0; i < gif_data->num_local_colors; ++i)
-            file->read((uchar *) &gif_data->local_colors[i], 3);
+            file->read(reinterpret_cast<uchar *>(&gif_data->local_colors[i]), 3);
 
           if (CImageState::getDebug()) {
             for (int i = 0; i < gif_data->num_local_colors; ++i)
@@ -389,7 +389,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
         uint num_image_bytes = image_header->width*image_header->height;
 
-        uchar *data = new uchar [file_size];
+        auto *data = new uchar [size_t(file_size)];
 
         uchar size;
 
@@ -412,9 +412,9 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
         //------
 
-        uchar *raw_data = new uchar [num_image_bytes];
+        auto *raw_data = new uchar [size_t(num_image_bytes)];
 
-        decompressData(data, num_bytes_read, raw_data, num_image_bytes);
+        decompressData(data, int(num_bytes_read), raw_data, int(num_image_bytes));
 
         delete [] data;
 
@@ -464,7 +464,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
         //------
 
-        CImageFrame *frame = new CImageFrame(image);
+        auto *frame = new CImageFrame(image);
 
         frame->setDelay(delay);
         frame->setDispose(dispose);
@@ -561,7 +561,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
           }
         }
         else {
-          CImage::errorMsg("Unknown control block " + std::to_string((int) id1));
+          CImage::errorMsg("Unknown control block " + std::to_string(int(id1)));
         }
 
         // skip to block terminator
@@ -614,8 +614,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
 bool
 CImageGIF::
-decompressData(uchar *in_data, int in_data_size,
-               uchar *out_data, int out_data_size)
+decompressData(uchar *in_data, int in_data_size, uchar *out_data, int out_data_size)
 {
   int num_out_data = 0;
 
@@ -667,7 +666,7 @@ decompressData(uchar *in_data, int in_data_size,
       }
 
       while (code1 > compress_data.bit_mask) {
-        compress_data.out_bytes[num_out_bytes++] = compress_data.dictionary[code1].character;
+        compress_data.out_bytes[num_out_bytes++] = uchar(compress_data.dictionary[code1].character);
 
         code1 = compress_data.dictionary[code1].parent_code;
       }
@@ -713,7 +712,7 @@ readCode(uint *bit_offset, uchar *data)
 {
   int byte_no = (*bit_offset)/8;
 
-  int code = data[byte_no] & 0xFF;
+  auto code = uint(data[byte_no] & 0xFF);
 
   code |= (data[byte_no + 1] << 8) & 0xFF00;
 
@@ -735,7 +734,7 @@ deInterlace(uchar *image, CImageGIFImageHeader *image_header)
 {
   int image_size = image_header->width*image_header->height;
 
-  uchar *image1 = new uchar [image_size];
+  auto *image1 = new uchar [size_t(image_size)];
 
   int i = 0;
 
@@ -769,7 +768,7 @@ deInterlace(uchar *image, CImageGIFImageHeader *image_header)
     memcpy(&image1[i2], &image[i1], image_header->width);
   }
 
-  memcpy(image, image1, image_size*sizeof(uchar));
+  memcpy(image, image1, size_t(image_size)*sizeof(uchar));
 
   delete [] image1;
 }
@@ -811,8 +810,8 @@ write(CFile *file, CImagePtr image)
   writeShort(file, left);
   writeShort(file, top );
 
-  writeShort(file, image1->getWidth ());
-  writeShort(file, image1->getHeight());
+  writeShort(file, int(image1->getWidth ()));
+  writeShort(file, int(image1->getHeight()));
 
   uint color_table   = 0;
   uint color_bits    = 0;
@@ -826,9 +825,9 @@ write(CFile *file, CImagePtr image)
   packed |= interlace     << 1;
   packed |= color_table   << 0;
 
-  writeByte(file, packed);
+  writeByte(file, int(packed));
 
-  compress_data.code_size = compress_data.color_table_bits;
+  compress_data.code_size = uchar(compress_data.color_table_bits);
 
   if (compress_data.code_size < 2)
     compress_data.code_size = 2;
@@ -853,7 +852,7 @@ writeAnim(CFile *file, const std::vector<CImagePtr> &images, int delay)
   writeChars(file, "GIF", 3);
   writeChars(file, "89a", 3);
 
-  uint num_images = images.size();
+  auto num_images = images.size();
 
   std::vector<CImagePtr> images1;
 
@@ -876,7 +875,7 @@ writeAnim(CFile *file, const std::vector<CImagePtr> &images, int delay)
 
   writeHeader(file, image1);
 
-  int color_table_bits = compress_data.color_table_bits;
+  auto color_table_bits = compress_data.color_table_bits;
 
   for (uint i = 0; i < num_images; ++i) {
     memset(&compress_data, 0, sizeof(CImageGIFCompressData));
@@ -896,8 +895,8 @@ writeAnim(CFile *file, const std::vector<CImagePtr> &images, int delay)
     writeShort(file, left);
     writeShort(file, top );
 
-    writeShort(file, iimage1->getWidth ());
-    writeShort(file, iimage1->getHeight());
+    writeShort(file, int(iimage1->getWidth ()));
+    writeShort(file, int(iimage1->getHeight()));
 
     uint color_table   = 0;
     uint color_bits    = 0;
@@ -911,9 +910,9 @@ writeAnim(CFile *file, const std::vector<CImagePtr> &images, int delay)
     packed |= interlace     << 1;
     packed |= color_table   << 0;
 
-    writeByte(file, packed);
+    writeByte(file, int(packed));
 
-    compress_data.code_size = compress_data.color_table_bits;
+    compress_data.code_size = uchar(compress_data.color_table_bits);
 
     if (compress_data.code_size < 2)
       compress_data.code_size = 2;
@@ -933,8 +932,8 @@ void
 CImageGIF::
 writeHeader(CFile *file, CImagePtr image)
 {
-  writeShort(file, image->getWidth() );
-  writeShort(file, image->getHeight());
+  writeShort(file, int(image->getWidth() ));
+  writeShort(file, int(image->getHeight()));
 
   uint color_table   = 1;
   uint color_bits    = 8;
@@ -946,7 +945,7 @@ writeHeader(CFile *file, CImagePtr image)
     if ((1<<i) >= image->getNumColors())
       break;
 
-  compress_data.color_table_bits = i;
+  compress_data.color_table_bits = uint(i);
 
   uint color_map_size = 1 << compress_data.color_table_bits;
 
@@ -957,25 +956,25 @@ writeHeader(CFile *file, CImagePtr image)
   packed |=  colors_sorted                       << 3;
   packed |= (compress_data.color_table_bits - 1) << 0;
 
-  writeByte(file, packed);
+  writeByte(file, int(packed));
 
   uint background = 0;
 
-  writeByte(file, background);
+  writeByte(file, int(background));
 
   uint aspect_ratio = 0;
 
-  writeByte(file, aspect_ratio);
+  writeByte(file, int(aspect_ratio));
 
   uint r, g, b, a;
 
-  for (i = 0; i < (int) color_map_size; ++i) {
+  for (i = 0; i < int(color_map_size); ++i) {
     if (i < image->getNumColors()) {
-      image->getColorRGBAI(i, &r, &g, &b, &a);
+      image->getColorRGBAI(uint(i), &r, &g, &b, &a);
 
-      writeByte(file, r);
-      writeByte(file, g);
-      writeByte(file, b);
+      writeByte(file, int(r));
+      writeByte(file, int(g));
+      writeByte(file, int(b));
     }
     else {
       writeByte(file, 0);
@@ -1037,16 +1036,20 @@ writeData(CFile *file, CImagePtr image)
 
   outputCode(file, compress_data.clear_code);
 
+  auto num_data = image->getWidth()*image->getHeight();
+
   int i = 0;
 
-  uint code_value = (uint) image->getColorIndexPixel(i);
+  uint code_value = 0;
 
-  ++i;
+  if (num_data > 0) {
+    code_value = uint(image->getColorIndexPixel(i));
 
-  int num_data = image->getWidth()*image->getHeight();
+    ++i;
+  }
 
-  while (i < num_data) {
-    uint character = (uint) image->getColorIndexPixel(i);
+  while (i < int(num_data)) {
+    auto character = uint(image->getColorIndexPixel(i));
 
     ++i;
 
@@ -1094,7 +1097,7 @@ uint
 CImageGIF::
 findChildCode(uint parent_code, uint character)
 {
-  int ind = (character << (compress_data.max_code_size - 8)) ^ parent_code;
+  int ind = int((character << (compress_data.max_code_size - 8)) ^ parent_code);
 
   int offset;
 
@@ -1105,11 +1108,11 @@ findChildCode(uint parent_code, uint character)
 
   while (true) {
     if (compress_data.dictionary[ind].code_value == UNUSED_CODE)
-      return ind;
+      return uint(ind);
 
     if (compress_data.dictionary[ind].parent_code == parent_code &&
         compress_data.dictionary[ind].character   == character)
-      return ind;
+      return uint(ind);
 
     ind -= offset;
 
@@ -1133,9 +1136,9 @@ outputCode(CFile *file, uint code)
   uint code1 = code & compress_data.code_mask;
 
   if     (compress_data.current_bit + compress_data.code_size > 16) {
-    uchar byte1 = code1 << compress_data.current_bit;
-    uchar byte2 = code1 >> (8  - compress_data.current_bit);
-    uchar byte3 = code1 >> (16 - compress_data.current_bit);
+    auto byte1 = uchar(code1 <<       compress_data.current_bit);
+    auto byte2 = uchar(code1 >> (8  - compress_data.current_bit));
+    auto byte3 = uchar(code1 >> (16 - compress_data.current_bit));
 
     compress_data.current_byte |= byte1;
 
@@ -1150,8 +1153,8 @@ outputCode(CFile *file, uint code)
     compress_data.current_bit += compress_data.code_size - 16;
   }
   else if (compress_data.current_bit + compress_data.code_size > 8) {
-    uchar byte1 = code1 << compress_data.current_bit;
-    uchar byte2 = code1 >> (8 - compress_data.current_bit);
+    auto byte1 = uchar(code1 <<      compress_data.current_bit);
+    auto byte2 = uchar(code1 >> (8 - compress_data.current_bit));
 
     compress_data.current_byte |= byte1;
 
@@ -1162,7 +1165,7 @@ outputCode(CFile *file, uint code)
     compress_data.current_bit += compress_data.code_size - 8;
   }
   else {
-    uchar byte1 = code1 << compress_data.current_bit;
+    auto byte1 = uchar(code1 << compress_data.current_bit);
 
     compress_data.current_byte |= byte1;
 
@@ -1188,7 +1191,7 @@ void
 CImageGIF::
 writeCodeByte(CFile *file, int data)
 {
-  compress_data.code_bytes[compress_data.num_code_bytes++] = data;
+  compress_data.code_bytes[compress_data.num_code_bytes++] = uchar(data);
 
   if (compress_data.num_code_bytes >= 254)
     flushCodeBytes(file);
@@ -1201,11 +1204,11 @@ flushCodeBytes(CFile *file)
   if (compress_data.num_code_bytes == 0)
     return;
 
-  uchar code_byte = compress_data.num_code_bytes;
+  auto code_byte = uchar(compress_data.num_code_bytes);
 
   file->write(&code_byte, 1);
 
-  file->write(compress_data.code_bytes, compress_data.num_code_bytes);
+  file->write(compress_data.code_bytes, size_t(compress_data.num_code_bytes));
 
   compress_data.num_code_bytes = 0;
 }
@@ -1214,14 +1217,14 @@ void
 CImageGIF::
 writeChars(CFile *file, const char *chars, int len)
 {
-  file->write((uchar *) chars, len);
+  file->write(reinterpret_cast<const uchar *>(chars), size_t(len));
 }
 
 void
 CImageGIF::
 writeShort(CFile *file, int data)
 {
-  ushort s = data;
+  auto s = ushort(data);
 
   uchar c[2];
 
@@ -1235,7 +1238,7 @@ void
 CImageGIF::
 writeByte(CFile *file, int data)
 {
-  uchar b = data;
+  auto b = uchar(data);
 
   file->write(&b, 1);
 }

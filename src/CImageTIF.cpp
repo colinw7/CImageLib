@@ -138,11 +138,11 @@ read(CFile *file, CImagePtr &image)
         else if (data_count > 1) {
           readInteger(file, &data_offset);
 
-          int pos = file->getPos();
+          auto pos = file->getPos();
 
           file->setPos(data_offset);
 
-          int *integer_array = new int [data_count];
+          auto *integer_array = new int [size_t(data_count)];
 
           for (int j = 0; j < data_count; ++j)
             readShort(file, &integer_array[j]);
@@ -165,11 +165,11 @@ read(CFile *file, CImagePtr &image)
         else if (data_count > 1) {
           readInteger(file, &data_offset);
 
-          int pos = file->getPos();
+          auto pos = file->getPos();
 
           file->setPos(data_offset);
 
-          int *integer_array = new int [data_count];
+          auto *integer_array = new int [size_t(data_count)];
 
           for (int j = 0; j < data_count; ++j)
             readInteger(file, &integer_array[j]);
@@ -255,15 +255,15 @@ read(CFile *file, CImagePtr &image)
       if (depth == 8) {
         tif_data.num_colors = 256;
 
-        tif_data.colors = new CRGBA [tif_data.num_colors];
+        tif_data.colors = new CRGBA [size_t(tif_data.num_colors)];
 
         for (int i = 0; i < 256; ++i)
-          tif_data.colors[i].setRGBAI(i, i, i);
+          tif_data.colors[i].setRGBAI(uint(i), uint(i), uint(i));
       }
       else {
         tif_data.num_colors = 2;
 
-        tif_data.colors = new CRGBA [tif_data.num_colors];
+        tif_data.colors = new CRGBA [size_t(tif_data.num_colors)];
 
         tif_data.colors[0].setRGBA(0, 0, 0);
         tif_data.colors[1].setRGBA(1, 1, 1);
@@ -292,7 +292,7 @@ read(CFile *file, CImagePtr &image)
       return false;
     }
 
-    uint *data = new uint [tif_data.image_width*tif_data.image_height];
+    auto *data = new uint [size_t(tif_data.image_width*tif_data.image_height)];
 
     int buffer_size = 0;
 
@@ -300,14 +300,14 @@ read(CFile *file, CImagePtr &image)
       if (tif_data.strip_byte_counts[i] > buffer_size)
         buffer_size = tif_data.strip_byte_counts[i];
 
-    uchar *buffer1 = new uchar [buffer_size];
+    auto *buffer1 = new uchar [size_t(buffer_size)];
 
     //------
 
     for (int i = 0; i < strips_per_image; ++i) {
       file->setPos(tif_data.strip_offsets[i]);
 
-      file->read(buffer1, tif_data.strip_byte_counts[i]);
+      file->read(buffer1, size_t(tif_data.strip_byte_counts[i]));
 
       uint *p = &data[i*tif_data.rows_per_strip*tif_data.image_width];
 
@@ -319,9 +319,9 @@ read(CFile *file, CImagePtr &image)
       }
       else if (depth == 16) {
         for (int j = 0; j < tif_data.strip_byte_counts[i]/2; ++j, ++p, p1 += 2)
-          *p = image->rgbaToPixelI(( p1[0] & 0xF0      ),
-                                   ((p1[0] & 0x0F) << 4),
-                                   ( p1[1] & 0xF0      ));
+          *p = image->rgbaToPixelI(uint( p1[0] & 0xF0      ),
+                                   uint((p1[0] & 0x0F) << 4),
+                                   uint( p1[1] & 0xF0      ));
       }
       else if (depth == 8) {
         for (int j = 0; j < tif_data.strip_byte_counts[i]; ++j, ++p, p1++)
@@ -466,9 +466,9 @@ setIntegerArray(int tag_id, int *values, int num_values)
         delete [] tif_data.strip_offsets;
 
       tif_data.num_strip_offsets = num_values;
-      tif_data.strip_offsets     = new int [num_values];
+      tif_data.strip_offsets     = new int [size_t(num_values)];
 
-      memcpy(tif_data.strip_offsets, values, num_values*sizeof(int));
+      memcpy(tif_data.strip_offsets, values, size_t(num_values)*sizeof(int));
 
       break;
     }
@@ -477,9 +477,9 @@ setIntegerArray(int tag_id, int *values, int num_values)
         delete [] tif_data.strip_byte_counts;
 
       tif_data.num_strip_byte_counts = num_values;
-      tif_data.strip_byte_counts     = new int [num_values];
+      tif_data.strip_byte_counts     = new int [size_t(num_values)];
 
-      memcpy(tif_data.strip_byte_counts, values, num_values*sizeof(int));
+      memcpy(tif_data.strip_byte_counts, values, size_t(num_values)*sizeof(int));
 
       break;
     }
@@ -488,7 +488,7 @@ setIntegerArray(int tag_id, int *values, int num_values)
         delete [] tif_data.colors;
 
       tif_data.num_colors = num_values/3;
-      tif_data.colors     = new CRGBA [tif_data.num_colors];
+      tif_data.colors     = new CRGBA [size_t(tif_data.num_colors)];
 
       int j1 = 0;
       int j2 = j1 + tif_data.num_colors;
@@ -546,7 +546,7 @@ bool
 CImageTIF::
 write(CFile *file, CImagePtr image)
 {
-  int row_size = 0;
+  size_t row_size = 0;
 
   int depth;
 
@@ -598,9 +598,9 @@ write(CFile *file, CImagePtr image)
 
   //------
 
-  int *strip_offsets = new int [image->getHeight()];
+  auto *strip_offsets = new int [image->getHeight()];
 
-  uchar *strip_data = new uchar [row_size];
+  auto *strip_data = new uchar [row_size];
 
   int j = 0;
 
@@ -610,33 +610,33 @@ write(CFile *file, CImagePtr image)
     strip_offsets[i] = offset;
 
     if      (depth == 24) {
-      for (int k = 0; k < row_size; k += 4, ++j) {
+      for (int k = 0; k < int(row_size); k += 4, ++j) {
         image->getRGBAPixelI(j, &r, &g, &b, &a);
 
-        strip_data[k + 0] = r;
-        strip_data[k + 1] = g;
-        strip_data[k + 2] = b;
-        strip_data[k + 3] = a;
+        strip_data[k + 0] = uchar(r);
+        strip_data[k + 1] = uchar(g);
+        strip_data[k + 2] = uchar(b);
+        strip_data[k + 3] = uchar(a);
       }
     }
     else if (depth == 16) {
-      for (int k = 0; k < row_size; k += 2, ++j) {
+      for (int k = 0; k < int(row_size); k += 2, ++j) {
         image->getRGBAPixelI(j, &r, &g, &b, &a);
 
         r >>= 4;
         g >>= 4;
         b >>= 4;
 
-        strip_data[k + 0] = ((r & 0x0F) << 4) | (g & 0x0F);
-        strip_data[k + 1] = (b & 0x0F);
+        strip_data[k + 0] = uchar(((r & 0x0F) << 4) | (g & 0x0F));
+        strip_data[k + 1] = uchar(b & 0x0F);
       }
     }
     else if (depth == 8) {
-      for (int k = 0; k < row_size; ++k, ++j)
-        strip_data[k] = image->getColorIndexPixel(j);
+      for (int k = 0; k < int(row_size); ++k, ++j)
+        strip_data[k] = uchar(image->getColorIndexPixel(j));
     }
     else {
-      for (int k = 0; k < row_size; ++k) {
+      for (int k = 0; k < int(row_size); ++k) {
         int pixel1 = image->getColorIndexPixel(j + 0);
         int pixel2 = image->getColorIndexPixel(j + 1);
         int pixel3 = image->getColorIndexPixel(j + 2);
@@ -646,20 +646,20 @@ write(CFile *file, CImagePtr image)
         int pixel7 = image->getColorIndexPixel(j + 6);
         int pixel8 = image->getColorIndexPixel(j + 7);
 
-        strip_data[k] = ((pixel1 & 0x01) << 0) |
-                        ((pixel2 & 0x01) << 1) |
-                        ((pixel3 & 0x01) << 2) |
-                        ((pixel4 & 0x01) << 3) |
-                        ((pixel5 & 0x01) << 4) |
-                        ((pixel6 & 0x01) << 5) |
-                        ((pixel7 & 0x01) << 6) |
-                        ((pixel8 & 0x01) << 7);
+        strip_data[k] = uchar(((pixel1 & 0x01) << 0) |
+                              ((pixel2 & 0x01) << 1) |
+                              ((pixel3 & 0x01) << 2) |
+                              ((pixel4 & 0x01) << 3) |
+                              ((pixel5 & 0x01) << 4) |
+                              ((pixel6 & 0x01) << 5) |
+                              ((pixel7 & 0x01) << 6) |
+                              ((pixel8 & 0x01) << 7));
 
         j += 8;
       }
     }
 
-    writeData(file, strip_data, row_size);
+    writeData(file, strip_data, int(row_size));
 
     offset += row_size;
   }
@@ -671,32 +671,32 @@ write(CFile *file, CImagePtr image)
   int colormap_offset = offset;
 
   if (depth <= 8) {
-    ushort *colors = new ushort [3*num_colors];
+    auto *colors = new ushort [size_t(3*num_colors)];
 
     double r1, g1, b1, a1;
 
     int i = 0;
 
     for (int jj = 0; jj < image->getNumColors(); ++jj) {
-      image->getColorRGBA(jj, &r1, &g1, &b1, &a1);
+      image->getColorRGBA(uint(jj), &r1, &g1, &b1, &a1);
 
-      colors[i++] = (int) (r1*65535);
+      colors[i++] = ushort(r1*65535);
     }
 
     i = num_colors;
 
     for (int jj = 0; jj < image->getNumColors(); ++jj) {
-      image->getColorRGBA(jj, &r1, &g1, &b1, &a1);
+      image->getColorRGBA(uint(jj), &r1, &g1, &b1, &a1);
 
-      colors[i++] = (int) (g1*65535);
+      colors[i++] = ushort(g1*65535);
     }
 
     i = 2*num_colors;
 
     for (int jj = 0; jj < image->getNumColors(); ++jj) {
-      image->getColorRGBA(jj, &r1, &g1, &b1, &a1);
+      image->getColorRGBA(uint(jj), &r1, &g1, &b1, &a1);
 
-      colors[i++] = (int) (b1*65535);
+      colors[i++] = ushort(b1*65535);
     }
 
     for (i = 0; i < 3*num_colors; ++i)
@@ -721,7 +721,7 @@ write(CFile *file, CImagePtr image)
   int strip_byte_counts_offset = offset;
 
   for (uint i = 0; i < image->getHeight(); ++i)
-    writeInteger(file, image->getWidth());
+    writeInteger(file, int(image->getWidth()));
 
   offset += 4*image->getHeight();
 
@@ -750,8 +750,8 @@ write(CFile *file, CImagePtr image)
   writeShort(file, num_tags);
 
   writeLongTag(file, NEW_SUBFILE_TYPE, 0);
-  writeLongTag(file, IMAGE_WIDTH     , image->getWidth());
-  writeLongTag(file, IMAGE_HEIGHT    , image->getHeight());
+  writeLongTag(file, IMAGE_WIDTH     , int(image->getWidth()));
+  writeLongTag(file, IMAGE_HEIGHT    , int(image->getHeight()));
 
   if (depth <= 8)
     writeShortTag(file, BITS_PER_SAMPLE, depth);
@@ -765,8 +765,7 @@ write(CFile *file, CImagePtr image)
   else
     writeShortTag(file, PHOTOMETRIC, TIF_RGB);
 
-  writeLongArrayTag(file, STRIP_OFFSETS, image->getHeight(),
-                    strip_offsets_offset);
+  writeLongArrayTag(file, STRIP_OFFSETS, int(image->getHeight()), strip_offsets_offset);
 
   if (depth <= 8)
     writeShortTag(file, SAMPLES_PER_PIXEL, 1);
@@ -775,8 +774,7 @@ write(CFile *file, CImagePtr image)
 
   writeLongTag(file, ROWS_PER_STRIP, 1);
 
-  writeLongArrayTag(file, STRIP_BYTE_COUNTS, image->getHeight(),
-                    strip_byte_counts_offset);
+  writeLongArrayTag(file, STRIP_BYTE_COUNTS, int(image->getHeight()), strip_byte_counts_offset);
 
   writeRationalTag(file, X_RESOLUTION, x_resolution_offset);
   writeRationalTag(file, Y_RESOLUTION, y_resolution_offset);
@@ -857,7 +855,7 @@ void
 CImageTIF::
 writeInteger(CFile *file, int data)
 {
-  uint i = data;
+  auto i = uint(data);
 
   file->putC( i        & 0xff);
   file->putC((i >>  8) & 0xff);
@@ -869,7 +867,7 @@ void
 CImageTIF::
 writeShort(CFile *file, int data)
 {
-  ushort s = data;
+  auto s = ushort(data);
 
   file->putC( s       & 0xff);
   file->putC((s >> 8) & 0xff);
@@ -879,7 +877,7 @@ void
 CImageTIF::
 writeByte(CFile *file, int data)
 {
-  uchar c = data;
+  auto c = uchar(data);
 
   file->putC(c & 0xff);
 }

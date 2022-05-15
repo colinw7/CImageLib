@@ -52,8 +52,8 @@ copyFrom(CImagePtr src)
       return;
     }
 
-    uint num_colors1 =      getNumColors();
-    uint num_colors2 = src->getNumColors();
+    auto num_colors1 = uint(     getNumColors());
+    auto num_colors2 = uint(src->getNumColors());
 
     if (num_colors1 == num_colors2) {
       memcpy(data_, src->data_, num_data1*sizeof(uint));
@@ -88,22 +88,22 @@ void
 CImage::
 subCopyFrom(CImagePtr src, int src_x, int src_y, int width, int height, int dst_x, int dst_y)
 {
-  int src_width  = src->getWidth ();
-  int src_height = src->getHeight();
+  auto src_width  = src->getWidth ();
+  auto src_height = src->getHeight();
 
-  int dst_width  = getWidth ();
-  int dst_height = getHeight();
+  auto dst_width  = getWidth ();
+  auto dst_height = getHeight();
 
-  if (width  < 0) width  = src_width;
-  if (height < 0) height = src_height;
+  if (width  < 0) width  = int(src_width);
+  if (height < 0) height = int(src_height);
 
   int width1  = width;
   int height1 = height;
 
-  if (src_x +  width1 > src_width )  width1 = src_width  - src_x;
-  if (src_y + height1 > src_height) height1 = src_height - src_y;
-  if (dst_x +  width1 > dst_width )  width1 = dst_width  - dst_x;
-  if (dst_y + height1 > dst_height) height1 = dst_height - dst_y;
+  if (src_x +  width1 > int(src_width ))  width1 = int(src_width ) - src_x;
+  if (src_y + height1 > int(src_height)) height1 = int(src_height) - src_y;
+  if (dst_x +  width1 > int(dst_width ))  width1 = int(dst_width ) - dst_x;
+  if (dst_y + height1 > int(dst_height)) height1 = int(dst_height) - dst_y;
 
   if (src->hasColormap()) {
     convertToColorIndex();
@@ -113,14 +113,13 @@ subCopyFrom(CImagePtr src, int src_x, int src_y, int width, int height, int dst_
     int num_colors = src->getNumColors();
 
     for (int i = 0; i < num_colors; ++i) {
-      if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT &&
-          src->isTransparentColor(i))
+      if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && src->isTransparentColor(uint(i)))
         continue;
 
-      int ind = findColor(src->getColor(i));
+      int ind = findColor(src->getColor(uint(i)));
 
       if (ind < 0)
-        ind = addColor(src->getColor(i));
+        ind = addColor(src->getColor(uint(i)));
 
       colorMap[i] = ind;
     }
@@ -138,11 +137,11 @@ subCopyFrom(CImagePtr src, int src_x, int src_y, int width, int height, int dst_
         else
           pixel = 0;
 
-        if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && src->isTransparentColor(pixel))
+        if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && src->isTransparentColor(uint(pixel)))
           continue;
 
         if (validPixel(xd, yd))
-          setColorIndexPixel(xd, yd, colorMap[pixel]);
+          setColorIndexPixel(xd, yd, uint(colorMap[pixel]));
       }
     }
   }
@@ -170,22 +169,22 @@ void
 CImage::
 subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x, int dst_y) const
 {
-  int src_width  = getWidth ();
-  int src_height = getHeight();
+  auto src_width  = getWidth ();
+  auto src_height = getHeight();
 
-  int dst_width  = dst->getWidth ();
-  int dst_height = dst->getHeight();
+  auto dst_width  = dst->getWidth ();
+  auto dst_height = dst->getHeight();
 
-  if (width  < 0) width  = src_width;
-  if (height < 0) height = src_height;
+  if (width  < 0) width  = int(src_width);
+  if (height < 0) height = int(src_height);
 
   int width1  = width;
   int height1 = height;
 
-  if (src_x +  width1 > src_width )  width1 = src_width  - src_x;
-  if (src_y + height1 > src_height) height1 = src_height - src_y;
-  if (dst_x +  width1 > dst_width )  width1 = dst_width  - dst_x;
-  if (dst_y + height1 > dst_height) height1 = dst_height - dst_y;
+  if (src_x +  width1 > int(src_width ))  width1 = int(src_width ) - src_x;
+  if (src_y + height1 > int(src_height)) height1 = int(src_height) - src_y;
+  if (dst_x +  width1 > int(dst_width ))  width1 = int(dst_width ) - dst_x;
+  if (dst_y + height1 > int(dst_height)) height1 = int(dst_height) - dst_y;
 
   if (hasColormap()) {
     dst->convertToColorIndex();
@@ -195,13 +194,13 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
     int num_colors = getNumColors();
 
     for (int i = 0; i < num_colors; ++i) {
-      if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && isTransparentColor(i))
+      if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && isTransparentColor(uint(i)))
         continue;
 
-      int ind = dst->findColor(getColor(i));
+      int ind = dst->findColor(getColor(uint(i)));
 
       if (ind < 0)
-        ind = dst->addColor(getColor(i));
+        ind = dst->addColor(getColor(uint(i)));
 
       colorMap[i] = ind;
     }
@@ -221,11 +220,11 @@ subCopyTo(CImagePtr &dst, int src_x, int src_y, int width, int height, int dst_x
         else
           pixel = 0;
 
-        if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && isTransparentColor(pixel))
+        if (copy_type == CIMAGE_COPY_SKIP_TRANSPARENT && isTransparentColor(uint(pixel)))
           continue;
 
         if (dst->validPixel(xd, yd))
-          dst->setColorIndexPixel(xd, yd, colorMap[pixel]);
+          dst->setColorIndexPixel(xd, yd, uint(colorMap[pixel]));
       }
     }
   }
@@ -256,16 +255,16 @@ bool
 CImage::
 copy(CImagePtr image, int x, int y)
 {
-  int iwidth  = getWidth ();
-  int iheight = getHeight();
+  auto iwidth  = getWidth ();
+  auto iheight = getHeight();
 
-  int iwidth1  = image->getWidth ();
-  int iheight1 = image->getHeight();
+  auto iwidth1  = image->getWidth ();
+  auto iheight1 = image->getHeight();
 
   int x1 = x;
-  int x2 = std::min(x + iwidth1  - 1, iwidth  - 1);
+  int x2 = std::min(x + int(iwidth1 ) - 1, int(iwidth  - 1));
   int y1 = y;
-  int y2 = std::min(y + iheight1 - 1, iheight - 1);
+  int y2 = std::min(y + int(iheight1) - 1, int(iheight - 1));
 
   if (hasColormap() && image->hasColormap()) {
     int color_ind;
@@ -311,16 +310,16 @@ bool
 CImage::
 copyAlpha(CImagePtr image, int x, int y)
 {
-  int iwidth  = getWidth ();
-  int iheight = getHeight();
+  auto iwidth  = getWidth ();
+  auto iheight = getHeight();
 
-  int iwidth1  = image->getWidth ();
-  int iheight1 = image->getHeight();
+  auto iwidth1  = image->getWidth ();
+  auto iheight1 = image->getHeight();
 
   int x1 = x;
-  int x2 = std::min(x + iwidth1  - 1, iwidth  - 1);
+  int x2 = std::min(x + int(iwidth1 ) - 1, int(iwidth  - 1));
   int y1 = y;
-  int y2 = std::min(y + iheight1 - 1, iheight - 1);
+  int y2 = std::min(y + int(iheight1) - 1, int(iheight - 1));
 
   if (hasColormap())
     convertToRGB();

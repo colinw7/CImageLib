@@ -153,7 +153,7 @@ floodFill(int x, int y, int pixel)
       if (pixel2 != pixel1)
         break;
 
-      setColorIndexPixel(x, y, pixel);
+      setColorIndexPixel(x, y, uint(pixel));
     }
 
     if (x >= x1)
@@ -173,7 +173,7 @@ floodFill(int x, int y, int pixel)
         if (pixel2 != pixel1)
           break;
 
-        setColorIndexPixel(x, y, pixel);
+        setColorIndexPixel(x, y, uint(pixel));
       }
 
       CIMAGE_FLOOD_FILL_PUSH(y, l, x - 1, dy);
@@ -243,13 +243,13 @@ fillLargestRect(int x, int y, int pixel)
 
   typedef CLargestRect<CMapImageAdapter,int> LargestRect;
 
-  LargestRect rect(adapter, getWidth(), getHeight());
+  LargestRect rect(adapter, int(getWidth()), int(getHeight()));
 
-  LargestRect::Rect r = rect.largestRect(fg);
+  auto r = rect.largestRect(fg);
 
   for (int yy = 0; yy < r.height; ++yy)
     for (int xx = 0; xx < r.width; ++xx)
-      setColorIndexPixel(r.left + xx, r.top + yy, pixel);
+      setColorIndexPixel(r.left + xx, r.top + yy, uint(pixel));
 }
 
 void
@@ -266,9 +266,9 @@ fillLargestRect(int x, int y, const CRGBA &rgba)
 
   typedef CLargestRect<RGBImageAdapter,CRGBA> LargestRect;
 
-  LargestRect rect(adapter, getWidth(), getHeight());
+  LargestRect rect(adapter, int(getWidth()), int(getHeight()));
 
-  LargestRect::Rect r = rect.largestRect(fg);
+  auto r = rect.largestRect(fg);
 
   for (int yy = 0; yy < r.height; ++yy)
     for (int xx = 0; xx < r.width; ++xx)

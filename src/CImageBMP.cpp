@@ -167,19 +167,19 @@ readColors(CFile *file, CImageBMPHeader *header, CRGBA **colors)
     if (header->num_colors == 0)
       header->num_colors = 1 << header->depth;
 
-    file->read(buffer, 4*header->num_colors);
+    file->read(buffer, size_t(4*header->num_colors));
 
-    *colors = new CRGBA [header->num_colors];
+    *colors = new CRGBA [size_t(header->num_colors)];
 
     for (int i = 0; i < header->num_colors; ++i) {
       (*colors)[i].setRGBAI(buffer[i*4 + 2], buffer[i*4 + 1], buffer[i*4 + 0]);
 
       if (CImageState::getDebug())
         CImage::infoMsg("Color " + std::to_string(i + 1) + ") " +
-                        std::string((char *) &buffer[i*4 + 2], 1) + "," +
-                        std::string((char *) &buffer[i*4 + 1], 1) + "," +
-                        std::string((char *) &buffer[i*4 + 0], 1) + "," +
-                        std::string((char *) &buffer[i*4 + 3], 1));
+                          std::string(reinterpret_cast<char *>(&buffer[i*4 + 2]), 1) + "," +
+                          std::string(reinterpret_cast<char *>(&buffer[i*4 + 1]), 1) + "," +
+                          std::string(reinterpret_cast<char *>(&buffer[i*4 + 0]), 1) + "," +
+                          std::string(reinterpret_cast<char *>(&buffer[i*4 + 3]), 1));
     }
   }
   else
@@ -201,11 +201,11 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 
     int num_data = line_width1*header->height;
 
-    *data = new uint [num_data];
+    *data = new uint [size_t(num_data)];
 
     std::vector<uchar> line_buffer;
 
-    line_buffer.resize(line_width);
+    line_buffer.resize(size_t(line_width));
 
     int pad = (4 - (line_width % 4)) & 0x03;
 
@@ -214,7 +214,7 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
     for (int i = 0; i < header->height; ++i) {
       j -= line_width1;
 
-      file->read(&line_buffer[0], line_width);
+      file->read(&line_buffer[0], size_t(line_width));
 
       int pad1 = pad;
 
@@ -254,7 +254,7 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 
     int num_data = header->width*header->height;
 
-    *data = new uint [num_data];
+    *data = new uint [size_t(num_data)];
 
     int bytes_per_line = (header->width + 7)/8;
 
@@ -262,31 +262,31 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 
     std::vector<uchar> buffer1;
 
-    buffer1.resize(width1);
+    buffer1.resize(size_t(width1));
 
     int j = header->width*header->height;
 
     for (int i = 0; i < header->height; ++i) {
       j -= header->width;
 
-      file->read(&buffer1[0], width1);
+      file->read(&buffer1[0], size_t(width1));
 
-      int k1 = 0;
-      int k2 = j;
+      size_t k1 = 0;
+      size_t k2 = size_t(j);
 
-      for ( ; k1 < header->width/2; k1++) {
-        (*data)[k2++] = (buffer1[k1] & 0xF0) >> 4;
-        (*data)[k2++] = (buffer1[k1] & 0x0F) >> 0;
+      for ( ; k1 < size_t(header->width/2); k1++) {
+        (*data)[k2++] = ((buffer1[k1] & 0xF0) >> 4);
+        (*data)[k2++] = ((buffer1[k1] & 0x0F) >> 0);
       }
 
-      if (k1 < (header->width + 1)/2)
+      if (k1 < size_t((header->width + 1)/2))
         (*data)[k2++] = (buffer1[k1] & 0xF0) >> 4;
     }
 
     header->depth = 8;
   }
   else {
-    *data = new uint [header->width*header->height];
+    *data = new uint [size_t(header->width*header->height)];
 
     int width1 = ((header->width + 31)/32)*32;
 
@@ -294,19 +294,19 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
 
     std::vector<uchar> buffer1;
 
-    buffer1.resize(width2);
+    buffer1.resize(size_t(width2));
 
     int j = header->width*header->height;
 
     for (int i = 0; i < header->height; ++i) {
       j -= header->width;
 
-      file->read(&buffer1[0], width2);
+      file->read(&buffer1[0], size_t(width2));
 
-      int k1 = 0;
-      int k2 = j;
+      size_t k1 = 0;
+      size_t k2 = size_t(j);
 
-      for ( ; k1 < header->width/8; k1++) {
+      for ( ; k1 < size_t(header->width/8); k1++) {
         (*data)[k2++] = buffer1[k1] & 0x80;
         (*data)[k2++] = buffer1[k1] & 0x40;
         (*data)[k2++] = buffer1[k1] & 0x20;
@@ -317,7 +317,7 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
         (*data)[k2++] = buffer1[k1] & 0x01;
       }
 
-      if (k1 < (header->width + 7)/8) {
+      if (k1 < size_t((header->width + 7)/8)) {
         (*data)[k2++] = buffer1[k1] & 0x80;
         (*data)[k2++] = buffer1[k1] & 0x40;
         (*data)[k2++] = buffer1[k1] & 0x20;
@@ -341,7 +341,7 @@ readCmp0Data8(CFile *file, int width, int height, uint **data, int *num_data)
 {
   *num_data = width*height;
 
-  *data = new uint [*num_data];
+  *data = new uint [size_t(*num_data)];
 
   int bytes_per_line = (width + 3)/4;
 
@@ -349,14 +349,14 @@ readCmp0Data8(CFile *file, int width, int height, uint **data, int *num_data)
 
   std::vector<uchar> buffer;
 
-  buffer.resize(width);
+  buffer.resize(size_t(width));
 
   int j = width*height;
 
   for (int i = 0; i < height; ++i) {
     j -= width;
 
-    file->read(&buffer[0], width);
+    file->read(&buffer[0], size_t(width));
 
     uint  *p1 = &(*data)[j];
     uchar *p2 = &buffer[0];
@@ -377,7 +377,7 @@ readCmp1Data8(CFile *file, int width, int height, uint **data, int *num_data)
 {
   *num_data = width*height;
 
-  *data = new uint [*num_data];
+  *data = new uint [size_t(*num_data)];
 
   int line_num = height - 1;
   int char_num = 0;
@@ -479,9 +479,9 @@ bool
 CImageBMP::
 write(CFile *file, CImagePtr image)
 {
-  int num_data = 0;
+  size_t num_data = 0;
 
-  int depth;
+  size_t depth;
 
   if (image->hasColormap())
     depth = 8;
@@ -489,9 +489,9 @@ write(CFile *file, CImagePtr image)
     depth = 24;
 
   if      (depth == 24) {
-    int line_width = 3*image->getWidth();
+    auto line_width = 3*image->getWidth();
 
-    int pad = (4 - (line_width % 4)) & 0x03;
+    size_t pad = (4 - (line_width % 4)) & 0x03;
 
     num_data = (line_width + pad)*image->getHeight();
   }
@@ -499,50 +499,50 @@ write(CFile *file, CImagePtr image)
     num_data = image->getWidth()*image->getHeight();
   }
   else if (depth == 4) {
-    int bytes_per_line = (image->getWidth() + 7)/8;
+    size_t bytes_per_line = (image->getWidth() + 7)/8;
 
     num_data = 4*bytes_per_line*image->getHeight();
   }
   else if (depth == 1) {
-    int width1 = ((image->getWidth() + 31)/32)*32;
+    size_t width1 = ((image->getWidth() + 31)/32)*32;
 
-    int width2 = width1/8;
+    size_t width2 = width1/8;
 
     num_data = width2*image->getHeight();
   }
   else
     return false;
 
-  int num_color_data = 0;
+  uint num_color_data = 0;
 
   if (depth == 1 || depth == 4 || depth == 8)
-    num_color_data = 4*image->getNumColors();
+    num_color_data = 4*uint(image->getNumColors());
 
   file->write('B');
   file->write('M');
 
-  int file_size = 40 + num_color_data + num_data;
+  int file_size = int(40 + num_color_data + num_data);
 
   writeInteger(file, file_size);
 
   writeShort(file, 0);
   writeShort(file, 0);
 
-  int offset = 40 + num_color_data;
+  uint offset = 40 + num_color_data;
 
-  writeInteger(file, offset);
+  writeInteger(file, int(offset));
 
   writeInteger(file, 40);
 
   int planes         = 1;
-  int bits_per_pixel = depth;
+  int bits_per_pixel = int(depth);
   int compression    = 0;
-  int bitmap_size    = image->getWidth()*image->getHeight();
+  int bitmap_size    = int(image->getWidth()*image->getHeight());
   int horz_res       = 0;
   int vert_res       = 0;
 
-  writeInteger(file, image->getWidth());
-  writeInteger(file, image->getHeight());
+  writeInteger(file, int(image->getWidth()));
+  writeInteger(file, int(image->getHeight()));
   writeShort  (file, planes);
   writeShort  (file, bits_per_pixel);
   writeInteger(file, compression);
@@ -557,14 +557,14 @@ write(CFile *file, CImagePtr image)
     uint r, g, b, a;
 
     for (int i = 0; i < image->getNumColors(); ++i) {
-      image->getColorRGBAI(i, &r, &g, &b, &a);
+      image->getColorRGBAI(uint(i), &r, &g, &b, &a);
 
       if (CImage::isConvertTransparent(a/255.0))
         CImage::getConvertBg().getRGBAI(&r, &g, &b, &a);
 
-      writeByte(file, b);
-      writeByte(file, g);
-      writeByte(file, r);
+      writeByte(file, int(b));
+      writeByte(file, int(g));
+      writeByte(file, int(r));
       writeByte(file, 0);
     }
   }
@@ -577,39 +577,39 @@ write(CFile *file, CImagePtr image)
   uint height = image->getHeight();
 
   if      (depth == 24) {
-    int line_width  = 3*width;
-    int line_width1 = width;
+    uint line_width  = 3*width;
+    uint line_width1 = width;
 
-    int num_data1 = line_width1*height;
+    uint num_data1 = line_width1*height;
 
     std::vector<uchar> buffer;
 
     buffer.resize(line_width);
 
-    int pad = (4 - (line_width % 4)) & 0x03;
+    uint pad = (4 - (line_width % 4)) & 0x03;
 
-    int j = num_data1;
+    uint j = num_data1;
 
     for (uint i = 0; i < height; ++i) {
       j -= line_width1;
 
       uchar *p = &buffer[0];
 
-      int ind = j;
+      auto ind = j;
 
       uint r, g, b, a;
 
       for (uint k = 0; k < width; ++k, ++ind) {
-        image->getRGBAPixelI(ind, &r, &g, &b, &a);
+        image->getRGBAPixelI(int(ind), &r, &g, &b, &a);
 
-        *p++ = b;
-        *p++ = g;
-        *p++ = r;
+        *p++ = uchar(b);
+        *p++ = uchar(g);
+        *p++ = uchar(r);
       }
 
       file->write(&buffer[0], line_width);
 
-      int pad1 = pad;
+      auto pad1 = pad;
 
       while (pad1--)
         file->write('\0');
@@ -618,45 +618,45 @@ write(CFile *file, CImagePtr image)
   else if (depth == 8) {
     std::vector<uchar> buffer;
 
-     buffer.resize(width);
+     buffer.resize(size_t(width));
 
-    int bytes_per_line = (width + 3)/4;
+    uint bytes_per_line = (width + 3)/4;
 
-    int pad = bytes_per_line*4 - width;
+    uint pad = bytes_per_line*4 - width;
 
-    int j = width*height;
+    uint j = width*height;
 
     for (uint i = 0; i < height; ++i) {
       j -= width;
 
       uchar *p = &buffer[0];
 
-      int ind = j;
+      uint ind = j;
 
       for (uint k = 0; k < width; ++k, ++ind) {
-        int pixel = image->getColorIndexPixel(ind);
+        int pixel = image->getColorIndexPixel(int(ind));
 
-        *p++ = (uchar) pixel;
+        *p++ = uchar(pixel);
       }
 
       file->write(&buffer[0], width);
 
-      int pad1 = pad;
+      auto pad1 = pad;
 
       while (pad1--)
         file->write('\0');
     }
   }
   else if (depth == 4) {
-    int bytes_per_line = (width + 7)/8;
+    uint bytes_per_line = (width + 7)/8;
 
-    int width1 = 4*bytes_per_line;
+    uint width1 = 4*bytes_per_line;
 
     std::vector<uchar> buffer;
 
-    buffer.resize(width1);
+    buffer.resize(size_t(width1));
 
-    int j = width*height;
+    uint j = width*height;
 
     for (uint i = 0; i < height; ++i) {
       j -= width;
@@ -665,18 +665,18 @@ write(CFile *file, CImagePtr image)
       uint k2 = j;
 
       for ( ; k1 < width/2; k1++) {
-        int pixel1 = image->getColorIndexPixel(k2    );
-        int pixel2 = image->getColorIndexPixel(k2 + 1);
+        int pixel1 = image->getColorIndexPixel(int(k2    ));
+        int pixel2 = image->getColorIndexPixel(int(k2 + 1));
 
-        buffer[k1] = (uchar) ((pixel1 << 4) | pixel2);
+        buffer[k1] = uchar((pixel1 << 4) | pixel2);
 
         k2 += 2;
       }
 
       if (k1 < (width + 1)/2) {
-        int pixel1 = image->getColorIndexPixel(k2);
+        auto pixel1 = image->getColorIndexPixel(int(k2));
 
-        buffer[k1] = (uchar) (pixel1 << 4);
+        buffer[k1] = uchar(pixel1 << 4);
 
         k2++;
       }
@@ -685,15 +685,15 @@ write(CFile *file, CImagePtr image)
     }
   }
   else {
-    int width1 = ((width + 31)/32)*32;
+    uint width1 = ((width + 31)/32)*32;
 
-    int width2 = width1/8;
+    uint width2 = width1/8;
 
     std::vector<uchar> buffer;
 
-    buffer.resize(width2);
+    buffer.resize(size_t(width2));
 
-    int j = width*height;
+    uint j = width*height;
 
     for (uint i = 0; i < height; ++i) {
       j -= width;
@@ -702,20 +702,19 @@ write(CFile *file, CImagePtr image)
       uint k2 = j;
 
       for ( ; k1 < width/8; k1++) {
-        int pixel1 = image->getColorIndexPixel(k2    );
-        int pixel2 = image->getColorIndexPixel(k2 + 1);
-        int pixel3 = image->getColorIndexPixel(k2 + 2);
-        int pixel4 = image->getColorIndexPixel(k2 + 3);
-        int pixel5 = image->getColorIndexPixel(k2 + 4);
-        int pixel6 = image->getColorIndexPixel(k2 + 5);
-        int pixel7 = image->getColorIndexPixel(k2 + 6);
-        int pixel8 = image->getColorIndexPixel(k2 + 7);
+        auto pixel1 = image->getColorIndexPixel(int(k2    ));
+        auto pixel2 = image->getColorIndexPixel(int(k2 + 1));
+        auto pixel3 = image->getColorIndexPixel(int(k2 + 2));
+        auto pixel4 = image->getColorIndexPixel(int(k2 + 3));
+        auto pixel5 = image->getColorIndexPixel(int(k2 + 4));
+        auto pixel6 = image->getColorIndexPixel(int(k2 + 5));
+        auto pixel7 = image->getColorIndexPixel(int(k2 + 6));
+        auto pixel8 = image->getColorIndexPixel(int(k2 + 7));
 
-        buffer[k1] = (uchar)
-         (((pixel1 << 7) & 0x80) | ((pixel2 << 6) & 0x40) |
-          ((pixel3 << 5) & 0x20) | ((pixel4 << 4) & 0x10) |
-          ((pixel5 << 3) & 0x08) | ((pixel6 << 2) & 0x04) |
-          ((pixel7 << 1) & 0x02) | ((pixel8 << 0) & 0x01));
+        buffer[k1] = uchar(((pixel1 << 7) & 0x80) | ((pixel2 << 6) & 0x40) |
+                           ((pixel3 << 5) & 0x20) | ((pixel4 << 4) & 0x10) |
+                           ((pixel5 << 3) & 0x08) | ((pixel6 << 2) & 0x04) |
+                           ((pixel7 << 1) & 0x02) | ((pixel8 << 0) & 0x01));
 
         k2 += 8;
       }
@@ -723,20 +722,19 @@ write(CFile *file, CImagePtr image)
       if (k1 < (width + 7)/8) {
         int k3 = width % 8;
 
-        int pixel1 = k3 > 0 ? image->getColorIndexPixel(k2    ) : 0;
-        int pixel2 = k3 > 1 ? image->getColorIndexPixel(k2 + 1) : 0;
-        int pixel3 = k3 > 2 ? image->getColorIndexPixel(k2 + 2) : 0;
-        int pixel4 = k3 > 3 ? image->getColorIndexPixel(k2 + 3) : 0;
-        int pixel5 = k3 > 4 ? image->getColorIndexPixel(k2 + 4) : 0;
-        int pixel6 = k3 > 5 ? image->getColorIndexPixel(k2 + 5) : 0;
-        int pixel7 = k3 > 6 ? image->getColorIndexPixel(k2 + 6) : 0;
-        int pixel8 = k3 > 7 ? image->getColorIndexPixel(k2 + 7) : 0;
+        auto pixel1 = (k3 > 0 ? image->getColorIndexPixel(int(k2    )) : 0);
+        auto pixel2 = (k3 > 1 ? image->getColorIndexPixel(int(k2 + 1)) : 0);
+        auto pixel3 = (k3 > 2 ? image->getColorIndexPixel(int(k2 + 2)) : 0);
+        auto pixel4 = (k3 > 3 ? image->getColorIndexPixel(int(k2 + 3)) : 0);
+        auto pixel5 = (k3 > 4 ? image->getColorIndexPixel(int(k2 + 4)) : 0);
+        auto pixel6 = (k3 > 5 ? image->getColorIndexPixel(int(k2 + 5)) : 0);
+        auto pixel7 = (k3 > 6 ? image->getColorIndexPixel(int(k2 + 6)) : 0);
+        auto pixel8 = (k3 > 7 ? image->getColorIndexPixel(int(k2 + 7)) : 0);
 
-        buffer[k1] = (uchar)
-         (((pixel1 << 7) & 0x80) | ((pixel2 << 6) & 0x40) |
-          ((pixel3 << 5) & 0x20) | ((pixel4 << 4) & 0x10) |
-          ((pixel5 << 3) & 0x08) | ((pixel6 << 2) & 0x04) |
-          ((pixel7 << 1) & 0x02) | ((pixel8 << 0) & 0x01));
+        buffer[k1] = uchar(((pixel1 << 7) & 0x80) | ((pixel2 << 6) & 0x40) |
+                           ((pixel3 << 5) & 0x20) | ((pixel4 << 4) & 0x10) |
+                           ((pixel5 << 3) & 0x08) | ((pixel6 << 2) & 0x04) |
+                           ((pixel7 << 1) & 0x02) | ((pixel8 << 0) & 0x01));
       }
 
       file->write(&buffer[0], width2);
@@ -750,29 +748,29 @@ void
 CImageBMP::
 writeInteger(CFile *file, int data)
 {
-  uint i = data;
+  auto i = uint(data);
 
-  file->write((char) ( i        & 0xff));
-  file->write((char) ((i >>  8) & 0xff));
-  file->write((char) ((i >> 16) & 0xff));
-  file->write((char) ((i >> 24) & 0xff));
+  file->write(char( i        & 0xff));
+  file->write(char((i >>  8) & 0xff));
+  file->write(char((i >> 16) & 0xff));
+  file->write(char((i >> 24) & 0xff));
 }
 
 void
 CImageBMP::
 writeShort(CFile *file, int data)
 {
-  ushort s = data;
+  auto s = ushort(data);
 
-  file->write((char) ( s       & 0xff));
-  file->write((char) ((s >> 8) & 0xff));
+  file->write(char( s       & 0xff));
+  file->write(char((s >> 8) & 0xff));
 }
 
 void
 CImageBMP::
 writeByte(CFile *file, int data)
 {
-  uchar c = data;
+  auto c = uchar(data);
 
-  file->write((char) (c & 0xff));
+  file->write(char(c & 0xff));
 }

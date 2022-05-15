@@ -4,52 +4,52 @@
 int
 main(int /*argc*/, char ** /*argv*/)
 {
-  CFile *ifile1 = new CFile("data/image.gif");
-  CFile *ifile2 = new CFile("data/image.png");
-  CFile *ifile3 = new CFile("data/image.iff");
-  CFile *ifile4 = new CFile("data/image.pcx");
-  CFile *ifile5 = new CFile("data/image.rgb");
-  CFile *ifile6 = new CFile("data/image.psp");
+  auto *ifile1 = new CFile("data/image.gif");
+  auto *ifile2 = new CFile("data/image.png");
+  auto *ifile3 = new CFile("data/image.iff");
+  auto *ifile4 = new CFile("data/image.pcx");
+  auto *ifile5 = new CFile("data/image.rgb");
+  auto *ifile6 = new CFile("data/image.psp");
 
-  CFile *ofile1 = new CFile("test.xpm");
-  CFile *ofile2 = new CFile("test.bmp");
-  CFile *ofile3 = new CFile("test.jpg");
-  CFile *ofile4 = new CFile("test.tif");
-  CFile *ofile5 = new CFile("test.xbm");
-  CFile *ofile6 = new CFile("test.xwd");
-  CFile *ofile7 = new CFile("test.ps");
-  CFile *ofile8 = new CFile("test.png");
+  auto *ofile1 = new CFile("test.xpm");
+  auto *ofile2 = new CFile("test.bmp");
+  auto *ofile3 = new CFile("test.jpg");
+  auto *ofile4 = new CFile("test.tif");
+  auto *ofile5 = new CFile("test.xbm");
+  auto *ofile6 = new CFile("test.xwd");
+  auto *ofile7 = new CFile("test.ps");
+  auto *ofile8 = new CFile("test.png");
 
-  CFile *tfile1 = new CFile("test_xpm.gif");
-  CFile *tfile2 = new CFile("test_bmp.gif");
-  CFile *tfile3 = new CFile("test_jpg.bmp");
-  CFile *tfile4 = new CFile("test_tif.bmp");
-  CFile *tfile5 = new CFile("test_xbm.bmp");
-  CFile *tfile6 = new CFile("test_xwd.bmp");
+  auto *tfile1 = new CFile("test_xpm.gif");
+  auto *tfile2 = new CFile("test_bmp.gif");
+  auto *tfile3 = new CFile("test_jpg.bmp");
+  auto *tfile4 = new CFile("test_tif.bmp");
+  auto *tfile5 = new CFile("test_xbm.bmp");
+  auto *tfile6 = new CFile("test_xwd.bmp");
 
-  CFile *wfile1 = new CFile("test_png.bmp");
-  CFile *wfile2 = new CFile("test_iff.bmp");
-  CFile *wfile3 = new CFile("test_pcx.bmp");
-  CFile *wfile4 = new CFile("test_sgi.bmp");
-  CFile *wfile5 = new CFile("test_psp.bmp");
+  auto *wfile1 = new CFile("test_png.bmp");
+  auto *wfile2 = new CFile("test_iff.bmp");
+  auto *wfile3 = new CFile("test_pcx.bmp");
+  auto *wfile4 = new CFile("test_sgi.bmp");
+  auto *wfile5 = new CFile("test_psp.bmp");
 
-  CFile *gfile1 = new CFile("test_gen.bmp");
+  auto *gfile1 = new CFile("test_gen.bmp");
 
   //------
 
   CImageFileSrc src(*ifile1);
 
-  CImagePtr image = CImageMgrInst->createImage(src);
+  auto image = CImageMgrInst->createImage(src);
 
   if (image.isValid()) {
-    image->writeXPM(ofile1);
-    image->writeBMP(ofile2);
-    image->writeJPG(ofile3);
-    image->writeTIF(ofile4);
-    image->writeXBM(ofile5);
-    image->writeXWD(ofile6);
-    image->writePS (ofile7);
-    image->writePNG(ofile8);
+    image->writeXPM(ofile1); ofile1->flush();
+    image->writeBMP(ofile2); ofile2->flush();
+    image->writeJPG(ofile3); ofile3->flush();
+    image->writeTIF(ofile4); ofile4->flush();
+    image->writeXBM(ofile5); ofile5->flush();
+    image->writeXWD(ofile6); ofile6->flush();
+    image->writePS (ofile7); ofile7->flush();
+    image->writePNG(ofile8); ofile8->flush();
   }
 
   //------

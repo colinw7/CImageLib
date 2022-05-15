@@ -40,9 +40,12 @@ class CImageAnim {
   iterator begin() { return frames_.begin(); }
   iterator end  () { return frames_.end  (); }
 
-  int size() const { return frames_.size(); }
+  int size() const { return int(frames_.size()); }
 
-  CImageFrame *operator[](int pos) { return frames_[pos]; }
+  CImageFrame *operator[](int pos) {
+    if (pos < 0 || pos > size()) return nullptr;
+    return frames_[size_t(pos)];
+  }
 
  private:
   FrameList frames_;

@@ -28,7 +28,7 @@ read(CFile *file, CImagePtr &image)
 
   image->setType(CFILE_TYPE_IMAGE_XBM);
 
-  image->setDataSize(width, height);
+  image->setDataSize(int(width), int(height));
 
   image->setColorIndexData(data);
 
@@ -86,7 +86,7 @@ readHeader(CFile *file, CImagePtr &image)
 
   image->setType(CFILE_TYPE_IMAGE_XBM);
 
-  image->setSize(width, height);
+  image->setSize(int(width), int(height));
 
   //------
 
@@ -108,15 +108,15 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
     //------
 
-    int text_len = file->getSize();
+    auto text_len = file->getSize();
 
     //------
 
     std::vector<char> text;
 
-    text.resize(text_len + 1);
+    text.resize(size_t(text_len + 1));
 
-    file->read((uchar *) &text[0], text_len);
+    file->read(reinterpret_cast<uchar *>(&text[0]), text_len);
 
     text[text_len] = '\0';
 
@@ -141,13 +141,13 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
     skipSpace(ptext, &i);
 
-    int j = i;
+    uint j = i;
 
     CStrUtil::skipNonSpace(ptext, &i);
 
     std::string str = std::string(&ptext[j], i - j);
 
-    *width = CStrUtil::toInteger(str);
+    *width = uint(CStrUtil::toInteger(str));
 
     //------
 
@@ -170,14 +170,14 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
     str = std::string(&ptext[j], i - j);
 
-    *height = CStrUtil::toInteger(str);
+    *height = uint(CStrUtil::toInteger(str));
 
     //------
 
     if (data != 0) {
       int width1 = ((*width) + 7)/8;
 
-      int num_bytes = (*width)*(*height);
+      auto num_bytes = (*width)*(*height);
 
       *data = new uint [num_bytes + 7];
 
@@ -186,7 +186,7 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
       hex_string[2] = '\0';
 
       for (uint jj = 0; jj < *height; ++jj) {
-        int l = jj*(*width);
+        auto l = jj*(*width);
 
         for (int k = 0; k < width1; ++k) {
           while (ptext[i] != '\0' &&
@@ -246,7 +246,7 @@ expandBitmapData(const uchar *data, int width, int height)
 
   int num_bytes = width*height;
 
-  uint *data1 = new uint [num_bytes + 7];
+  uint *data1 = new uint [size_t(num_bytes + 7)];
 
   int i = 0;
 
@@ -323,9 +323,9 @@ write(CFile *file, CImagePtr image)
     for (uint j = 0; j < image->getWidth(); ++j, ++k) {
       double gray;
 
-      image->getGrayPixel(k, &gray);
+      image->getGrayPixel(int(k), &gray);
 
-      int pixel = (gray > 0.5 ? 0 : 1);
+      uint pixel = (gray > 0.5 ? 0 : 1);
 
       byte |= (pixel << bit_no);
 

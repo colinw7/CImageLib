@@ -17,7 +17,7 @@ CImage::
 CImage(int width, int height) :
  size_(width, height)
 {
-  int size = size_.area();
+  auto size = size_t(size_.area());
 
   if (size > 0) {
     data_ = new uint [size];
@@ -32,7 +32,7 @@ CImage::
 CImage(const CISize2D &size) :
  size_(size)
 {
-  int dsize = size_.area();
+  size_t dsize = size_t(size_.area());
 
   if (dsize > 0) {
     data_ = new uint [dsize];
@@ -48,12 +48,10 @@ CImage(const CImage &image) :
  type_  (image.type_),
  size_  (image.size_),
  border_(image.border_),
- data_  (nullptr),
- colors_(),
  window_(image.window_),
  bg_    (image.bg_)
 {
-  int size = size_.area();
+  auto size = size_t(size_.area());
 
   if (size > 0 && image.data_) {
     const_cast<CImage &>(image).updateData();
@@ -63,10 +61,10 @@ CImage(const CImage &image) :
     memcpy(data_, image.data_, size*sizeof(uint));
   }
 
-  int num_colors = (int) image.colors_.size();
+  int num_colors = int(image.colors_.size());
 
   for (int i = 0; i < num_colors; ++i)
-    addColor(image.colors_[i]);
+    addColor(image.colors_[size_t(i)]);
 
   CImageMgrInst->addImage(this);
 }
@@ -75,14 +73,14 @@ CImage::
 CImage(const CImage &image, int x, int y, int width, int height) :
  size_(width, height)
 {
-  int size = size_.area();
+  auto size = size_t(size_.area());
 
   if (size > 0)
     data_ = new uint [size];
 
-  int num_colors = (int) image.colors_.size();
+  auto num_colors = image.colors_.size();
 
-  for (int i = 0; i < num_colors; ++i)
+  for (size_t i = 0; i < num_colors; ++i)
     addColor(image.colors_[i]);
 
   if (x + width  <= 0 || x >= image.size_.width  ||
@@ -148,19 +146,19 @@ operator=(const CImage &image)
   if (size > 0 && image.data_) {
     const_cast<CImage &>(image).updateData();
 
-    data_ = new uint [size];
+    data_ = new uint [size_t(size)];
 
-    memcpy(data_, image.data_, size*sizeof(uint));
+    memcpy(data_, image.data_, size_t(size)*sizeof(uint));
   }
   else
     data_ = 0;
 
   colors_.clear();
 
-  int num_colors = (int) image.colors_.size();
+  int num_colors = int(image.colors_.size());
 
   for (int i = 0; i < num_colors; ++i)
-    addColor(image.colors_[i]);
+    addColor(image.colors_[size_t(i)]);
 
   dataChanged();
 
@@ -238,9 +236,9 @@ setDataSizeV(int width, int height)
     int size = size_.area();
 
     if (size > 0) {
-      data_ = new uint [size];
+      data_ = new uint [size_t(size)];
 
-      memset(data_, 0, size*sizeof(uint));
+      memset(data_, 0, size_t(size)*sizeof(uint));
     }
 
     dataChanged();
@@ -410,7 +408,7 @@ getColorIndexPixel(int ind) const
   if (! CASSERT(pixel < colors_.size(), "Invalid Color Ind"))
     return 0;
 
-  return pixel;
+  return int(pixel);
 }
 
 int
@@ -454,7 +452,7 @@ setRGBAData(uint *data)
   int size = size_.area();
 
   if (size > 0)
-    memcpy(data_, data, size*sizeof(data_[0]));
+    memcpy(data_, data, size_t(size)*sizeof(data_[0]));
 
 #if 0
   uint *p1 = data;
@@ -822,7 +820,7 @@ addColor(const CRGBA &rgba)
 
   colors_.push_back(rgba);
 
-  return colors_.size() - 1;
+  return int(colors_.size() - 1);
 }
 
 CRGBA
@@ -914,7 +912,7 @@ CImage::
 getNumColors() const
 {
   if (hasColormap())
-    return colors_.size();
+    return int(colors_.size());
   else {
     const_cast<CImage *>(this)->updateData();
 
@@ -934,7 +932,7 @@ getNumColors() const
       }
     }
 
-    return used.size();
+    return int(used.size());
   }
 }
 
@@ -945,12 +943,12 @@ setTransparentColor(uint pixel)
   if (! CASSERT(hasColormap(), "Colormap required"))
     return;
 
-  uint num_colors = colors_.size();
+  auto num_colors = colors_.size();
 
   if (! CASSERT(pixel <= num_colors, "Invalid Color Ind"))
     return;
 
-  for (uint i = 0; i < num_colors; ++i) {
+  for (size_t i = 0; i < num_colors; ++i) {
     if (i == pixel)
       colors_[i].setAlpha(0.0);
     else
@@ -963,11 +961,11 @@ CImage::
 setTransparentColor(const CRGBA &rgba)
 {
   if (hasColormap()) {
-    uint num_colors = colors_.size();
+    auto num_colors = colors_.size();
 
-    for (uint i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       if (colors_[i] == rgba) {
-        setTransparentColor(i);
+        setTransparentColor(uint(i));
         break;
       }
   }
@@ -1002,11 +1000,11 @@ getTransparentColor() const
   if (! CASSERT(hasColormap(), "Colormap required"))
     return -1;
 
-  int num_colors = colors_.size();
+  auto num_colors = colors_.size();
 
-  for (int i = 0; i < num_colors; ++i)
+  for (size_t i = 0; i < num_colors; ++i)
     if (colors_[i].isTransparent())
-      return i;
+      return int(i);
 
   return -1;
 }
@@ -1075,7 +1073,7 @@ bool
 CImage::
 isTransparentI(int pos, COptInt tol) const
 {
-  return (getAlphaI(pos) <= tol);
+  return (int(getAlphaI(pos)) <= tol);
 }
 
 double
@@ -1354,9 +1352,9 @@ CImage::
 setAlphaByGray(bool positive)
 {
   if (hasColormap()) {
-    int num_colors = colors_.size();
+    auto num_colors = colors_.size();
 
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       colors_[i].setAlphaByGray(positive);
   }
   else {
@@ -1386,9 +1384,9 @@ CImage::
 setGrayByAlpha(bool positive)
 {
   if (hasColormap()) {
-    int num_colors = colors_.size();
+    auto num_colors = colors_.size();
 
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       colors_[i].setGrayByAlpha(positive);
   }
   else {
@@ -1416,9 +1414,9 @@ CImage::
 setAlphaByColor(const CRGB &rgb, double a)
 {
   if (hasColormap()) {
-    int num_colors = colors_.size();
+    auto num_colors = colors_.size();
 
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       colors_[i].setAlphaByColor(rgb);
   }
   else {
@@ -1479,9 +1477,9 @@ CImage::
 scaleAlpha(double a)
 {
   if (hasColormap()) {
-    int num_colors = colors_.size();
+    auto num_colors = colors_.size();
 
-    for (int i = 0; i < num_colors; ++i)
+    for (size_t i = 0; i < num_colors; ++i)
       colors_[i].setAlpha(a*colors_[i].getAlpha());
   }
   else {
@@ -1510,11 +1508,11 @@ findColor(const CRGBA &rgba)
   if (! hasColormap())
     return -1;
 
-  int num_colors = colors_.size();
+  auto num_colors = colors_.size();
 
-  for (int i = 0; i < num_colors; ++i)
+  for (size_t i = 0; i < num_colors; ++i)
     if (colors_[i] == rgba)
-      return i;
+      return int(i);
 
   return -1;
 }
@@ -1525,19 +1523,19 @@ uint
 CImage::
 memUsage() const
 {
-  uint mem = 0;
+  size_t mem = 0;
 
   mem += sizeof(CImage);
 
   if (data_ != 0)
-    mem += size_.area()*sizeof(uint);
+    mem += size_t(size_.area())*sizeof(uint);
 
-  int num_colors = colors_.size();
+  auto num_colors = colors_.size();
 
-  for (int i = 0; i < num_colors; ++i)
+  for (size_t i = 0; i < num_colors; ++i)
     mem += sizeof(CRGBA);
 
-  return mem;
+  return uint(mem);
 }
 
 //-----------
@@ -1576,8 +1574,8 @@ double
 CImage::
 boxScale(int w, int h) const
 {
-  int iw = getWidth ();
-  int ih = getHeight();
+  auto iw = getWidth ();
+  auto ih = getHeight();
 
   return std::min((1.0*w)/iw, (1.0*h)/ih);
 }

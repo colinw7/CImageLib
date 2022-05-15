@@ -5,8 +5,8 @@
 
 #include <XWDFile.h>
 
-static int xwd_bits_used  = -1;
-static int xwd_pixel_mask = -1;
+static int  xwd_bits_used  = -1;
+static uint xwd_pixel_mask = uint(-1);
 
 bool
 CImageXWD::
@@ -27,12 +27,12 @@ read(CFile *file, CImagePtr &image)
   CRGBA *colors = 0;
 
   if (hdr.ncolors > 0) {
-    XWDColor *xcolors = new XWDColor [hdr.ncolors];
+    auto *xcolors = new XWDColor [hdr.ncolors];
 
-    file->read((uchar *) xcolors, sizeof(XWDColor)*hdr.ncolors);
+    file->read(reinterpret_cast<uchar *>(xcolors), sizeof(XWDColor)*hdr.ncolors);
 
     if (swap_flag) {
-      for (int i = 0; i < (int) hdr.ncolors; ++i) {
+      for (int i = 0; i < int(hdr.ncolors); ++i) {
         xcolors[i].r = image->swapBytes16(xcolors[i].r);
         xcolors[i].g = image->swapBytes16(xcolors[i].g);
         xcolors[i].b = image->swapBytes16(xcolors[i].b);
@@ -42,7 +42,7 @@ read(CFile *file, CImagePtr &image)
     if (hdr.pixmap_depth <= 8) {
       colors = new CRGBA [hdr.ncolors];
 
-      for (int i = 0; i < (int) hdr.ncolors; ++i)
+      for (int i = 0; i < int(hdr.ncolors); ++i)
         colors[i].setRGBA(xcolors[i].r/65535.0,
                           xcolors[i].g/65535.0,
                           xcolors[i].b/65535.0);
@@ -66,13 +66,11 @@ read(CFile *file, CImagePtr &image)
   //------
 
   xwd_bits_used  = -1;
-  xwd_pixel_mask = -1;
+  xwd_pixel_mask = uint(-1);
 
   data_length = hdr.pixmap_width*hdr.pixmap_height;
 
-  int line_pad = hdr.bitmap_pad*
-                 ((8*hdr.bytes_per_line + hdr.bitmap_pad - 1)/
-                  hdr.bitmap_pad);
+  auto line_pad = hdr.bitmap_pad*((8*hdr.bytes_per_line + hdr.bitmap_pad - 1)/hdr.bitmap_pad);
 
   line_pad /= hdr.bits_per_pixel;
   line_pad -= hdr.pixmap_width;
@@ -94,7 +92,7 @@ read(CFile *file, CImagePtr &image)
         *p = (pixel ? 0x01 : 0x00);
       }
 
-      for (int x = 0; x < line_pad; ++x)
+      for (size_t x = 0; x < line_pad; ++x)
         getPixel(&hdr, data, &pos);
     }
   }
@@ -111,7 +109,7 @@ read(CFile *file, CImagePtr &image)
         *p = pixel & 0xFF;
       }
 
-      for (int x = 0; x < line_pad; ++x)
+      for (size_t x = 0; x < line_pad; ++x)
         getPixel(&hdr, data, &pos);
     }
   }
@@ -134,7 +132,7 @@ read(CFile *file, CImagePtr &image)
         *p = image->rgbaToPixel(r/31.0, g/63.0, b/31.0);
       }
 
-      for (int x = 0; x < line_pad; ++x)
+      for (size_t x = 0; x < line_pad; ++x)
         getPixel(&hdr, data, &pos);
     }
   }
@@ -154,16 +152,16 @@ read(CFile *file, CImagePtr &image)
         g = (pixel >> 16) & 0xFF;
         b = (pixel >>  8) & 0xFF;
 
-        *p = image->rgbaToPixelI(r, g, b);
+        *p = image->rgbaToPixelI(uint(r), uint(g), uint(b));
       }
 
-      for (int x = 0; x < line_pad; ++x)
+      for (size_t x = 0; x < line_pad; ++x)
         getPixel(&hdr, data, &pos);
     }
   }
   else {
     CImage::errorMsg(std::string("Invalid pixmap depth ") +
-                     CStrUtil::toString((int) hdr.pixmap_depth));
+                     CStrUtil::toString(int(hdr.pixmap_depth)));
     return false;
   }
 
@@ -172,7 +170,7 @@ read(CFile *file, CImagePtr &image)
   //------
 
   if (hdr.xoffset != 0) {
-    CImage::errorMsg(std::string("Invalid x offset ") + CStrUtil::toString((int) hdr.xoffset));
+    CImage::errorMsg(std::string("Invalid x offset ") + CStrUtil::toString(int(hdr.xoffset)));
     return false;
   }
 
@@ -180,7 +178,7 @@ read(CFile *file, CImagePtr &image)
 
   image->setType(CFILE_TYPE_IMAGE_XWD);
 
-  image->setDataSize(hdr.pixmap_width, hdr.pixmap_height);
+  image->setDataSize(int(hdr.pixmap_width), int(hdr.pixmap_height));
 
   if (hdr.pixmap_depth <= 8) {
     image->setColorIndexData(data1);
@@ -216,7 +214,7 @@ readHeader(CFile *file, CImagePtr &image)
 
   image->setType(CFILE_TYPE_IMAGE_XWD);
 
-  image->setSize(hdr.pixmap_width, hdr.pixmap_height);
+  image->setSize(int(hdr.pixmap_width), int(hdr.pixmap_height));
 
   //------
 
@@ -227,7 +225,7 @@ bool
 CImageXWD::
 readHeader(CFile *file, CImagePtr &image, XWDFileHeader *hdr, bool *swap_flag)
 {
-  file->read((uchar *) hdr, sz_XWDheader);
+  file->read(reinterpret_cast<uchar *>(hdr), sz_XWDheader);
 
   *swap_flag = false;
 
@@ -284,7 +282,7 @@ getPixel(XWDFileHeader *hdr, uchar *data, uint *pos)
   static uint   bit_shift;
 
   if (xwd_bits_used == -1) {
-    xwd_bits_used = hdr->bitmap_unit;
+    xwd_bits_used = int(hdr->bitmap_unit);
 
     if (hdr->bits_per_pixel == 32)
       xwd_pixel_mask = 0xFFFFFFFF;
@@ -292,7 +290,7 @@ getPixel(XWDFileHeader *hdr, uchar *data, uint *pos)
       xwd_pixel_mask = (1 << hdr->bits_per_pixel) - 1;
   }
 
-  if (xwd_bits_used == (int) hdr->bitmap_unit) {
+  if (xwd_bits_used == int(hdr->bitmap_unit)) {
     switch (hdr->bitmap_unit) {
       case 8:
         c = data[(*pos)++];
@@ -300,11 +298,11 @@ getPixel(XWDFileHeader *hdr, uchar *data, uint *pos)
         break;
       case 16:
         if (hdr->byte_order == MSBFirst)
-          s = ((data[(*pos) + 0] & 0xFF) << 8) |
-              ((data[(*pos) + 1] & 0xFF)     );
+          s = ushort(((data[(*pos) + 0] & 0xFF) << 8) |
+                     ((data[(*pos) + 1] & 0xFF)     ));
         else
-          s = ((data[(*pos) + 0] & 0xFF)     ) |
-              ((data[(*pos) + 1] & 0xFF) << 8);
+          s = ushort(((data[(*pos) + 0] & 0xFF)     ) |
+                     ((data[(*pos) + 1] & 0xFF) << 8));
 
         *pos += 2;
 
@@ -312,15 +310,15 @@ getPixel(XWDFileHeader *hdr, uchar *data, uint *pos)
       case 24:
       case 32:
         if (hdr->byte_order == MSBFirst)
-          l = ((data[(*pos) + 0] & 0xFF) << 24) |
-              ((data[(*pos) + 1] & 0xFF) << 16) |
-              ((data[(*pos) + 2] & 0xFF) <<  8) |
-              ((data[(*pos) + 3] & 0xFF)      );
+          l = uint(((data[(*pos) + 0] & 0xFF) << 24) |
+                   ((data[(*pos) + 1] & 0xFF) << 16) |
+                   ((data[(*pos) + 2] & 0xFF) <<  8) |
+                   ((data[(*pos) + 3] & 0xFF)      ));
         else
-          l = ((data[(*pos) + 0] & 0xFF)      ) |
-              ((data[(*pos) + 1] & 0xFF) <<  8) |
-              ((data[(*pos) + 2] & 0xFF) << 16) |
-              ((data[(*pos) + 3] & 0xFF) << 24);
+          l = uint(((data[(*pos) + 0] & 0xFF)      ) |
+                   ((data[(*pos) + 1] & 0xFF) <<  8) |
+                   ((data[(*pos) + 2] & 0xFF) << 16) |
+                   ((data[(*pos) + 3] & 0xFF) << 24));
 
         *pos += 4;
 
@@ -374,7 +372,7 @@ expandData(uchar *data, int width, int height)
 
   int num_bytes = width*height;
 
-  uchar *data1 = new uchar [num_bytes + 7];
+  auto *data1 = new uchar [size_t(num_bytes + 7)];
 
   int i = 0;
 
@@ -420,7 +418,7 @@ write(CFile *file, CImagePtr image)
     depth = 24;
 
   if      (depth == 24) {
-    bytes_per_line = 4*image->getWidth();
+    bytes_per_line = int(4*image->getWidth());
     visual_class   = TrueColor;
     r_mask         = 0x0000ff;
     g_mask         = 0x00ff00;
@@ -431,7 +429,7 @@ write(CFile *file, CImagePtr image)
     bitmap_pad     = 8;
   }
   else if (depth == 8) {
-    bytes_per_line = image->getWidth();
+    bytes_per_line = int(image->getWidth());
     visual_class   = PseudoColor;
     bits_per_pixel = 8;
     bits_per_rgb   = 8;
@@ -456,26 +454,26 @@ write(CFile *file, CImagePtr image)
 
   header->header_size      = sizeof(XWDFileHeader);
   header->file_version     = XWD_FILE_VERSION;
-  header->pixmap_format    = format;
-  header->pixmap_depth     = depth;
+  header->pixmap_format    = CIMAGE_INT32(format);
+  header->pixmap_depth     = CIMAGE_INT32(depth);
   header->pixmap_width     = image->getWidth();
   header->pixmap_height    = image->getHeight();
   header->xoffset          = 0;
   header->byte_order       = LSBFirst;
-  header->bitmap_unit      = bitmap_unit;
+  header->bitmap_unit      = CIMAGE_INT32(bitmap_unit);
   header->bitmap_bit_order = LSBFirst;
-  header->bitmap_pad       = bitmap_pad;
-  header->bits_per_pixel   = bits_per_pixel;
-  header->bytes_per_line   = bytes_per_line;
-  header->visual_class     = visual_class;
+  header->bitmap_pad       = CIMAGE_INT32(bitmap_pad);
+  header->bits_per_pixel   = CIMAGE_INT32(bits_per_pixel);
+  header->bytes_per_line   = CIMAGE_INT32(bytes_per_line);
+  header->visual_class     = CIMAGE_INT32(visual_class);
   header->r_mask           = r_mask;
   header->g_mask           = g_mask;
   header->b_mask           = b_mask;
-  header->bits_per_rgb     = bits_per_rgb;
+  header->bits_per_rgb     = CIMAGE_INT32(bits_per_rgb);
 
   if (image->hasColormap()) {
     header->colormap_entries = 256;
-    header->ncolors          = image->getNumColors();
+    header->ncolors          = CIMAGE_INT32(image->getNumColors());
   }
   else {
     header->colormap_entries = 0;
@@ -488,30 +486,29 @@ write(CFile *file, CImagePtr image)
   header->window_y         = 0;
   header->window_bdrwidth  = 0;
 
-  file->write((uchar *) header, sizeof(XWDFileHeader));
+  file->write(reinterpret_cast<uchar *>(header), sizeof(XWDFileHeader));
 
   delete header;
 
   if (header->ncolors > 0) {
-    XWDColor *xcolors = new XWDColor [header->ncolors];
+    auto *xcolors = new XWDColor [header->ncolors];
 
     uint r, g, b, a;
 
     for (uint i = 0; i < header->ncolors; ++i) {
       image->getColorRGBAI(i, &r, &g, &b, &a);
 
-      xcolors[i].r = (r << 8) | r;
-      xcolors[i].g = (g << 8) | g;
-      xcolors[i].b = (b << 8) | b;
+      xcolors[i].r = CIMAGE_INT16((r << 8) | r);
+      xcolors[i].g = CIMAGE_INT16((g << 8) | g);
+      xcolors[i].b = CIMAGE_INT16((b << 8) | b);
     }
 
-    file->write((uchar *) xcolors,
-                sizeof(XWDColor)*header->ncolors);
+    file->write(reinterpret_cast<uchar *>(xcolors), sizeof(XWDColor)*header->ncolors);
 
     delete [] xcolors;
   }
 
-  int len = image->getHeight()*bytes_per_line;
+  auto len = image->getHeight()*uint(bytes_per_line);
 
   uchar *data = new uchar [len];
 
@@ -526,10 +523,10 @@ write(CFile *file, CImagePtr image)
       for (uint j = 0; j < image->getWidth(); ++j, p += 4, ++k) {
         image->getRGBAPixelI(k, &r, &g, &b, &a);
 
-        p[0] = a;
-        p[1] = b;
-        p[2] = g;
-        p[3] = r;
+        p[0] = uchar(a);
+        p[1] = uchar(b);
+        p[2] = uchar(g);
+        p[3] = uchar(r);
       }
   }
   else {
@@ -537,7 +534,7 @@ write(CFile *file, CImagePtr image)
 
     for (uint i = 0; i < image->getHeight(); ++i)
       for (uint j = 0; j < image->getWidth(); ++j, ++p, ++k)
-        *p = (uchar) image->getColorIndexPixel(k);
+        *p = uchar(image->getColorIndexPixel(k));
   }
 
   file->write(data, len);

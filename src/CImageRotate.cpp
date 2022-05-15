@@ -29,8 +29,8 @@ rotate(double angle)
   int width  = right - left + 1;
   int height = top - bottom + 1;
 
-  int width1  = (int) (fabs(width *c) + fabs(height*s));
-  int height1 = (int) (fabs(height*c) + fabs(width *s));
+  int width1  = int(fabs(width *c) + fabs(height*s));
+  int height1 = int(fabs(height*c) + fabs(width *s));
 
   image->setDataSize(width1, height1);
 
@@ -40,12 +40,12 @@ rotate(double angle)
     int num_colors = getNumColors();
 
     for (int i = 0; i < num_colors; ++i)
-      image->addColor(getColor(i));
+      image->addColor(getColor(uint(i)));
 
     //-----
 
     if (isTransparent())
-      image->setTransparentColor(getTransparentColor());
+      image->setTransparentColor(uint(getTransparentColor()));
   }
 
   //-----
@@ -78,7 +78,7 @@ rotate(double angle)
 
         int ind = getColorIndexPixel(x1, y1);
 
-        image->setColorIndexPixel(x, y, ind);
+        image->setColorIndexPixel(x, y, uint(ind));
       }
     }
   }

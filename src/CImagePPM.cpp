@@ -12,7 +12,7 @@ read(CFile *file, CImagePtr &image)
 
   file->readLine(line);
 
-  int len = line.size();
+  auto len = line.size();
 
   if (len < 2)
     return false;
@@ -40,7 +40,7 @@ readV6(CFile *file, CImagePtr &image)
 
   file->readLine(line);
 
-  int len = line.size();
+  auto len = line.size();
 
   while (len > 0 && line[0] == '#') {
     file->readLine(line);
@@ -75,9 +75,9 @@ readV6(CFile *file, CImagePtr &image)
 
   int num_pixels = width*height;
 
-  int buffer_size = 3*num_pixels;
+  auto buffer_size = size_t(3*num_pixels);
 
-  uchar *buffer = new uchar [buffer_size];
+  auto *buffer = new uchar [buffer_size];
 
   if (! file->read(buffer, buffer_size))
     return false;

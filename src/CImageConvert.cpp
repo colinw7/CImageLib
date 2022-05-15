@@ -9,13 +9,13 @@ CImage::
 convertToNColors(uint ncolors, ConvertMethod method)
 {
   if (hasColormap()) {
-    if (getNumColors() > (int) ncolors) {
+    if (getNumColors() > int(ncolors)) {
       CImage::errorMsg("convertToNColors not implemented for color map");
       return;
     }
   }
 
-  uint num_bytes = size_.area();
+  auto num_bytes = uint(size_.area());
 
   //----------
 
@@ -41,7 +41,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
       color_map[ind] = 1;
   }
 
-  uint num_colors = color_map.size();
+  auto num_colors = color_map.size();
 
   if (CImageState::getDebug())
     CImage::infoMsg("Num Colors " + std::to_string(num_colors));
@@ -58,7 +58,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
     num_colors = 0;
 
     for (auto &pc : color_map) {
-      if (pc.second <= (int) num)
+      if (pc.second <= int(num))
         pc.second = 0;
       else
         ++num_colors;
@@ -82,11 +82,11 @@ convertToNColors(uint ncolors, ConvertMethod method)
       continue;
     }
 
-    int ind1 = pc.first;
+    auto ind1 = pc.first;
 
-    int r1 = (ind1 >> 16) & 0xFF;
-    int g1 = (ind1 >>  8) & 0xFF;
-    int b1 = (ind1 >>  0) & 0xFF;
+    auto r1 = uint((ind1 >> 16) & 0xFF);
+    auto g1 = uint((ind1 >>  8) & 0xFF);
+    auto b1 = uint((ind1 >>  0) & 0xFF);
 
     addColor(r1*f, g1*f, b1*f, 1);
 
@@ -111,16 +111,16 @@ convertToNColors(uint ncolors, ConvertMethod method)
       auto pc = color_map.find(ind);
 
       if ((*pc).second >= 0) {
-        *p1 = (*pc).second;
+        *p1 = uint((*pc).second);
         continue;
       }
 
       if ((*pc).second < -1) {
-        *p1 = -((*pc).second + 2);
+        *p1 = uint(-((*pc).second + 2));
         continue;
       }
 
-      int min_d = (1 << 24);
+      uint min_d = (1 << 24);
 
       auto pc1 = color_map.begin();
       auto pc2 = color_map.end  ();
@@ -129,13 +129,13 @@ convertToNColors(uint ncolors, ConvertMethod method)
         if ((*pc1).second < 0)
           continue;
 
-        int ind1 = (*pc1).first;
+        auto ind1 = (*pc1).first;
 
-        int r1 = (ind1 >> 16) & 0xFF;
-        int g1 = (ind1 >>  8) & 0xFF;
-        int b1 = (ind1 >>  0) & 0xFF;
+        auto r1 = uint((ind1 >> 16) & 0xFF);
+        auto g1 = uint((ind1 >>  8) & 0xFF);
+        auto b1 = uint((ind1 >>  0) & 0xFF);
 
-        int d = (r - r1)*(r - r1) + (g - g1)*(g - g1) + (b - b1)*(b - b1);
+        uint d = (r - r1)*(r - r1) + (g - g1)*(g - g1) + (b - b1)*(b - b1);
 
         if (d < min_d) {
           (*pc).second = -((*pc1).second + 2);
@@ -143,7 +143,7 @@ convertToNColors(uint ncolors, ConvertMethod method)
         }
       }
 
-      *p1 = -((*pc).second + 2);
+      *p1 = uint(-((*pc).second + 2));
     }
   }
   else if (method == CONVERT_NEAREST_PHYSICAL) {
@@ -168,13 +168,13 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
       if ((*pc).second >= 0) {
         current = (*pc).second;
-        *p1     = current;
+        *p1     = uint(current);
 
         continue;
       }
 
       if (current >= 0) {
-        *p1 = current;
+        *p1 = uint(current);
 
         continue;
       }
@@ -192,10 +192,10 @@ convertToNColors(uint ncolors, ConvertMethod method)
 
         if ((*pc1).second >= 0) {
           current = (*pc1).second;
-          *p1     = current;
+          *p1     = uint(current);
 
           for (uint *p = pt; p < p1; ++p)
-            *p = current;
+            *p = uint(current);
 
           break;
         }
@@ -211,7 +211,7 @@ CImage::
 convertToColorIndex()
 {
   double ralpha_tol = convertAlphaTol_;
-  uint   alpha_tol  = 256*ralpha_tol;
+  uint   alpha_tol  = uint(256*ralpha_tol);
 
   if (hasColormap())
     return;
@@ -219,7 +219,7 @@ convertToColorIndex()
   bool transparent = false;
 
   // TODO: handle transparency
-  uint num_bytes = size_.area();
+  auto num_bytes = uint(size_.area());
 
   uint num_colors;
   uint colors[256];
@@ -294,15 +294,15 @@ convertToColorIndex()
     double r, g, b, a;
 
     if      (cycle == 2) {
-      int max = (1 << b_bits) - 1;
+      uint max = (1 << b_bits) - 1;
 
       for (uint i = 0; i < num_bytes; ++i, ++p) {
         pixelToRGBA(*p, &r, &g, &b, &a);
 
         if (a > ralpha_tol) {
-          int r1 = int(255*(r*a + convertBg_.getRed  ()*(1 - a)));
-          int g1 = int(255*(g*a + convertBg_.getGreen()*(1 - a)));
-          int b1 = int(255*(b*a + convertBg_.getBlue ()*(1 - a)));
+          auto r1 = uint(255*(r*a + convertBg_.getRed  ()*(1 - a)));
+          auto g1 = uint(255*(g*a + convertBg_.getGreen()*(1 - a)));
+          auto b1 = uint(255*(b*a + convertBg_.getBlue ()*(1 - a)));
 
           if (b1 < max)
             b1 += error;
@@ -318,15 +318,15 @@ convertToColorIndex()
       --b_bits;
     }
     else if (cycle == 1) {
-      int max = (1 << g_bits) - 1;
+      uint max = (1 << g_bits) - 1;
 
       for (uint i = 0; i < num_bytes; ++i, ++p) {
         pixelToRGBA(*p, &r, &g, &b, &a);
 
         if (a > ralpha_tol) {
-          int r1 = int(255*(r*a + convertBg_.getRed  ()*(1 - a)));
-          int g1 = int(255*(g*a + convertBg_.getGreen()*(1 - a)));
-          int b1 = int(255*(b*a + convertBg_.getBlue ()*(1 - a)));
+          auto r1 = uint(255*(r*a + convertBg_.getRed  ()*(1 - a)));
+          auto g1 = uint(255*(g*a + convertBg_.getGreen()*(1 - a)));
+          auto b1 = uint(255*(b*a + convertBg_.getBlue ()*(1 - a)));
 
           if (g1 < max)
             g1 += error;
@@ -342,15 +342,15 @@ convertToColorIndex()
       --g_bits;
     }
     else {
-      int max = (1 << r_bits) - 1;
+      uint max = (1 << r_bits) - 1;
 
       for (uint i = 0; i < num_bytes; ++i, ++p) {
         pixelToRGBA(*p, &r, &g, &b, &a);
 
         if (a > ralpha_tol) {
-          int r1 = int(255*(r*a + convertBg_.getRed  ()*(1 - a)));
-          int g1 = int(255*(g*a + convertBg_.getGreen()*(1 - a)));
-          int b1 = int(255*(b*a + convertBg_.getBlue ()*(1 - a)));
+          auto r1 = uint(255*(r*a + convertBg_.getRed  ()*(1 - a)));
+          auto g1 = uint(255*(g*a + convertBg_.getGreen()*(1 - a)));
+          auto b1 = uint(255*(b*a + convertBg_.getBlue ()*(1 - a)));
 
           if (r1 < max)
             r1 += error;
@@ -409,9 +409,9 @@ convertToColorIndex()
   // add colors
   deleteColors();
 
-  double r_factor = 1.0/(((double) (1 << r_bits)) - 1.0);
-  double g_factor = 1.0/(((double) (1 << g_bits)) - 1.0);
-  double b_factor = 1.0/(((double) (1 << b_bits)) - 1.0);
+  double r_factor = 1.0/(double(1 << r_bits) - 1.0);
+  double g_factor = 1.0/(double(1 << g_bits) - 1.0);
+  double b_factor = 1.0/(double(1 << b_bits) - 1.0);
 
   double r, g, b, a;
 
@@ -420,9 +420,9 @@ convertToColorIndex()
 
     assert(a > ralpha_tol);
 
-    int r1 = int(255*(r*a + convertBg_.getRed  ()*(1 - a)));
-    int g1 = int(255*(g*a + convertBg_.getGreen()*(1 - a)));
-    int b1 = int(255*(b*a + convertBg_.getBlue ()*(1 - a)));
+    auto r1 = uint(255*(r*a + convertBg_.getRed  ()*(1 - a)));
+    auto g1 = uint(255*(g*a + convertBg_.getGreen()*(1 - a)));
+    auto b1 = uint(255*(b*a + convertBg_.getBlue ()*(1 - a)));
 
     if (CImageState::getDebug())
       CImage::infoMsg("Color " + std::to_string(i + 1) +

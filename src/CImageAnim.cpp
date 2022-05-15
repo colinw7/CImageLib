@@ -9,8 +9,10 @@ CImageAnim() :
 CImageAnim::
 ~CImageAnim()
 {
-  for (int i = frames_.size() - 1; i >= 0; --i)
-    delete frames_[i];
+  auto n = frames_.size();
+
+  for (size_t i = 0; i < n; ++i)
+    delete frames_[n - i - 1];
 }
 
 void

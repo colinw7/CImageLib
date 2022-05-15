@@ -26,7 +26,7 @@ invert()
       for (int x = x1; x <= x2; ++x) {
         int ind = getColorIndexPixel(x, y);
 
-        rgba = getColor(ind).invert();
+        rgba = getColor(uint(ind)).invert();
 
         int ind1 = findColor(rgba);
 
@@ -34,13 +34,13 @@ invert()
           ind1 = addColor(rgba);
 
           if (ind1 < 0) {
-            setColor(ind, rgba);
+            setColor(uint(ind), rgba);
 
             ind1 = ind;
           }
         }
 
-        setColorIndexPixel(x, y, ind1);
+        setColorIndexPixel(x, y, uint(ind1));
       }
     }
   }

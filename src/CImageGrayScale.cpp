@@ -21,11 +21,11 @@ grayScale()
     CRGBA rgba;
 
     for (int i = 0; i < num_colors; ++i) {
-      rgba = getColor(i);
+      rgba = getColor(uint(i));
 
       rgba.toGray();
 
-      setColor(i, rgba);
+      setColor(uint(i), rgba);
     }
   }
   else {

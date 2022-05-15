@@ -318,16 +318,16 @@ readBMHD(CFile *file, IFFBitMapHeader *bitmap_header)
   if (sizeof(IFFBitMapHeader) != header_length)
     return false;
 
-  if (! readStorage(file, header_length, (IFF_UBYTE *) bitmap_header))
+  if (! readStorage(file, int(header_length), reinterpret_cast<IFF_UBYTE *>(bitmap_header)))
     return false;
 
   convertWord(&bitmap_header->w);
   convertWord(&bitmap_header->h);
-  convertWord((IFF_UWORD *) &bitmap_header->x);
-  convertWord((IFF_UWORD *) &bitmap_header->y);
+  convertWord(reinterpret_cast<IFF_UWORD *>(&bitmap_header->x));
+  convertWord(reinterpret_cast<IFF_UWORD *>(&bitmap_header->y));
   convertWord(&bitmap_header->TransCol);
-  convertWord((IFF_UWORD *) &bitmap_header->Width);
-  convertWord((IFF_UWORD *) &bitmap_header->Height);
+  convertWord(reinterpret_cast<IFF_UWORD *>(&bitmap_header->Width));
+  convertWord(reinterpret_cast<IFF_UWORD *>(&bitmap_header->Height));
 
   if (CImageState::getDebug()) {
     CImage::infoMsg("  w           = " + std::to_string(bitmap_header->w));
@@ -366,12 +366,12 @@ readCMAP(CFile *file, IFFColorRegister *cregs, int *num_colors)
 
   buffer.resize(header_length + 1);
 
-  if (! readStorage(file, header_length, &buffer[0]))
+  if (! readStorage(file, int(header_length), &buffer[0]))
     return false;
 
   *num_colors = header_length/3;
 
-  for (int i = 0; i < *num_colors; ++i) {
+  for (uint i = 0; i < uint(*num_colors); ++i) {
     cregs[i].r = buffer[(3 * i) + 0];
     cregs[i].g = buffer[(3 * i) + 1];
     cregs[i].b = buffer[(3 * i) + 2];
@@ -404,7 +404,7 @@ readCAMG(CFile *file, IFFCommodoreAmiga *commodore_amiga)
   if (sizeof(IFFCommodoreAmiga) != header_length)
     return false;
 
-  if (! readStorage(file, header_length, (IFF_UBYTE *) commodore_amiga))
+  if (! readStorage(file, int(header_length), reinterpret_cast<IFF_UBYTE *>(commodore_amiga)))
     return false;
 
   convertWord(&commodore_amiga->ViewModes);
@@ -443,11 +443,11 @@ readCRNG(CFile *file, IFFColorRange *color_range)
   if (sizeof(IFFColorRange) != header_length)
     return false;
 
-  if (! readStorage(file, header_length, (IFF_UBYTE *) color_range))
+  if (! readStorage(file, int(header_length), reinterpret_cast<IFF_UBYTE *>(color_range)))
     return false;
 
-  convertWord((IFF_UWORD *) &color_range->rate);
-  convertWord((IFF_UWORD *) &color_range->active);
+  convertWord(reinterpret_cast<IFF_UWORD *>(&color_range->rate));
+  convertWord(reinterpret_cast<IFF_UWORD *>(&color_range->active));
 
   if (CImageState::getDebug()) {
     CImage::infoMsg("  Rate   = " + std::to_string(color_range->rate));
@@ -480,7 +480,7 @@ readBody(CFile *file, IFF_UBYTE **screen_memory, IFF_ULONG *screen_memory_size)
   if (*screen_memory == 0)
     return false;
 
-  if (! readStorage(file, header_length, *screen_memory)) {
+  if (! readStorage(file, int(header_length), *screen_memory)) {
     delete [] *screen_memory;
 
     return false;
@@ -501,7 +501,7 @@ readUnknown(CFile *file)
   if (CImageState::getDebug())
     CImage::infoMsg("  " + std::to_string(header_length) + " bytes");
 
-  if (! readBytes(file, header_length))
+  if (! readBytes(file, int(header_length)))
     return false;
 
   return true;
@@ -517,7 +517,7 @@ readHeaderName(CFile *file, char *name)
   if (! file->read(buffer, 4, &size))
     return false;
 
-  strncpy(&name[0], (char *) &buffer[0], 4);
+  strncpy(&name[0], reinterpret_cast<char *>(&buffer[0]), 4);
   name[4] = '\0';
 
   for (int i = 0; i < 4; ++i)
@@ -539,10 +539,10 @@ readHeaderLength(CFile *file, IFF_ULONG *length)
   if (! file->read(buffer, 4, &size))
     return false;
 
-  *length = ((buffer[0] << 24) & 0xFF000000U) |
-            ((buffer[1] << 16) & 0x00FF0000U) |
-            ((buffer[2] << 8 ) & 0x0000FF00U) |
-            ((buffer[3]      ) & 0x000000FFU);
+  *length = IFF_ULONG((uint(buffer[0] << 24) & 0xFF000000U) |
+                      (uint(buffer[1] << 16) & 0x00FF0000U) |
+                      (uint(buffer[2] << 8 ) & 0x0000FF00U) |
+                      (uint(buffer[3]      ) & 0x000000FFU));
 
   return true;
 }
@@ -556,9 +556,9 @@ readBytes(CFile *file, int length)
   if (length & 1)
     length += 1;
 
-  IFF_UBYTE *buffer = new IFF_UBYTE [length];
+  auto *buffer = new IFF_UBYTE [size_t(length)];
 
-  if (! file->read(buffer, length, &size)) {
+  if (! file->read(buffer, size_t(length), &size)) {
     delete [] buffer;
 
     return false;
@@ -578,7 +578,7 @@ readStorage(CFile *file, int length, IFF_UBYTE *buffer)
   if (length & 1)
     length += 1;
 
-  if (! file->read(buffer, length, &size))
+  if (! file->read(buffer, size_t(length), &size))
     return false;
 
   return true;
@@ -589,11 +589,11 @@ CImageIFF::
 decompressScreenMemory(IFF_UBYTE *screen_memory, IFF_ULONG screen_memory_size, int width,
                        int height, int depth)
 {
-  IFF_UBYTE bytes_per_row = ((width + 15)/16) * 2;
+  auto bytes_per_row = IFF_UBYTE(((width + 15)/16) * 2);
 
-  IFF_ULONG screen_memory_size1 = height*depth*bytes_per_row;
+  auto screen_memory_size1 = IFF_ULONG(height*depth*bytes_per_row);
 
-  IFF_UBYTE *screen_memory1 = new IFF_UBYTE [screen_memory_size1];
+  auto *screen_memory1 = new IFF_UBYTE [screen_memory_size1];
 
   IFF_ULONG screen_memory_position  = 0;
   IFF_ULONG screen_memory_position1 = 0;
@@ -615,7 +615,7 @@ decompressScreenMemory(IFF_UBYTE *screen_memory, IFF_ULONG screen_memory_size, i
          screen_memory[screen_memory_position++];
     }
     else if (key > 128) {
-      int count = 257 - key;
+      uint count = 257 - key;
 
       if (screen_memory_position >= screen_memory_size) {
         CImage::errorMsg("Decompress Failed 2");
@@ -624,14 +624,14 @@ decompressScreenMemory(IFF_UBYTE *screen_memory, IFF_ULONG screen_memory_size, i
 
       IFF_UBYTE data_byte = screen_memory[screen_memory_position++];
 
-      if (screen_memory_position1 + count > screen_memory_size1) {
+      if (IFF_ULONG(screen_memory_position1 + count) > screen_memory_size1) {
         CImage::errorMsg("Decompress Failed 3");
         CImage::errorMsg("Count = " + std::to_string(count) + ", Left = " +
                          std::to_string(screen_memory_size1 - screen_memory_position1));
         break;
       }
 
-      for (int i = 0; i < count; ++i)
+      for (uint i = 0; i < count; ++i)
         screen_memory1[screen_memory_position1++] = data_byte;
     }
     else
@@ -645,11 +645,11 @@ IFF_UBYTE *
 CImageIFF::
 convertScreenMemory8(IFF_UBYTE *screen_memory, int width, int height, int depth)
 {
-  IFF_UBYTE bytes_per_row = ((width + 15)/16) * 2;
+  auto bytes_per_row = IFF_UBYTE(((width + 15)/16) * 2);
 
-  int screen_memory_size1 = 8*height*bytes_per_row;
+  auto screen_memory_size1 = uint(8*height*bytes_per_row);
 
-  IFF_UBYTE *screen_memory1 = new IFF_UBYTE [screen_memory_size1];
+  auto *screen_memory1 = new IFF_UBYTE [screen_memory_size1];
 
   memset(screen_memory1, 0, screen_memory_size1*sizeof(IFF_UBYTE));
 
@@ -664,14 +664,14 @@ convertScreenMemory8(IFF_UBYTE *screen_memory, int width, int height, int depth)
       for (int k = 0; k < bytes_per_row; ++k) {
         IFF_UBYTE byte = screen_memory[screen_memory_position++];
 
-        IFF_UBYTE byte1 = ((byte >> 0) & 0x01) << j;
-        IFF_UBYTE byte2 = ((byte >> 1) & 0x01) << j;
-        IFF_UBYTE byte3 = ((byte >> 2) & 0x01) << j;
-        IFF_UBYTE byte4 = ((byte >> 3) & 0x01) << j;
-        IFF_UBYTE byte5 = ((byte >> 4) & 0x01) << j;
-        IFF_UBYTE byte6 = ((byte >> 5) & 0x01) << j;
-        IFF_UBYTE byte7 = ((byte >> 6) & 0x01) << j;
-        IFF_UBYTE byte8 = ((byte >> 7) & 0x01) << j;
+        auto byte1 = IFF_UBYTE((byte >> 0) & 0x01) << j;
+        auto byte2 = IFF_UBYTE((byte >> 1) & 0x01) << j;
+        auto byte3 = IFF_UBYTE((byte >> 2) & 0x01) << j;
+        auto byte4 = IFF_UBYTE((byte >> 3) & 0x01) << j;
+        auto byte5 = IFF_UBYTE((byte >> 4) & 0x01) << j;
+        auto byte6 = IFF_UBYTE((byte >> 5) & 0x01) << j;
+        auto byte7 = IFF_UBYTE((byte >> 6) & 0x01) << j;
+        auto byte8 = IFF_UBYTE((byte >> 7) & 0x01) << j;
 
         screen_memory1[m++] |= byte8;
         screen_memory1[m++] |= byte7;
@@ -692,11 +692,11 @@ IFF_UBYTE *
 CImageIFF::
 convertScreenMemory24(IFF_UBYTE *screen_memory, int width, int height)
 {
-  IFF_UBYTE bytes_per_row = ((width + 15)/16) * 2;
+  auto bytes_per_row = IFF_UBYTE(((width + 15)/16) * 2);
 
-  int screen_memory_size1 = 24*height*bytes_per_row;
+  auto screen_memory_size1 = uint(24*height*bytes_per_row);
 
-  IFF_UBYTE *screen_memory1 = new IFF_UBYTE [screen_memory_size1];
+  auto *screen_memory1 = new IFF_UBYTE [screen_memory_size1];
 
   memset(screen_memory1, 0, screen_memory_size1*sizeof(IFF_UBYTE));
 
@@ -713,14 +713,14 @@ convertScreenMemory24(IFF_UBYTE *screen_memory, int width, int height)
       for (int k = 0; k < bytes_per_row; ++k) {
         IFF_UBYTE byte = screen_memory[screen_memory_position++];
 
-        IFF_UBYTE byte1 = ((byte >> 0) & 0x01) << j;
-        IFF_UBYTE byte2 = ((byte >> 1) & 0x01) << j;
-        IFF_UBYTE byte3 = ((byte >> 2) & 0x01) << j;
-        IFF_UBYTE byte4 = ((byte >> 3) & 0x01) << j;
-        IFF_UBYTE byte5 = ((byte >> 4) & 0x01) << j;
-        IFF_UBYTE byte6 = ((byte >> 5) & 0x01) << j;
-        IFF_UBYTE byte7 = ((byte >> 6) & 0x01) << j;
-        IFF_UBYTE byte8 = ((byte >> 7) & 0x01) << j;
+        auto byte1 = IFF_UBYTE((byte >> 0) & 0x01) << j;
+        auto byte2 = IFF_UBYTE((byte >> 1) & 0x01) << j;
+        auto byte3 = IFF_UBYTE((byte >> 2) & 0x01) << j;
+        auto byte4 = IFF_UBYTE((byte >> 3) & 0x01) << j;
+        auto byte5 = IFF_UBYTE((byte >> 4) & 0x01) << j;
+        auto byte6 = IFF_UBYTE((byte >> 5) & 0x01) << j;
+        auto byte7 = IFF_UBYTE((byte >> 6) & 0x01) << j;
+        auto byte8 = IFF_UBYTE((byte >> 7) & 0x01) << j;
 
         screen_memory1[m] |= byte8; m += 3;
         screen_memory1[m] |= byte7; m += 3;
@@ -739,14 +739,14 @@ convertScreenMemory24(IFF_UBYTE *screen_memory, int width, int height)
       for (int k = 0; k < bytes_per_row; ++k) {
         IFF_UBYTE byte = screen_memory[screen_memory_position++];
 
-        IFF_UBYTE byte1 = ((byte >> 0) & 0x01) << j;
-        IFF_UBYTE byte2 = ((byte >> 1) & 0x01) << j;
-        IFF_UBYTE byte3 = ((byte >> 2) & 0x01) << j;
-        IFF_UBYTE byte4 = ((byte >> 3) & 0x01) << j;
-        IFF_UBYTE byte5 = ((byte >> 4) & 0x01) << j;
-        IFF_UBYTE byte6 = ((byte >> 5) & 0x01) << j;
-        IFF_UBYTE byte7 = ((byte >> 6) & 0x01) << j;
-        IFF_UBYTE byte8 = ((byte >> 7) & 0x01) << j;
+        auto byte1 = IFF_UBYTE((byte >> 0) & 0x01) << j;
+        auto byte2 = IFF_UBYTE((byte >> 1) & 0x01) << j;
+        auto byte3 = IFF_UBYTE((byte >> 2) & 0x01) << j;
+        auto byte4 = IFF_UBYTE((byte >> 3) & 0x01) << j;
+        auto byte5 = IFF_UBYTE((byte >> 4) & 0x01) << j;
+        auto byte6 = IFF_UBYTE((byte >> 5) & 0x01) << j;
+        auto byte7 = IFF_UBYTE((byte >> 6) & 0x01) << j;
+        auto byte8 = IFF_UBYTE((byte >> 7) & 0x01) << j;
 
         screen_memory1[m] |= byte8; m += 3;
         screen_memory1[m] |= byte7; m += 3;
@@ -765,14 +765,14 @@ convertScreenMemory24(IFF_UBYTE *screen_memory, int width, int height)
       for (int k = 0; k < bytes_per_row; ++k) {
         IFF_UBYTE byte = screen_memory[screen_memory_position++];
 
-        IFF_UBYTE byte1 = ((byte >> 0) & 0x01) << j;
-        IFF_UBYTE byte2 = ((byte >> 1) & 0x01) << j;
-        IFF_UBYTE byte3 = ((byte >> 2) & 0x01) << j;
-        IFF_UBYTE byte4 = ((byte >> 3) & 0x01) << j;
-        IFF_UBYTE byte5 = ((byte >> 4) & 0x01) << j;
-        IFF_UBYTE byte6 = ((byte >> 5) & 0x01) << j;
-        IFF_UBYTE byte7 = ((byte >> 6) & 0x01) << j;
-        IFF_UBYTE byte8 = ((byte >> 7) & 0x01) << j;
+        auto byte1 = IFF_UBYTE((byte >> 0) & 0x01) << j;
+        auto byte2 = IFF_UBYTE((byte >> 1) & 0x01) << j;
+        auto byte3 = IFF_UBYTE((byte >> 2) & 0x01) << j;
+        auto byte4 = IFF_UBYTE((byte >> 3) & 0x01) << j;
+        auto byte5 = IFF_UBYTE((byte >> 4) & 0x01) << j;
+        auto byte6 = IFF_UBYTE((byte >> 5) & 0x01) << j;
+        auto byte7 = IFF_UBYTE((byte >> 6) & 0x01) << j;
+        auto byte8 = IFF_UBYTE((byte >> 7) & 0x01) << j;
 
         screen_memory1[m] |= byte8; m += 3;
         screen_memory1[m] |= byte7; m += 3;
@@ -802,9 +802,9 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
     cregs[i].b = (cregs[i].b >> 4) & 0x0F;
   }
 
-  IFF_ULONG size = width*height;
+  auto size = IFF_ULONG(width*height);
 
-  IFF_UBYTE *screen_memory1 = new IFF_UBYTE [size*3];
+  auto *screen_memory1 = new IFF_UBYTE [size*3];
 
   IFF_UBYTE *p  = screen_memory;
   IFF_UBYTE *p1 = screen_memory1;
@@ -825,13 +825,13 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
 
           break;
         case 0x10:
-          b = c;
+          b = IFF_UBYTE(c);
           break;
         case 0x20:
-          r = c;
+          r = IFF_UBYTE(c);
           break;
         case 0x30:
-          g = c;
+          g = IFF_UBYTE(c);
           break;
       }
 
@@ -843,15 +843,15 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
     }
   }
 
-  int max_c = 16*16*16;
+  size_t max_c = 16*16*16;
 
-  IFF_UBYTE *c_flags  = new IFF_UBYTE [max_c];
-  IFF_ULONG *c_flags1 = new IFF_ULONG [256  ];
+  auto *c_flags  = new IFF_UBYTE [max_c];
+  auto *c_flags1 = new IFF_ULONG [256];
 
   int tol     = 0;
   int tol_inc = 2;
 
-  int num_c;
+  size_t num_c;
 
   while (true) {
     num_c = 0;
@@ -866,7 +866,7 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
       IFF_UBYTE g = *p1++;
       IFF_UBYTE b = *p1++;
 
-      IFF_ULONG c = (r << 8) + (g << 4) + b;
+      auto c = IFF_ULONG((r << 8) + (g << 4) + b);
 
       if (c_flags[c] == 1)
         continue;
@@ -888,9 +888,9 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
       for (int rr = r1; rr <= r2; ++rr)
         for (int gg = g1; gg <= g2; ++gg)
           for (int bb = b1; bb <= b2; ++bb) {
-            IFF_ULONG c1 = ((rr & 0x0F) << 8) +
-                           ((gg & 0x0F) << 4) +
-                           ((bb & 0x0F) << 0);
+            IFF_ULONG c1 = (uint(rr & 0x0F) << 8) +
+                           (uint(gg & 0x0F) << 4) +
+                           (uint(bb & 0x0F) << 0);
 
             c_flags[c1] = 1;
           }
@@ -931,12 +931,12 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
   if (CImageState::getDebug())
     CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " + std::to_string(tol));
 
-  *num_colors = num_c;
-  *colors     = new CRGBA [num_c];
+  *num_colors = int(num_c);
+  *colors     = new CRGBA [size_t(num_c)];
 
   memset(c_flags, '\0', max_c*sizeof(IFF_UBYTE));
 
-  for (i = 0; i < num_c; ++i) {
+  for (i = 0; i < int(num_c); ++i) {
     IFF_UBYTE r = (c_flags1[i] >> 8) & 0x0F;
     IFF_UBYTE g = (c_flags1[i] >> 4) & 0x0F;
     IFF_UBYTE b = (c_flags1[i]     ) & 0x0F;
@@ -965,15 +965,15 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
     for (int rr = r1; rr <= r2; ++rr)
       for (int gg = g1; gg <= g2; ++gg)
         for (int bb = b1; bb <= b2; ++bb) {
-          IFF_ULONG c1 = ((rr & 0x0F) << 8) +
-                         ((gg & 0x0F) << 4) +
-                         ((bb & 0x0F) << 0);
+          IFF_ULONG c1 = (uint(rr & 0x0F) << 8) +
+                         (uint(gg & 0x0F) << 4) +
+                         (uint(bb & 0x0F) << 0);
 
-          c_flags[c1] = i;
+          c_flags[c1] = IFF_UBYTE(i);
         }
   }
 
-  IFF_UBYTE *screen_memory2 = new IFF_UBYTE [size];
+  auto *screen_memory2 = new IFF_UBYTE [size];
 
   p  = screen_memory1;
   p1 = screen_memory2;
@@ -983,7 +983,7 @@ convertHAM(IFF_UBYTE *screen_memory, int width, int height,
     IFF_UBYTE g = *p++;
     IFF_UBYTE b = *p++;
 
-    IFF_ULONG c1 = (r << 8) + (g << 4) + b;
+    auto c1 = IFF_ULONG((r << 8) + (g << 4) + b);
 
     *p1++ = c_flags[c1];
   }
@@ -1021,9 +1021,9 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     }
   }
 
-  IFF_ULONG size = width*height;
+  auto size = IFF_ULONG(width*height);
 
-  IFF_UBYTE *screen_memory1 = new IFF_UBYTE [size*3];
+  auto *screen_memory1 = new IFF_UBYTE [size*3];
 
   IFF_UBYTE *p  = screen_memory;
   IFF_UBYTE *p1 = screen_memory1;
@@ -1044,13 +1044,13 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
 
           break;
         case 0x40:
-          b = c;
+          b = IFF_UBYTE(c);
           break;
         case 0x80:
-          r = c;
+          r = IFF_UBYTE(c);
           break;
         case 0xc0:
-          g = c;
+          g = IFF_UBYTE(c);
           break;
       }
 
@@ -1062,15 +1062,15 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     }
   }
 
-  int max_c = 64*64*64;
+  size_t max_c = 64*64*64;
 
-  IFF_UBYTE *c_flags  = new IFF_UBYTE [max_c];
-  IFF_ULONG *c_flags1 = new IFF_ULONG [256  ];
+  auto *c_flags  = new IFF_UBYTE [max_c];
+  auto *c_flags1 = new IFF_ULONG [256  ];
 
   int tol     = 0;
   int tol_inc = 2;
 
-  int num_c;
+  size_t num_c;
 
   while (true) {
     num_c = 0;
@@ -1085,7 +1085,7 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
       IFF_UBYTE g = *p1++;
       IFF_UBYTE b = *p1++;
 
-      IFF_ULONG c = (r << 12) + (g << 6) + b;
+      auto c = IFF_ULONG((r << 12) + (g << 6) + b);
 
       if (c_flags[c] == 1)
         continue;
@@ -1107,9 +1107,9 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
       for (int rr = r1; rr <= r2; ++rr)
         for (int gg = g1; gg <= g2; ++gg)
           for (int bb = b1; bb <= b2; ++bb) {
-            IFF_ULONG c1 = ((rr & 0x3F) << 12) +
-                           ((gg & 0x3F) <<  6) +
-                           ((bb & 0x3F) <<  0);
+            IFF_ULONG c1 = (uint(rr & 0x3F) << 12) +
+                           (uint(gg & 0x3F) <<  6) +
+                           (uint(bb & 0x3F) <<  0);
 
             c_flags[c1] = 1;
           }
@@ -1151,12 +1151,12 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
                     std::to_string(tol));
 
-  *num_colors = num_c;
-  *colors     = new CRGBA [num_c];
+  *num_colors = int(num_c);
+  *colors     = new CRGBA [size_t(num_c)];
 
   memset(c_flags, '\0', max_c*sizeof(IFF_UBYTE));
 
-  for (int i = 0; i < num_c; ++i) {
+  for (int i = 0; i < int(num_c); ++i) {
     IFF_UBYTE r = (c_flags1[i] >> 12) & 0x3F;
     IFF_UBYTE g = (c_flags1[i] >>  6) & 0x3F;
     IFF_UBYTE b = (c_flags1[i]      ) & 0x3F;
@@ -1185,15 +1185,15 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     for (int rr = r1; rr <= r2; ++rr)
       for (int gg = g1; gg <= g2; ++gg)
         for (int bb = b1; bb <= b2; ++bb) {
-          IFF_ULONG c1 = ((rr & 0x3F) << 12) +
-                         ((gg & 0x3F) <<  6) +
-                         ((bb & 0x3F) <<  0);
+          IFF_ULONG c1 = (uint(rr & 0x3F) << 12) +
+                         (uint(gg & 0x3F) <<  6) +
+                         (uint(bb & 0x3F) <<  0);
 
-          c_flags[c1] = i;
+          c_flags[c1] = IFF_UBYTE(i);
         }
   }
 
-  IFF_UBYTE *screen_memory2 = new IFF_UBYTE [size];
+  auto *screen_memory2 = new IFF_UBYTE [size];
 
   p  = screen_memory1;
   p1 = screen_memory2;
@@ -1203,7 +1203,7 @@ convertHAM8(IFF_UBYTE *screen_memory, int width, int height,
     IFF_UBYTE g = *p++;
     IFF_UBYTE b = *p++;
 
-    IFF_ULONG c1 = (r << 12) + (g << 6) + b;
+    auto c1 = IFF_ULONG((r << 12) + (g << 6) + b);
 
     *p1++ = c_flags[c1];
   }
@@ -1219,15 +1219,15 @@ IFF_UBYTE *
 CImageIFF::
 convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, int *num_colors)
 {
-  int max_c = 256*256*256;
+  size_t max_c = 256*256*256;
 
-  IFF_UBYTE *c_flags  = new IFF_UBYTE [max_c];
-  IFF_ULONG *c_flags1 = new IFF_ULONG [256  ];
+  auto *c_flags  = new IFF_UBYTE [max_c];
+  auto *c_flags1 = new IFF_ULONG [256];
 
   int tol     = 0;
   int tol_inc = 2;
 
-  int num_c;
+  size_t num_c;
 
   while (true) {
     num_c = 0;
@@ -1243,7 +1243,7 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
         IFF_UBYTE g = *p++;
         IFF_UBYTE b = *p++;
 
-        IFF_ULONG c = (r << 16) + (g << 8) + b;
+        auto c = IFF_ULONG((r << 16) + (g << 8) + b);
 
         if (c_flags[c] == 1)
           continue;
@@ -1258,9 +1258,9 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
         for (int rr = r1; rr <= r2; ++rr)
           for (int gg = g1; gg <= g2; ++gg)
             for (int bb = b1; bb <= b2; ++bb) {
-              IFF_ULONG c1 = ((rr & 0xFF) << 16) +
-                             ((gg & 0xFF) <<  8) +
-                             ((bb & 0xFF) <<  0);
+              IFF_ULONG c1 = (uint(rr & 0xFF) << 16) +
+                             (uint(gg & 0xFF) <<  8) +
+                             (uint(bb & 0xFF) <<  0);
 
               c_flags[c1] = 1;
             }
@@ -1303,14 +1303,14 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
     CImage::infoMsg(std::to_string(num_c) + " Colors at Tolerance of " +
                     std::to_string(tol));
 
-  *num_colors = num_c;
+  *num_colors = int(num_c);
   *colors     = new CRGBA [num_c];
 
   memset(c_flags, '\0', max_c*sizeof(IFF_UBYTE));
 
   int i;
 
-  for (i = 0; i < num_c; ++i) {
+  for (i = 0; i < int(num_c); ++i) {
     IFF_UBYTE r = (c_flags1[i] >> 16) & 0xFF;
     IFF_UBYTE g = (c_flags1[i] >>  8) & 0xFF;
     IFF_UBYTE b = (c_flags1[i]      ) & 0xFF;
@@ -1332,15 +1332,15 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
     for (int rr = r1; rr <= r2; ++rr)
       for (int gg = g1; gg <= g2; ++gg)
         for (int bb = b1; bb <= b2; ++bb) {
-          IFF_ULONG c1 = ((rr & 0xFF) << 16) +
-                         ((gg & 0xFF) <<  8) +
-                         ((bb & 0xFF) <<  0);
+          IFF_ULONG c1 = (uint(rr & 0xFF) << 16) +
+                         (uint(gg & 0xFF) <<  8) +
+                         (uint(bb & 0xFF) <<  0);
 
-          c_flags[c1] = i;
+          c_flags[c1] = IFF_UBYTE(i);
         }
   }
 
-  IFF_UBYTE *screen_memory1 = new IFF_UBYTE [width*height];
+  auto *screen_memory1 = new IFF_UBYTE [size_t(width*height)];
 
   IFF_UBYTE *p  = screen_memory;
   IFF_UBYTE *p1 = screen_memory1;
@@ -1351,7 +1351,7 @@ convert24Bit(IFF_UBYTE *screen_memory, int width, int height, CRGBA **colors, in
       IFF_UBYTE g = *p++;
       IFF_UBYTE b = *p++;
 
-      IFF_ULONG c1 = (r << 16) + (g << 8) + b;
+      auto c1 = IFF_ULONG((r << 16) + (g << 8) + b);
 
       *p1++ = c_flags[c1];
     }
@@ -1367,7 +1367,7 @@ CRGBA *
 CImageIFF::
 convertColors(IFFColorRegister *cregs, int num_colors)
 {
-  CRGBA *colors = new CRGBA [num_colors];
+  auto *colors = new CRGBA [size_t(num_colors)];
 
   for (int i = 0; i < num_colors; ++i) {
     IFF_UBYTE r = (cregs[i].r >> 4) & 0x0F;
@@ -1390,9 +1390,9 @@ void
 CImageIFF::
 convertWord(IFF_UWORD *integer)
 {
-  IFF_UBYTE *p = (IFF_UBYTE *) integer;
+  IFF_UBYTE *p = reinterpret_cast<IFF_UBYTE *>(integer);
 
-  IFF_UWORD integer1 = (p[0] << 8) | p[1];
+  auto integer1 = IFF_UWORD((p[0] << 8) | p[1]);
 
   *integer = integer1;
 }

@@ -4,7 +4,7 @@
 
 void
 CImage::
-lineArt(double tolerance=CIMAGE_LINE_ART_TOLERANCE)
+lineArt(double tolerance)
 {
   double r, g, b, a;
 
@@ -14,7 +14,7 @@ lineArt(double tolerance=CIMAGE_LINE_ART_TOLERANCE)
     CRGBA rgba;
 
     for (int i = 0; i < num_colors; ++i) {
-      rgba = getColor(i);
+      rgba = getColor(uint(i));
 
       r = rgba.getRed  ();
       g = rgba.getGreen();
@@ -25,17 +25,17 @@ lineArt(double tolerance=CIMAGE_LINE_ART_TOLERANCE)
       else
         rgba.setRGBA(0.0, 0.0, 0.0);
 
-      setColor(i, rgba);
+      setColor(uint(i), rgba);
     }
   }
   else {
-    int width  = getWidth ();
-    int height = getHeight();
+    auto width  = getWidth ();
+    auto height = getHeight();
 
     int i = 0;
 
-    for (int y = 0; y < height; ++y) {
-      for (int x = 0; x < width; ++x, ++i) {
+    for (int y = 0; y < int(height); ++y) {
+      for (int x = 0; x < int(width); ++x, ++i) {
         getRGBAPixel(i, &r, &g, &b, &a);
 
         if (r > tolerance || g > tolerance || b > tolerance)

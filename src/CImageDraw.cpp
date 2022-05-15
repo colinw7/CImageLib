@@ -34,7 +34,7 @@ fillColorIndexRectangle(int x1, int y1, int x2, int y2, int ind)
     uint *p2 = p1 + x1;
 
     for (int x = x1; x <= x2; ++x, ++p2)
-      *p2 = ind;
+      *p2 = uint(ind);
 
     p1 += size_.width;
   }
@@ -46,14 +46,14 @@ void
 CImage::
 drawColorIndexPoint(int x, int y, int color_ind)
 {
-  setColorIndexPixel(x, y, color_ind);
+  setColorIndexPixel(x, y, uint(color_ind));
 }
 
 void
 CImage::
 drawColorIndexPoint(int i, int color_ind)
 {
-  setColorIndexPixel(i, color_ind);
+  setColorIndexPixel(i, uint(color_ind));
 }
 
 void

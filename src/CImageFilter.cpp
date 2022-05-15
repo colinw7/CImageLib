@@ -191,14 +191,14 @@ CImage::
 sobelPixelGradient(int x, int y, int dx, int dy, double &xgray, double &ygray,
                    double &xf, double &yf)
 {
-  int w = getWidth ();
-  int h = getHeight();
+  auto w = getWidth ();
+  auto h = getHeight();
 
   int wx1, wy1, wx2, wy2;
 
   getWindow(&wx1, &wy1, &wx2, &wy2);
 
-  if (x < dx || x > w - dx - 1 || y < dy || y > h - dy - 1) {
+  if (x < dx || x > int(w) - dx - 1 || y < dy || y > int(h) - dy - 1) {
     getGrayPixel(x, y, &xgray);
 
     ygray = xgray;
@@ -211,8 +211,8 @@ sobelPixelGradient(int x, int y, int dx, int dy, double &xgray, double &ygray,
 
   double gray1, gray2, gray3, gray4, gray5, gray6, gray7, gray8, gray9;
 
-  bool left = (x < dx), right  = (x > w - dx - 1);
-  bool top  = (y < dy), bottom = (y > h - dy - 1);
+  bool left = (x < dx), right  = (x > int(w) - dx - 1);
+  bool top  = (y < dy), bottom = (y > int(h) - dy - 1);
 
   if      (top && left) {
     getGrayPixel(x - dx, y - dy, &gray1);
@@ -343,7 +343,7 @@ void
 CImage::
 convolve(CImagePtr src, CImagePtr &dst, const std::vector<double> &kernel)
 {
-  int size = sqrt(kernel.size());
+  auto size = int(sqrt(double(kernel.size())));
 
   return convolve(src, dst, size, size, kernel);
 }
@@ -352,7 +352,7 @@ CImagePtr
 CImage::
 convolve(const std::vector<double> &kernel)
 {
-  int size = sqrt(kernel.size());
+  auto size = int(sqrt(double(kernel.size())));
 
   return convolve(size, size, kernel);
 }
@@ -361,7 +361,7 @@ void
 CImage::
 convolve(CImagePtr &dst, const std::vector<double> &kernel)
 {
-  int size = sqrt(kernel.size());
+  auto size = int(sqrt(double(kernel.size())));
 
   return convolve(dst, size, size, kernel);
 }
@@ -407,10 +407,10 @@ convolve(CImagePtr &dst, const CImageConvolveData &data)
   int ysize = data.ysize;
 
   if (xsize < 0)
-    xsize = sqrt(data.kernel.size());
+    xsize = int(sqrt(double(data.kernel.size())));
 
   if (ysize < 0)
-    ysize = sqrt(data.kernel.size());
+    ysize = int(sqrt(double(data.kernel.size())));
 
   //---
 
@@ -463,7 +463,7 @@ convolve(CImagePtr &dst, const CImageConvolveData &data)
     for ( ; x <= wx2 - xborder; ++x) {
       CRGBA sum;
 
-      int k = 0;
+      size_t k = 0;
 
       for (int yk = -yborder; yk <= yborder; ++yk) {
         for (int xk = -xborder; xk <= xborder; ++xk) {
@@ -565,8 +565,8 @@ gaussianBlurExec(CImagePtr &dst, double bx, double by, int nx, int ny)
     void getPixelRange(int *x1, int *y1, int *x2, int *y2) const {
       *x1 = 0;
       *y1 = 0;
-      *x2 = image_->getWidth () - 1;
-      *y2 = image_->getHeight() - 1;
+      *x2 = int(image_->getWidth () - 1);
+      *y2 = int(image_->getHeight() - 1);
     }
 
     void getWindow(int *x1, int *y1, int *x2, int *y2) const {

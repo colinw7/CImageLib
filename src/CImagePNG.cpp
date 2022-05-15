@@ -96,25 +96,25 @@ read(CFile *file, CImagePtr &image)
 
   png_read_update_info(png_ptr, info_ptr);
 
-  int width            = png_get_image_width (png_ptr, info_ptr);
-  int height           = png_get_image_height(png_ptr, info_ptr);
+  int width            = int(png_get_image_width (png_ptr, info_ptr));
+  int height           = int(png_get_image_height(png_ptr, info_ptr));
 #if 0
   int filter_type      = png_get_filter_type(png_ptr, info_ptr);
   int compression_type = png_get_compression_type(png_ptr, info_ptr);
   int interlace_type   = png_get_interlace_type(png_ptr, info_ptr);
   int channels         = png_get_channels(png_ptr, info_ptr);
 #endif
-  int rowbytes         = png_get_rowbytes(png_ptr, info_ptr);
+  int rowbytes         = int(png_get_rowbytes(png_ptr, info_ptr));
 
   bit_depth  = png_get_bit_depth(png_ptr, info_ptr);
   color_type = png_get_color_type(png_ptr, info_ptr);
 
   //------
 
-  png_bytep *row_pointers = new png_bytep [height];
+  auto *row_pointers = new png_bytep [size_t(height)];
 
   for (int i = 0; i < height; ++i)
-    row_pointers[i] = new uchar [rowbytes];
+    row_pointers[i] = new uchar [size_t(rowbytes)];
 
   //------
 
@@ -131,7 +131,7 @@ read(CFile *file, CImagePtr &image)
   if (bit_depth == 8)
     depth = 24;
 
-  uint *data = new uint [width*height];
+  auto *data = new uint [size_t(width*height)];
 
   if (depth == 24) {
     if (color_type & PNG_COLOR_MASK_ALPHA) {
@@ -252,8 +252,8 @@ readHeader(CFile *file, CImagePtr &image)
 
   png_read_info(png_ptr, info_ptr);
 
-  int width  = png_get_image_width (png_ptr, info_ptr);
-  int height = png_get_image_height(png_ptr, info_ptr);
+  int width  = int(png_get_image_width (png_ptr, info_ptr));
+  int height = int(png_get_image_height(png_ptr, info_ptr));
 
   png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 
@@ -316,8 +316,8 @@ write(CFile *file, CImagePtr image)
   int color_type     = PNG_COLOR_TYPE_RGB_ALPHA;
   int interlace_type = PNG_INTERLACE_NONE;
 
-  int width  = image1->getWidth ();
-  int height = image1->getHeight();
+  auto width  = image1->getWidth ();
+  auto height = image1->getHeight();
 
   png_set_IHDR(png_ptr, info_ptr, width, height, 8, color_type, interlace_type,
                PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
@@ -332,16 +332,16 @@ write(CFile *file, CImagePtr image)
 
   uint r, g, b, a;
 
-  for (int y = 0; y < height; ++y) {
+  for (int y = 0; y < int(height); ++y) {
     j = 0;
 
-    for (int x = 0; x < width; ++x, ++i, j += 4) {
+    for (int x = 0; x < int(width); ++x, ++i, j += 4) {
       image1->getRGBAPixelI(i, &r, &g, &b, &a);
 
-      row_data[j + 0] = r;
-      row_data[j + 1] = g;
-      row_data[j + 2] = b;
-      row_data[j + 3] = a;
+      row_data[j + 0] = uchar(r);
+      row_data[j + 1] = uchar(g);
+      row_data[j + 2] = uchar(b);
+      row_data[j + 3] = uchar(a);
     }
 
     png_write_row(png_ptr, row_data);

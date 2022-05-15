@@ -38,7 +38,7 @@ read(CFile *file, CImagePtr &image)
   if (header.id_len) {
     char buffer[256];
 
-    if (! file->read((uchar *) buffer, header.id_len))
+    if (! file->read(reinterpret_cast<uchar *>(buffer), header.id_len))
       return false;
 
     buffer[header.id_len] = '\0';
@@ -87,11 +87,11 @@ read(CFile *file, CImagePtr &image)
   uint pixel_size = (header.depth >> 3);
 
   int   num_data = header.width*header.height;
-  uint *data     = new uint [num_data];
+  auto *data     = new uint [size_t(num_data)];
 
-  int x   = 0;
-  int y   = header.height - 1;
-  int pos = header.width*y;
+  int  x   = 0;
+  int  y   = header.height - 1;
+  auto pos = size_t(header.width*y);
 
   int r, g, b, a;
 
@@ -119,7 +119,7 @@ read(CFile *file, CImagePtr &image)
       if (r == EOF || g == EOF || b == EOF || a == EOF)
         return false;
 
-      data[pos++] = image->rgbaToPixelI(r, g, b, a);
+      data[pos++] = image->rgbaToPixelI(uint(r), uint(g), uint(b), uint(a));
 
       ++x;
 
@@ -128,7 +128,7 @@ read(CFile *file, CImagePtr &image)
 
         --y;
 
-        pos = header.width*y;
+        pos = size_t(header.width*y);
       }
     }
     else {
@@ -160,7 +160,7 @@ read(CFile *file, CImagePtr &image)
           return false;
 
         for (int i = 0; i < size; ++i) {
-          data[pos++] = image->rgbaToPixelI(r, g, b, a);
+          data[pos++] = image->rgbaToPixelI(uint(r), uint(g), uint(b), uint(a));
 
           ++x;
 
@@ -169,7 +169,7 @@ read(CFile *file, CImagePtr &image)
 
             --y;
 
-            pos = header.width*y;
+            pos = size_t(header.width*y);
           }
         }
       }
@@ -197,7 +197,7 @@ read(CFile *file, CImagePtr &image)
           if (r == EOF || g == EOF || b == EOF || a == EOF)
             return false;
 
-          data[pos++] = image->rgbaToPixelI(r, g, b, a);
+          data[pos++] = image->rgbaToPixelI(uint(r), uint(g), uint(b), uint(a));
 
           ++x;
 
@@ -206,7 +206,7 @@ read(CFile *file, CImagePtr &image)
 
             --y;
 
-            pos = header.width*y;
+            pos = size_t(header.width*y);
           }
         }
       }
@@ -260,13 +260,13 @@ readHeader(CFile *file, CImagePtr &, TGAHeader *header)
   header->id_len         = buffer[ 0];
   header->has_cmap       = buffer[ 1];
   header->image_type     = buffer[ 2];
-  header->cmap_start     = buffer[ 3] + (buffer[ 4] << 8);
-  header->cmap_len       = buffer[ 5] + (buffer[ 6] << 8);
+  header->cmap_start     = ushort(buffer[ 3] + (buffer[ 4] << 8));
+  header->cmap_len       = ushort(buffer[ 5] + (buffer[ 6] << 8));
   header->cmap_byte_size = buffer[ 7];
-  header->x              = buffer[ 8] + (buffer[ 9] << 8);
-  header->y              = buffer[10] + (buffer[11] << 8);
-  header->width          = buffer[12] + (buffer[13] << 8);
-  header->height         = buffer[14] + (buffer[15] << 8);
+  header->x              = ushort(buffer[ 8] + (buffer[ 9] << 8));
+  header->y              = ushort(buffer[10] + (buffer[11] << 8));
+  header->width          = ushort(buffer[12] + (buffer[13] << 8));
+  header->height         = ushort(buffer[14] + (buffer[15] << 8));
   header->depth          = buffer[16];
   header->image_alpha    =  buffer[17] & 0x0F;
   header->image_origin   = (buffer[17] & 0x30) >> 4;

@@ -58,8 +58,8 @@ read(CFile *file, CImagePtr &image)
 
   if (CImageState::getDebug()) {
     CImage::infoMsg("Magic       " + std::to_string(sgi_image.magic));
-    CImage::infoMsg("Compressed  " + std::to_string((int) sgi_image.compressed));
-    CImage::infoMsg("Bytes/Pixel " + std::to_string((int) sgi_image.bytes_per_pixel));
+    CImage::infoMsg("Compressed  " + std::to_string(int(sgi_image.compressed)));
+    CImage::infoMsg("Bytes/Pixel " + std::to_string(int(sgi_image.bytes_per_pixel)));
     CImage::infoMsg("Dimension   " + std::to_string(sgi_image.dimension));
     CImage::infoMsg("X Size      " + std::to_string(sgi_image.x_size));
     CImage::infoMsg("Y Size      " + std::to_string(sgi_image.y_size));
@@ -158,8 +158,8 @@ readHeader(CFile *file, CImagePtr &image)
 
   if (CImageState::getDebug()) {
     CImage::infoMsg("Magic       " + std::to_string(sgi_image.magic));
-    CImage::infoMsg("Compressed  " + std::to_string((int) sgi_image.compressed));
-    CImage::infoMsg("Bytes/Pixel " + std::to_string((int) sgi_image.bytes_per_pixel));
+    CImage::infoMsg("Compressed  " + std::to_string(int(sgi_image.compressed)));
+    CImage::infoMsg("Bytes/Pixel " + std::to_string(int(sgi_image.bytes_per_pixel)));
     CImage::infoMsg("Dimension   " + std::to_string(sgi_image.dimension));
     CImage::infoMsg("X Size      " + std::to_string(sgi_image.x_size));
     CImage::infoMsg("Y Size      " + std::to_string(sgi_image.y_size));
@@ -189,7 +189,7 @@ convertDataBW(uchar *data, SGIImage *sgi_image, uint **data1,
   uchar *c_flags  = new uchar [256];
   uint  *c_flags1 = new uint  [256];
 
-  int num_c = 0;
+  size_t num_c = 0;
 
   memset(c_flags , '\0', 256*sizeof(uchar));
   memset(c_flags1, '\0', 256*sizeof(uint ));
@@ -215,22 +215,22 @@ convertDataBW(uchar *data, SGIImage *sgi_image, uint **data1,
   if (CImageState::getDebug())
     CImage::infoMsg(std::to_string(num_c) + " Grays");
 
-  *num_colors = num_c;
+  *num_colors = int(num_c);
   *colors     = new CRGBA [num_c];
 
   memset(c_flags, '\0', 256*sizeof(uchar));
 
   uchar g;
 
-  for (int i = 0; i < num_c; ++i) {
-    g = (uchar) c_flags1[i];
+  for (size_t i = 0; i < num_c; ++i) {
+    g = uchar(c_flags1[i]);
 
     (*colors)[i].setRGBAI(g, g, g);
 
     if (CImageState::getDebug())
       CImage::infoMsg("Color : Gray " + std::to_string(g));
 
-    c_flags[g] = i;
+    c_flags[g] = uchar(i);
   }
 
   *data1 = new uint [sgi_image->x_size*sgi_image->y_size];
@@ -273,7 +273,7 @@ convertDataRGB(uchar *data, CImagePtr image, SGIImage *sgi_image, uint **data1)
       g = *p++;
       r = *p++;
 
-      *p1++ = image->rgbaToPixelI(r, g, b);
+      *p1++ = image->rgbaToPixelI(uint(r), uint(g), uint(b));
     }
   }
 }
@@ -293,8 +293,8 @@ readCompressedData(CFile *file, SGIImage *sgi_image)
 
   file->setPos(512);
 
-  readTable(file, start_table , table_len);
-  readTable(file, length_table, table_len);
+  readTable(file, start_table , int(table_len));
+  readTable(file, length_table, int(table_len));
 
   uint pos       = 0;
   bool bad_order = false;
@@ -493,7 +493,7 @@ getLong(CFile *file)
 
   file->read(buf, 4);
 
-  uint l = (buf[0] << 24) + (buf[1] << 16) + (buf[2] << 8) + buf[3];
+  auto l = uint((buf[0] << 24) + (buf[1] << 16) + (buf[2] << 8) + buf[3]);
 
   return l;
 }
@@ -506,7 +506,7 @@ getShort(CFile *file)
 
   file->read(buf, 2);
 
-  ushort s = (buf[0] << 8) + buf[1];
+  auto s = ushort((buf[0] << 8) + buf[1]);
 
   return s;
 }

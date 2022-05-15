@@ -21,7 +21,7 @@
 
 CImageThumbnailMgr::
 CImageThumbnailMgr(uint width, uint height) :
- size_(width, height), image_mgr_()
+ size_(int(width), int(height))
 {
 }
 
@@ -266,7 +266,7 @@ lookupImage(const CImageSrc &src)
 
     creating_ = false;
 
-    if (! image->read((const uchar *) data->getDataP(), data->getDataLen())) {
+    if (! image->read(reinterpret_cast<const uchar *>(data->getDataP()), data->getDataLen())) {
       CImage::errorMsg("Failed to read image");
       return CImagePtr();
     }
