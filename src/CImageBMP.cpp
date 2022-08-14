@@ -19,8 +19,8 @@ read(CFile *file, CImagePtr &image)
 {
   bool rc = true;
 
-  CRGBA *colors = 0;
-  uint  *data   = 0;
+  CRGBA *colors = nullptr;
+  uint  *data   = nullptr;
 
   file->rewind();
 
@@ -51,8 +51,9 @@ read(CFile *file, CImagePtr &image)
 
       image->setColorIndexData(data);
     }
-    else
+    else {
       image->setRGBAData(data);
+    }
   }
   catch (...) {
     CImage::errorMsg("Failed to read BMP file");
@@ -176,10 +177,10 @@ readColors(CFile *file, CImageBMPHeader *header, CRGBA **colors)
 
       if (CImageState::getDebug())
         CImage::infoMsg("Color " + std::to_string(i + 1) + ") " +
-                          std::string(reinterpret_cast<char *>(&buffer[i*4 + 2]), 1) + "," +
-                          std::string(reinterpret_cast<char *>(&buffer[i*4 + 1]), 1) + "," +
-                          std::string(reinterpret_cast<char *>(&buffer[i*4 + 0]), 1) + "," +
-                          std::string(reinterpret_cast<char *>(&buffer[i*4 + 3]), 1));
+                        std::string(reinterpret_cast<char *>(&buffer[i*4 + 2]), 1) + "," +
+                        std::string(reinterpret_cast<char *>(&buffer[i*4 + 1]), 1) + "," +
+                        std::string(reinterpret_cast<char *>(&buffer[i*4 + 0]), 1) + "," +
+                        std::string(reinterpret_cast<char *>(&buffer[i*4 + 3]), 1));
     }
   }
   else
@@ -237,9 +238,9 @@ readData(CFile *file, CImagePtr &image, CImageBMPHeader *header, uint **data)
     int num_data;
 
     if      (header->compression == 0)
-          readCmp0Data8(file, header->width, header->height, data, &num_data);
+      readCmp0Data8(file, header->width, header->height, data, &num_data);
     else if (header->compression == 1)
-          readCmp1Data8(file, header->width, header->height, data, &num_data);
+      readCmp1Data8(file, header->width, header->height, data, &num_data);
     else {
       CImage::errorMsg("Compression " + std::to_string(header->compression) +
                        " not supported for Depth " + std::to_string(header->depth));

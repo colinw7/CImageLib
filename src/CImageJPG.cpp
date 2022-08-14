@@ -2,7 +2,7 @@
 #include <CImageJPG.h>
 
 #include <cstring>
-#include <setjmp.h>
+#include <csetjmp>
 
 #ifdef IMAGE_JPEG
 extern "C" {

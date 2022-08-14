@@ -60,14 +60,14 @@ struct CImageXPMData {
    width            (0),
    height           (0),
    num_colors       (0),
-   colors           (0),
+   colors           (nullptr),
    transparent      (false),
    transparent_color(0),
    chars_per_pixel  (0),
    x_hot            (0),
    y_hot            (0),
    extension        (false),
-   data             (0) {
+   data             (nullptr) {
   }
 };
 
@@ -89,7 +89,7 @@ read(CFile *file, CImagePtr &image)
 {
   CImageXPMData xpm_data;
 
-  CFileData *file_data = 0;
+  CFileData *file_data = nullptr;
 
   try {
     file->rewind();
@@ -142,7 +142,7 @@ read(CFile *file, CImagePtr &image)
 
     //------
 
-    CRGBA *colors = createImageColors(&xpm_data);
+    auto *colors = createImageColors(&xpm_data);
 
     //------
 
@@ -234,7 +234,7 @@ read(const char **strings, uint num_strings, CImagePtr &image)
 
     //------
 
-    CRGBA *colors = createImageColors(&xpm_data);
+    auto *colors = createImageColors(&xpm_data);
 
     xpm_data.data = new uint [size_t(xpm_data.width*xpm_data.height)];
 
@@ -289,7 +289,6 @@ read(const char **strings, uint num_strings, CImagePtr &image)
     //------
 
     delete [] colors;
-
     delete [] xpm_data.colors;
 
     return true;
@@ -307,7 +306,7 @@ bool
 CImageXPM::
 readHeader(CFile *file, CImagePtr &image)
 {
-  CFileData *file_data = 0;
+  CFileData *file_data = nullptr;
 
   file->rewind();
 
@@ -432,7 +431,7 @@ readValues(const char *data, int *i, CImageXPMData *xpm_data)
 
   char *str = readString(data, i);
 
-  if (str == 0) {
+  if (str == nullptr) {
     CImage::errorMsg("Failed value string");
     return false;
   }
@@ -538,7 +537,7 @@ readColors(const char *data, int *i, CImageXPMData *xpm_data)
 
     char *str = readString(data, i);
 
-    if (str == 0) {
+    if (str == nullptr) {
       CImage::errorMsg("Failed to read color string");
       return false;
     }
@@ -693,7 +692,7 @@ readData(const char *data, int *i, CImageXPMData *xpm_data)
 
   //------
 
-  CRGBA *colors = createImageColors(xpm_data);
+  auto *colors = createImageColors(xpm_data);
 
   //------
 
@@ -710,7 +709,7 @@ readData(const char *data, int *i, CImageXPMData *xpm_data)
 
     char *str = readString(data, i);
 
-    if (str == 0) {
+    if (str == nullptr) {
       CImage::errorMsg("Failed to read color string '" +
                        std::string(&data[j], size_t(*i - j)) + "'");
       return false;

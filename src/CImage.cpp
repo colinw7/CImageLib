@@ -1586,21 +1586,21 @@ void
 CImage::
 errorMsg(const std::string &msg)
 {
-  std::cerr << "Error: " + msg << std::endl;
+  std::cerr << "Error: " + msg << "\n";
 }
 
 void
 CImage::
 warnMsg(const std::string &msg)
 {
-  std::cerr << "Warning: " + msg << std::endl;
+  std::cerr << "Warning: " + msg << "\n";
 }
 
 void
 CImage::
 debugMsg(const std::string &msg)
 {
-  std::cerr << msg << std::endl;
+  std::cerr << msg << "\n";
 }
 
 void
@@ -1610,5 +1610,5 @@ infoMsg(const std::string &msg, bool newline)
   std::cerr << msg;
 
   if (newline)
-    std::cerr << std::endl;
+    std::cerr << "\n";
 }

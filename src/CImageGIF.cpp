@@ -149,9 +149,9 @@ createAnim(CFile *file)
 
   gif_data->header = new CImageGIFHeader;
 
-  gif_data->global_colors     = 0;
+  gif_data->global_colors     = nullptr;
   gif_data->num_global_colors = 0;
-  gif_data->local_colors      = 0;
+  gif_data->local_colors      = nullptr;
   gif_data->num_local_colors  = 0;
 
   //------
@@ -173,12 +173,12 @@ createAnim(CFile *file)
   }
   catch (...) {
     CImage::errorMsg("Failed to read GIF file");
-    return 0;
+    return nullptr;
   }
 
   //------
 
-  if (gif_data != 0) {
+  if (gif_data != nullptr) {
     delete gif_data->header;
 
     delete [] gif_data->global_colors;
@@ -484,7 +484,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
         delete image_header;
 
-        image_header = 0;
+        image_header = nullptr;
       }
       catch (...) {
         delete image_header;
@@ -932,7 +932,7 @@ void
 CImageGIF::
 writeHeader(CFile *file, CImagePtr image)
 {
-  writeShort(file, int(image->getWidth() ));
+  writeShort(file, int(image->getWidth ()));
   writeShort(file, int(image->getHeight()));
 
   uint color_table   = 1;
@@ -942,7 +942,7 @@ writeHeader(CFile *file, CImagePtr image)
   int i;
 
   for (i = 1; i < 8; ++i)
-    if ((1<<i) >= image->getNumColors())
+    if ((1 << i) >= image->getNumColors())
       break;
 
   compress_data.color_table_bits = uint(i);
@@ -1136,7 +1136,7 @@ outputCode(CFile *file, uint code)
   uint code1 = code & compress_data.code_mask;
 
   if     (compress_data.current_bit + compress_data.code_size > 16) {
-    auto byte1 = uchar(code1 <<       compress_data.current_bit);
+    auto byte1 = uchar(code1 <<       compress_data.current_bit );
     auto byte2 = uchar(code1 >> (8  - compress_data.current_bit));
     auto byte3 = uchar(code1 >> (16 - compress_data.current_bit));
 
@@ -1153,7 +1153,7 @@ outputCode(CFile *file, uint code)
     compress_data.current_bit += compress_data.code_size - 16;
   }
   else if (compress_data.current_bit + compress_data.code_size > 8) {
-    auto byte1 = uchar(code1 <<      compress_data.current_bit);
+    auto byte1 = uchar(code1 <<      compress_data.current_bit );
     auto byte2 = uchar(code1 >> (8 - compress_data.current_bit));
 
     compress_data.current_byte |= byte1;

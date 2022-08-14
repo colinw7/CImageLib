@@ -11,7 +11,7 @@ bool readParameter(CFileParse &parse, int &parameter) {
     str += parse.readChar();
 
   if (str == "") {
-    std::cerr << "Invalid parameter" << std::endl;
+    std::cerr << "Invalid parameter\n";
     return false;
   }
 
@@ -42,14 +42,14 @@ bool readSixData(CFileParse &parse, int &data) {
   int c = parse.readChar();
 
   if (c < 0x3f) {
-    std::cerr << "Invalid data '" << c << "'" << std::endl;
+    std::cerr << "Invalid data '" << c << "'\n";
     return false;
   }
 
   int c1 = c - 0x3f;
 
   if (c1 > 0x3f) {
-    std::cerr << "Invalid data '" << c << "'" << std::endl;
+    std::cerr << "Invalid data '" << c << "'\n";
     return false;
   }
 

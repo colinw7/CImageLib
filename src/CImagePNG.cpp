@@ -28,22 +28,22 @@ read(CFile *file, CImagePtr &image)
     return false;
   }
 
-  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 
-  if (png_ptr == 0)
+  if (png_ptr == nullptr)
     return false;
 
   png_infop info_ptr = png_create_info_struct(png_ptr);
 
-  if (info_ptr == 0) {
-    png_destroy_read_struct(&png_ptr, 0, 0);
+  if (info_ptr == nullptr) {
+    png_destroy_read_struct(&png_ptr, nullptr, nullptr);
     return false;
   }
 
   png_infop end_info = png_create_info_struct(png_ptr);
 
-  if (end_info == 0) {
-    png_destroy_read_struct(&png_ptr, &info_ptr, 0);
+  if (end_info == nullptr) {
+    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     return false;
   }
 
@@ -222,22 +222,22 @@ readHeader(CFile *file, CImagePtr &image)
     return false;
   }
 
-  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 
-  if (png_ptr == 0)
+  if (png_ptr == nullptr)
     return false;
 
   png_infop info_ptr = png_create_info_struct(png_ptr);
 
-  if (info_ptr == 0) {
-    png_destroy_read_struct(&png_ptr, 0, 0);
+  if (info_ptr == nullptr) {
+    png_destroy_read_struct(&png_ptr, nullptr, nullptr);
     return false;
   }
 
   png_infop end_info = png_create_info_struct(png_ptr);
 
-  if (end_info == 0) {
-    png_destroy_read_struct(&png_ptr, &info_ptr, 0);
+  if (end_info == nullptr) {
+    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     return false;
   }
 
@@ -292,7 +292,7 @@ write(CFile *file, CImagePtr image)
   }
 
   png_structp png_ptr =
-    png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, pngWriteErrorHandler, 0);
+    png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, pngWriteErrorHandler, nullptr);
 
   if (! png_ptr)
     return false;
@@ -300,7 +300,7 @@ write(CFile *file, CImagePtr image)
   png_infop info_ptr = png_create_info_struct(png_ptr);
 
   if (! info_ptr) {
-    png_destroy_write_struct(&png_ptr, 0);
+    png_destroy_write_struct(&png_ptr, nullptr);
     return false;
   }
 
@@ -347,7 +347,7 @@ write(CFile *file, CImagePtr image)
     png_write_row(png_ptr, row_data);
   }
 
-  png_write_end(png_ptr, 0);
+  png_write_end(png_ptr, nullptr);
 
   delete [] row_data;
 
