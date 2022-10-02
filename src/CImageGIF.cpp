@@ -643,7 +643,7 @@ decompressData(uchar *in_data, int in_data_size, uchar *out_data, int out_data_s
 
       last_code = code;
 
-      last_byte = code & compress_data.bit_mask;
+      last_byte = uchar(code & compress_data.bit_mask);
 
       if (num_out_data + 1 > out_data_size) {
         if (CImageState::getDebug())
@@ -671,7 +671,7 @@ decompressData(uchar *in_data, int in_data_size, uchar *out_data, int out_data_s
         code1 = compress_data.dictionary[code1].parent_code;
       }
 
-      last_byte = code1 & compress_data.bit_mask;
+      last_byte = uchar(code1 & compress_data.bit_mask);
 
       compress_data.out_bytes[num_out_bytes++] = last_byte;
 
@@ -1228,8 +1228,8 @@ writeShort(CFile *file, int data)
 
   uchar c[2];
 
-  c[0] =  s       & 0xff;
-  c[1] = (s >> 8) & 0xff;
+  c[0] = uchar( s       & 0xff);
+  c[1] = uchar((s >> 8) & 0xff);
 
   file->write(c, 2);
 }

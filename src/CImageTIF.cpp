@@ -573,7 +573,7 @@ write(CFile *file, CImagePtr image)
 
   int start_offset = 8;
 
-  start_offset += image->getHeight()*row_size;
+  start_offset += int(image->getHeight()*row_size);
 
   if (depth <= 8)
     start_offset += 6*num_colors;
@@ -661,7 +661,7 @@ write(CFile *file, CImagePtr image)
 
     writeData(file, strip_data, int(row_size));
 
-    offset += row_size;
+    offset += int(row_size);
   }
 
   delete [] strip_data;

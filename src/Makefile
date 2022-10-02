@@ -67,7 +67,7 @@ $(CDEBUG) \
 -DLARGEST_RECT \
 -DIMAGE_PNG \
 -DIMAGE_JPEG \
--std=c++14 \
+-std=c++17 \
 -I$(INC_DIR) \
 -I../../CFile/include \
 -I../../CFileUtil/include \

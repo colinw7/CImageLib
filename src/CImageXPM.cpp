@@ -1182,7 +1182,7 @@ pixelToSymbol(int pixel)
 
     pixel_string += xpm_pixel_chars_[pixel2];
 
-    pixel1 /= xpm_pixel_chars_.size();
+    pixel1 /= uint(xpm_pixel_chars_.size());
   }
 
   pixel_string += char(xpm_pixel_chars_[pixel1]);

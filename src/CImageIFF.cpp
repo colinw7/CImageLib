@@ -664,14 +664,14 @@ convertScreenMemory8(IFF_UBYTE *screen_memory, int width, int height, int depth)
       for (int k = 0; k < bytes_per_row; ++k) {
         IFF_UBYTE byte = screen_memory[screen_memory_position++];
 
-        auto byte1 = IFF_UBYTE((byte >> 0) & 0x01) << j;
-        auto byte2 = IFF_UBYTE((byte >> 1) & 0x01) << j;
-        auto byte3 = IFF_UBYTE((byte >> 2) & 0x01) << j;
-        auto byte4 = IFF_UBYTE((byte >> 3) & 0x01) << j;
-        auto byte5 = IFF_UBYTE((byte >> 4) & 0x01) << j;
-        auto byte6 = IFF_UBYTE((byte >> 5) & 0x01) << j;
-        auto byte7 = IFF_UBYTE((byte >> 6) & 0x01) << j;
-        auto byte8 = IFF_UBYTE((byte >> 7) & 0x01) << j;
+        auto byte1 = IFF_UBYTE(((byte >> 0) & 0x01) << j);
+        auto byte2 = IFF_UBYTE(((byte >> 1) & 0x01) << j);
+        auto byte3 = IFF_UBYTE(((byte >> 2) & 0x01) << j);
+        auto byte4 = IFF_UBYTE(((byte >> 3) & 0x01) << j);
+        auto byte5 = IFF_UBYTE(((byte >> 4) & 0x01) << j);
+        auto byte6 = IFF_UBYTE(((byte >> 5) & 0x01) << j);
+        auto byte7 = IFF_UBYTE(((byte >> 6) & 0x01) << j);
+        auto byte8 = IFF_UBYTE(((byte >> 7) & 0x01) << j);
 
         screen_memory1[m++] |= byte8;
         screen_memory1[m++] |= byte7;
@@ -708,19 +708,19 @@ convertScreenMemory24(IFF_UBYTE *screen_memory, int width, int height)
     int j;
 
     for (j = 0; j < 8; ++j) {
-      int m = l;
+      uint m = l;
 
       for (int k = 0; k < bytes_per_row; ++k) {
         IFF_UBYTE byte = screen_memory[screen_memory_position++];
 
-        auto byte1 = IFF_UBYTE((byte >> 0) & 0x01) << j;
-        auto byte2 = IFF_UBYTE((byte >> 1) & 0x01) << j;
-        auto byte3 = IFF_UBYTE((byte >> 2) & 0x01) << j;
-        auto byte4 = IFF_UBYTE((byte >> 3) & 0x01) << j;
-        auto byte5 = IFF_UBYTE((byte >> 4) & 0x01) << j;
-        auto byte6 = IFF_UBYTE((byte >> 5) & 0x01) << j;
-        auto byte7 = IFF_UBYTE((byte >> 6) & 0x01) << j;
-        auto byte8 = IFF_UBYTE((byte >> 7) & 0x01) << j;
+        auto byte1 = IFF_UBYTE(((byte >> 0) & 0x01) << j);
+        auto byte2 = IFF_UBYTE(((byte >> 1) & 0x01) << j);
+        auto byte3 = IFF_UBYTE(((byte >> 2) & 0x01) << j);
+        auto byte4 = IFF_UBYTE(((byte >> 3) & 0x01) << j);
+        auto byte5 = IFF_UBYTE(((byte >> 4) & 0x01) << j);
+        auto byte6 = IFF_UBYTE(((byte >> 5) & 0x01) << j);
+        auto byte7 = IFF_UBYTE(((byte >> 6) & 0x01) << j);
+        auto byte8 = IFF_UBYTE(((byte >> 7) & 0x01) << j);
 
         screen_memory1[m] |= byte8; m += 3;
         screen_memory1[m] |= byte7; m += 3;
@@ -739,14 +739,14 @@ convertScreenMemory24(IFF_UBYTE *screen_memory, int width, int height)
       for (int k = 0; k < bytes_per_row; ++k) {
         IFF_UBYTE byte = screen_memory[screen_memory_position++];
 
-        auto byte1 = IFF_UBYTE((byte >> 0) & 0x01) << j;
-        auto byte2 = IFF_UBYTE((byte >> 1) & 0x01) << j;
-        auto byte3 = IFF_UBYTE((byte >> 2) & 0x01) << j;
-        auto byte4 = IFF_UBYTE((byte >> 3) & 0x01) << j;
-        auto byte5 = IFF_UBYTE((byte >> 4) & 0x01) << j;
-        auto byte6 = IFF_UBYTE((byte >> 5) & 0x01) << j;
-        auto byte7 = IFF_UBYTE((byte >> 6) & 0x01) << j;
-        auto byte8 = IFF_UBYTE((byte >> 7) & 0x01) << j;
+        auto byte1 = IFF_UBYTE(((byte >> 0) & 0x01) << j);
+        auto byte2 = IFF_UBYTE(((byte >> 1) & 0x01) << j);
+        auto byte3 = IFF_UBYTE(((byte >> 2) & 0x01) << j);
+        auto byte4 = IFF_UBYTE(((byte >> 3) & 0x01) << j);
+        auto byte5 = IFF_UBYTE(((byte >> 4) & 0x01) << j);
+        auto byte6 = IFF_UBYTE(((byte >> 5) & 0x01) << j);
+        auto byte7 = IFF_UBYTE(((byte >> 6) & 0x01) << j);
+        auto byte8 = IFF_UBYTE(((byte >> 7) & 0x01) << j);
 
         screen_memory1[m] |= byte8; m += 3;
         screen_memory1[m] |= byte7; m += 3;
@@ -760,19 +760,19 @@ convertScreenMemory24(IFF_UBYTE *screen_memory, int width, int height)
     }
 
     for (j = 0; j < 8; ++j) {
-      int m = l + 2;
+      uint m = l + 2;
 
       for (int k = 0; k < bytes_per_row; ++k) {
         IFF_UBYTE byte = screen_memory[screen_memory_position++];
 
-        auto byte1 = IFF_UBYTE((byte >> 0) & 0x01) << j;
-        auto byte2 = IFF_UBYTE((byte >> 1) & 0x01) << j;
-        auto byte3 = IFF_UBYTE((byte >> 2) & 0x01) << j;
-        auto byte4 = IFF_UBYTE((byte >> 3) & 0x01) << j;
-        auto byte5 = IFF_UBYTE((byte >> 4) & 0x01) << j;
-        auto byte6 = IFF_UBYTE((byte >> 5) & 0x01) << j;
-        auto byte7 = IFF_UBYTE((byte >> 6) & 0x01) << j;
-        auto byte8 = IFF_UBYTE((byte >> 7) & 0x01) << j;
+        auto byte1 = IFF_UBYTE(((byte >> 0) & 0x01) << j);
+        auto byte2 = IFF_UBYTE(((byte >> 1) & 0x01) << j);
+        auto byte3 = IFF_UBYTE(((byte >> 2) & 0x01) << j);
+        auto byte4 = IFF_UBYTE(((byte >> 3) & 0x01) << j);
+        auto byte5 = IFF_UBYTE(((byte >> 4) & 0x01) << j);
+        auto byte6 = IFF_UBYTE(((byte >> 5) & 0x01) << j);
+        auto byte7 = IFF_UBYTE(((byte >> 6) & 0x01) << j);
+        auto byte8 = IFF_UBYTE(((byte >> 7) & 0x01) << j);
 
         screen_memory1[m] |= byte8; m += 3;
         screen_memory1[m] |= byte7; m += 3;
