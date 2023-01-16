@@ -39,11 +39,11 @@ class CImageSizedFile : public CImageFile {
   CImageSizedFile(CImageFile *file, int width, int height, bool keep_aspect=false);
  ~CImageSizedFile();
 
-  std::string getFilename() const;
+  std::string getFilename() const override;
 
-  CImagePtr getImage() const;
+  CImagePtr getImage() const override;
 
-  bool unload();
+  bool unload() override;
 
   bool match(uint width, uint height, bool keep_aspect) const;
 

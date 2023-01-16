@@ -16,10 +16,10 @@ class CImageICO : public CImageFmt {
     return instance;
   }
 
-  bool read(CFile *file, CImagePtr &image);
-  bool readHeader(CFile *file, CImagePtr &image);
+  bool read(CFile *file, CImagePtr &image) override;
+  bool readHeader(CFile *file, CImagePtr &image) override;
 
-  bool write(CFile *file, CImagePtr image);
+  bool write(CFile *file, CImagePtr image) override;
 
  private:
   CImageICO() :

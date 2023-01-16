@@ -52,7 +52,7 @@ class CImageNoSrc : public CImageSrc {
    CImageSrc(NO_SRC) {
   }
 
-  std::string getName() const { return ""; }
+  std::string getName() const override { return ""; }
 };
 
 //---
@@ -69,7 +69,7 @@ class CImageSizedFileSrc : public CImageSrc {
    width_(width), height_(height), keep_aspect_(keep_aspect) {
   }
 
-  std::string getName() const {
+  std::string getName() const override {
     return "sized_file:" + getFilename() +
            "?width="  + CStrUtil::toString(width_) +
            "&height=" + CStrUtil::toString(height_) +
@@ -104,7 +104,7 @@ class CImageFileSrc : public CImageSrc {
 
   const std::string &getFilename() const { return filename_; }
 
-  std::string getName() const { return "file:" + getFilename(); }
+  std::string getName() const override { return "file:" + getFilename(); }
 
  private:
   std::string filename_;
@@ -136,7 +136,7 @@ class CImageDataSrc : public CImageSrc {
 
   uint getDataLen() const { return uint(data_.size()); }
 
-  std::string getName() const { return "data:" + CStrUtil::toString(id_); }
+  std::string getName() const override { return "data:" + CStrUtil::toString(id_); }
 
  private:
   const std::string data_;
@@ -151,7 +151,7 @@ class CImageNameSrc : public CImageSrc {
    CImageSrc(NAME_SRC), name_(name) {
   }
 
-  std::string getName() const { return "name:" + name_; }
+  std::string getName() const override { return "name:" + name_; }
 
  private:
   const std::string name_;
@@ -180,7 +180,7 @@ class CImageXPMSrc : public CImageSrc {
   const char **getStrs   () const { return strs_; }
   uint         getNumStrs() const { return num_strs_; }
 
-  std::string getName() const { return "xpm:" + CStrUtil::toString(id_); }
+  std::string getName() const override { return "xpm:" + CStrUtil::toString(id_); }
 
  private:
   CImageXPMSrc &operator=(const CImageXPMSrc &rhs);
@@ -210,7 +210,7 @@ class CImageXBMSrc : public CImageSrc {
   int          getWidth () const { return width_ ; }
   int          getHeight() const { return height_; }
 
-  std::string getName() const { return "xbm:" + CStrUtil::toString(id_); }
+  std::string getName() const override { return "xbm:" + CStrUtil::toString(id_); }
 
  private:
   CImageXBMSrc(const CImageXBMSrc &rhs);
