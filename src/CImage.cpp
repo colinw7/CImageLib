@@ -690,6 +690,13 @@ getRGBAPixel(int x, int y, CRGBA &rgba) const
 
 void
 CImage::
+getRGBAPixelI(int x, int y, uint *r, uint *g, uint *b, uint *a) const
+{
+  getRGBAPixelI(y*size_.width + x, r, g, b, a);
+}
+
+void
+CImage::
 getRGBAPixelI(int ind, uint *r, uint *g, uint *b, uint *a) const
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index")) {
