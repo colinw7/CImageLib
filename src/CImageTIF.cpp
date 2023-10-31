@@ -66,11 +66,11 @@ read(CFile *file, CImagePtr &image)
     tif_data.planar_config         = -1;
     tif_data.resolution_unit       = -1;
     tif_data.num_strip_offsets     = 0;
-    tif_data.strip_offsets         = 0;
+    tif_data.strip_offsets         = nullptr;
     tif_data.num_strip_byte_counts = 0;
-    tif_data.strip_byte_counts     = 0;
+    tif_data.strip_byte_counts     = nullptr;
     tif_data.num_colors            = 0;
-    tif_data.colors                = 0;
+    tif_data.colors                = nullptr;
 
     //------
 
@@ -245,7 +245,7 @@ read(CFile *file, CImagePtr &image)
       return false;
     }
 
-    if (tif_data.photometric == TIF_PALETTERGB && tif_data.colors == 0) {
+    if (tif_data.photometric == TIF_PALETTERGB && tif_data.colors == nullptr) {
       CImage::errorMsg("No Colors for RGB");
       return false;
     }
@@ -416,7 +416,7 @@ setInteger(int tag_id, int value)
       tif_data.resolution_unit = value;
       break;
     case STRIP_OFFSETS:
-      if (tif_data.strip_offsets != 0)
+      if (tif_data.strip_offsets != nullptr)
         delete [] tif_data.strip_offsets;
 
       tif_data.num_strip_offsets = 1;
@@ -426,7 +426,7 @@ setInteger(int tag_id, int value)
 
       break;
     case STRIP_BYTE_COUNTS:
-      if (tif_data.strip_byte_counts != 0)
+      if (tif_data.strip_byte_counts != nullptr)
         delete [] tif_data.strip_byte_counts;
 
       tif_data.num_strip_byte_counts = 1;
@@ -462,7 +462,7 @@ setIntegerArray(int tag_id, int *values, int num_values)
 
   switch (tag_id) {
     case STRIP_OFFSETS: {
-      if (tif_data.strip_offsets != 0)
+      if (tif_data.strip_offsets != nullptr)
         delete [] tif_data.strip_offsets;
 
       tif_data.num_strip_offsets = num_values;
@@ -473,7 +473,7 @@ setIntegerArray(int tag_id, int *values, int num_values)
       break;
     }
     case STRIP_BYTE_COUNTS: {
-      if (tif_data.strip_byte_counts != 0)
+      if (tif_data.strip_byte_counts != nullptr)
         delete [] tif_data.strip_byte_counts;
 
       tif_data.num_strip_byte_counts = num_values;
@@ -484,7 +484,7 @@ setIntegerArray(int tag_id, int *values, int num_values)
       break;
     }
     case COLORMAP: {
-      if (tif_data.colors != 0)
+      if (tif_data.colors != nullptr)
         delete [] tif_data.colors;
 
       tif_data.num_colors = num_values/3;

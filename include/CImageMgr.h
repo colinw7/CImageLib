@@ -4,7 +4,6 @@
 #include <CFileType.h>
 #include <CFile.h>
 #include <CISize2D.h>
-#include <CStrUtil.h>
 #include <CImagePtr.h>
 
 #include <map>
@@ -69,12 +68,7 @@ class CImageSizedFileSrc : public CImageSrc {
    width_(width), height_(height), keep_aspect_(keep_aspect) {
   }
 
-  std::string getName() const override {
-    return "sized_file:" + getFilename() +
-           "?width="  + CStrUtil::toString(width_) +
-           "&height=" + CStrUtil::toString(height_) +
-           "&keep_aspect=" + (keep_aspect_ ? "true" : "false");
-  }
+  std::string getName() const override;
 
   const std::string &getFilename() const { return filename_; }
 
@@ -136,7 +130,7 @@ class CImageDataSrc : public CImageSrc {
 
   uint getDataLen() const { return uint(data_.size()); }
 
-  std::string getName() const override { return "data:" + CStrUtil::toString(id_); }
+  std::string getName() const override;
 
  private:
   const std::string data_;
@@ -180,7 +174,7 @@ class CImageXPMSrc : public CImageSrc {
   const char **getStrs   () const { return strs_; }
   uint         getNumStrs() const { return num_strs_; }
 
-  std::string getName() const override { return "xpm:" + CStrUtil::toString(id_); }
+  std::string getName() const override;
 
  private:
   CImageXPMSrc &operator=(const CImageXPMSrc &rhs);
@@ -210,7 +204,7 @@ class CImageXBMSrc : public CImageSrc {
   int          getWidth () const { return width_ ; }
   int          getHeight() const { return height_; }
 
-  std::string getName() const override { return "xbm:" + CStrUtil::toString(id_); }
+  std::string getName() const override;
 
  private:
   CImageXBMSrc(const CImageXBMSrc &rhs);

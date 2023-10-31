@@ -151,7 +151,7 @@ operator=(const CImage &image)
     memcpy(data_, image.data_, size_t(size)*sizeof(uint));
   }
   else
-    data_ = 0;
+    data_ = nullptr;
 
   colors_.clear();
 
@@ -618,10 +618,10 @@ CImage::
 getRGBAPixel(int ind, double *r, double *g, double *b, double *a) const
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index")) {
-    if (r != 0) *r = 0.0;
-    if (g != 0) *g = 0.0;
-    if (b != 0) *b = 0.0;
-    if (a != 0) *a = 0.0;
+    if (r) *r = 0.0;
+    if (g) *g = 0.0;
+    if (b) *b = 0.0;
+    if (a) *a = 0.0;
 
     return;
   }
@@ -632,18 +632,18 @@ getRGBAPixel(int ind, double *r, double *g, double *b, double *a) const
     uint pixel = data_[ind];
 
     if (! CASSERT(pixel < colors_.size(), "Invalid Color Ind")) {
-      if (r != 0) *r = 0.0;
-      if (g != 0) *g = 0.0;
-      if (b != 0) *b = 0.0;
-      if (a != 0) *a = 0.0;
+      if (r) *r = 0.0;
+      if (g) *g = 0.0;
+      if (b) *b = 0.0;
+      if (a) *a = 0.0;
 
       return;
     }
 
-    if (r != 0) *r = colors_[pixel].getRed  ();
-    if (g != 0) *g = colors_[pixel].getGreen();
-    if (b != 0) *b = colors_[pixel].getBlue ();
-    if (a != 0) *a = colors_[pixel].getAlpha();
+    if (r) *r = colors_[pixel].getRed  ();
+    if (g) *g = colors_[pixel].getGreen();
+    if (b) *b = colors_[pixel].getBlue ();
+    if (a) *a = colors_[pixel].getAlpha();
   }
   else {
     pixelToRGBA(data_[ind], r, g, b, a);
@@ -700,10 +700,10 @@ CImage::
 getRGBAPixelI(int ind, uint *r, uint *g, uint *b, uint *a) const
 {
   if (! CASSERT(ind >= 0 && ind < size_.area(), "Invalid Index")) {
-    if (r != 0) *r = 0;
-    if (g != 0) *g = 0;
-    if (b != 0) *b = 0;
-    if (a != 0) *a = 0;
+    if (r) *r = 0;
+    if (g) *g = 0;
+    if (b) *b = 0;
+    if (a) *a = 0;
 
     return;
   }
@@ -714,18 +714,18 @@ getRGBAPixelI(int ind, uint *r, uint *g, uint *b, uint *a) const
     uint pixel = data_[ind];
 
     if (! CASSERT(pixel < colors_.size(), "Invalid Color Ind")) {
-      if (r != 0) *r = 0;
-      if (g != 0) *g = 0;
-      if (b != 0) *b = 0;
-      if (a != 0) *a = 0;
+      if (r) *r = 0;
+      if (g) *g = 0;
+      if (b) *b = 0;
+      if (a) *a = 0;
 
       return;
     }
 
-    if (r != 0) *r = colors_[pixel].getRedI  ();
-    if (g != 0) *g = colors_[pixel].getGreenI();
-    if (b != 0) *b = colors_[pixel].getBlueI ();
-    if (a != 0) *a = colors_[pixel].getAlphaI();
+    if (r) *r = colors_[pixel].getRedI  ();
+    if (g) *g = colors_[pixel].getGreenI();
+    if (b) *b = colors_[pixel].getBlueI ();
+    if (a) *a = colors_[pixel].getAlphaI();
   }
   else {
     pixelToRGBAI(data_[ind], r, g, b, a);
@@ -1534,7 +1534,7 @@ memUsage() const
 
   mem += sizeof(CImage);
 
-  if (data_ != 0)
+  if (data_)
     mem += size_t(size_.area())*sizeof(uint);
 
   auto num_colors = colors_.size();

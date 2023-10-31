@@ -110,7 +110,7 @@ class CImage {
       uint          width;
 
       current() :
-       image(0), pos1(0), pos2(0), width(0) {
+       image(nullptr), pos1(0), pos2(0), width(0) {
       }
 
       void inc() {

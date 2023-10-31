@@ -48,7 +48,7 @@ read(CFile *file, CImagePtr &image)
   getShort(&buffer[0], &version1);
   getShort(&buffer[2], &version2);
 
-  CRGBA *colors     = 0;
+  CRGBA *colors     = nullptr;
   int    num_colors = 0;
 
   std::vector<uchar *> layers;
@@ -291,7 +291,7 @@ readLayerStartBlock(uchar *buffer, int compression,
 
   pos += len1;
 
-  uchar *block_data1 = 0;
+  uchar *block_data1 = nullptr;
   int    block_size2 = 0;
 
   for (int i = 0; i < num_channels; ++i) {

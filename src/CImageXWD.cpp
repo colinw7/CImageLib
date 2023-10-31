@@ -24,7 +24,7 @@ read(CFile *file, CImagePtr &image)
 
   // Read Color Map
 
-  CRGBA *colors = 0;
+  CRGBA *colors = nullptr;
 
   if (hdr.ncolors > 0) {
     auto *xcolors = new XWDColor [hdr.ncolors];
@@ -75,7 +75,7 @@ read(CFile *file, CImagePtr &image)
   line_pad /= hdr.bits_per_pixel;
   line_pad -= hdr.pixmap_width;
 
-  uint *data1 = 0;
+  uint *data1 = nullptr;
 
   if      (hdr.pixmap_depth == 1) {
     hdr.pixmap_depth = 8;

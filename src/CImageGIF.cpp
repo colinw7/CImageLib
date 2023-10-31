@@ -93,12 +93,12 @@ bool
 CImageGIF::
 read(CFile *file, CImagePtr &image)
 {
-  CImageAnim *image_anim = createAnim(file);
+  auto *image_anim = createAnim(file);
 
   if (image_anim->begin() != image_anim->end()) {
-    CImageFrame *frame = *(image_anim->begin());
+    auto *frame = *(image_anim->begin());
 
-    CImagePtr ptr = frame->getImage();
+    auto ptr = frame->getImage();
 
     image->replace(ptr);
   }
@@ -199,22 +199,22 @@ readHeader(CFile *file, CImagePtr &, CImageGIFHeader *header)
   uchar byte1;
   uchar byte2;
 
-  file->read(reinterpret_cast<uchar *>(header->signature), 3);
-  file->read(reinterpret_cast<uchar *>(header->version  ), 3);
+  if (! file->read(reinterpret_cast<uchar *>(header->signature), 3)) return false;
+  if (! file->read(reinterpret_cast<uchar *>(header->version  ), 3)) return false;
 
-  file->read(&byte1, 1);
-  file->read(&byte2, 1);
+  if (! file->read(&byte1, 1)) return false;
+  if (! file->read(&byte2, 1)) return false;
 
   header->width = ushort((byte2 << 8) | byte1);
 
-  file->read(&byte1, 1);
-  file->read(&byte2, 1);
+  if (! file->read(&byte1, 1)) return false;
+  if (! file->read(&byte2, 1)) return false;
 
   header->height = ushort((byte2 << 8) | byte1);
 
-  file->read(&header->flags     , 1);
-  file->read(&header->background, 1);
-  file->read(&header->aspect    , 1);
+  if (! file->read(&header->flags     , 1)) return false;
+  if (! file->read(&header->background, 1)) return false;
+  if (! file->read(&header->aspect    , 1)) return false;
 
   header->color_bits         = (header->flags     ) & 0x07;
   header->colors_sorted      = (header->flags >> 3) & 0x01;
@@ -268,8 +268,10 @@ readGlobalColors(CFile *file, CImageGIFData *gif_data)
 
     gif_data->global_colors = new CImageGIFColorTable [size_t(gif_data->num_global_colors)];
 
-    for (int i = 0; i < gif_data->num_global_colors; ++i)
-      file->read(reinterpret_cast<uchar *>(&gif_data->global_colors[i]), 3);
+    for (int i = 0; i < gif_data->num_global_colors; ++i) {
+      if (! file->read(reinterpret_cast<uchar *>(&gif_data->global_colors[i]), 3))
+        break;
+    }
   }
 
   compress_data.bit_mask = uchar(gif_data->num_global_colors - 1);
@@ -319,27 +321,27 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
         uchar byte1;
         uchar byte2;
 
-        file->read(&byte1, 1);
-        file->read(&byte2, 1);
+        if (! file->read(&byte1, 1)) break;
+        if (! file->read(&byte2, 1)) break;
 
         image_header->left = ushort((byte2 << 8) | byte1);
 
-        file->read(&byte1, 1);
-        file->read(&byte2, 1);
+        if (! file->read(&byte1, 1)) break;
+        if (! file->read(&byte2, 1)) break;
 
         image_header->top = ushort((byte2 << 8) | byte1);
 
-        file->read(&byte1, 1);
-        file->read(&byte2, 1);
+        if (! file->read(&byte1, 1)) break;
+        if (! file->read(&byte2, 1)) break;
 
         image_header->width = ushort((byte2 << 8) | byte1);
 
-        file->read(&byte1, 1);
-        file->read(&byte2, 1);
+        if (! file->read(&byte1, 1)) break;
+        if (! file->read(&byte2, 1)) break;
 
         image_header->height = ushort((byte2 << 8) | byte1);
 
-        file->read(&image_header->flags, 1);
+        if (! file->read(&image_header->flags, 1)) break;
 
         image_header->local_color_table = (image_header->flags >> 7) & 0x01;
         image_header->interlaced        = (image_header->flags >> 6) & 0x01;
@@ -363,8 +365,10 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
           gif_data->local_colors = new CImageGIFColorTable [size_t(gif_data->num_local_colors)];
 
-          for (int i = 0; i < gif_data->num_local_colors; ++i)
-            file->read(reinterpret_cast<uchar *>(&gif_data->local_colors[i]), 3);
+          for (int i = 0; i < gif_data->num_local_colors; ++i) {
+            if (! file->read(reinterpret_cast<uchar *>(&gif_data->local_colors[i]), 3))
+              break;
+          }
 
           if (CImageState::getDebug()) {
             for (int i = 0; i < gif_data->num_local_colors; ++i)
@@ -374,7 +378,8 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
           }
         }
 
-        file->read(&compress_data.code_size, 1);
+        if (! file->read(&compress_data.code_size, 1))
+          break;
 
         compress_data.clear_code = 1 << compress_data.code_size;
         compress_data.eof_code   = compress_data.clear_code + 1;
@@ -393,18 +398,21 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
         uchar size;
 
-        file->read(&size, 1);
+        if (! file->read(&size, 1))
+          break;
 
         uint num_bytes_read = 0;
 
         while (size > 0) {
           while (size--) {
-            file->read(&data[num_bytes_read], 1);
+            if (! file->read(&data[num_bytes_read], 1))
+              break;
 
             ++num_bytes_read;
           }
 
-          file->read(&size, 1);
+          if (! file->read(&size, 1))
+            break;
         }
 
         if (num_bytes_read < file_size)
@@ -501,14 +509,14 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
       try {
         uchar id1;
 
-        file->read(&id1, 1);
+        if (! file->read(&id1, 1)) break;
 
         if (CImageState::getDebug())
           CImage::infoMsg("Id = " + CStrUtil::toHexString(id1));
 
         uchar size;
 
-        file->read(&size, 1);
+        if (! file->read(&size, 1)) break;
 
         if (CImageState::getDebug())
           CImage::infoMsg("Size = " + CStrUtil::toHexString(size));
@@ -518,7 +526,7 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
         if (size == 0)
           continue;
 
-        file->read(compress_data.buffer, size);
+        if (! file->read(compress_data.buffer, size)) break;
 
         if (id1 == CONTROL_LABEL_ID) {
           if (CImageState::getDebug())
@@ -549,15 +557,18 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
 
           uchar len = 0;
 
-          file->read(&len, 1);
+          if (! file->read(&len, 1)) break;
 
           while (len > 0) {
             uchar c;
 
-            for (uint i = 0; i < len; ++i)
-              file->read(&c, 1);
+            for (uint i = 0; i < len; ++i) {
+              if (! file->read(&c, 1))
+                break;
+            }
 
-            file->read(&len, 1);
+            if (! file->read(&len, 1))
+              break;
           }
         }
         else {
@@ -572,7 +583,8 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
           if (size == 0)
             break;
 
-          file->read(compress_data.buffer, size);
+          if (! file->read(compress_data.buffer, size))
+            break;
         }
 
         if (CImageState::getDebug())
@@ -592,15 +604,17 @@ readAnimData(CFile *file, CImageAnim *image_anim, CImageGIFData *gif_data)
     else if (id == 0) {
       uchar pad;
 
-      file->read(&pad, 1);
+      if (! file->read(&pad, 1))
+        break;
     }
     else {
-      CImage::errorMsg("Invalid Id " + std::to_string(int(id)) +
+      CImage::errorMsg("Invalid GIF Id " + std::to_string(int(id)) +
                        " @ " + std::to_string(file->getPos()));
 
       uchar c;
 
-      file->read(&c, 1);
+      if (! file->read(&c, 1))
+        break;
 
       while (c) {
         if (! file->read(&c, 1))

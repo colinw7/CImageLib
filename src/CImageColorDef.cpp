@@ -31,11 +31,11 @@ getRGBI(const std::string &name, int *r, int *g, int *b)
 
   const char *name1 = lname.c_str();
 
-  for (i = 0; color_def_data[i].name != 0; ++i)
+  for (i = 0; color_def_data[i].name != nullptr; ++i)
     if (strcmp(color_def_data[i].name, name1) == 0)
       break;
 
-  if (color_def_data[i].name == 0)
+  if (color_def_data[i].name == nullptr)
     return false;
 
   *r = color_def_data[i].r;

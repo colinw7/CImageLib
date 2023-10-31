@@ -105,7 +105,7 @@ read(CFile *file, CImagePtr &image)
 
   delete [] data;
 
-  if (data1 == 0) {
+  if (data1 == nullptr) {
     CImage::errorMsg("Unhandled Data Type");
     return false;
   }
@@ -182,8 +182,8 @@ CImageSGI::
 convertDataBW(uchar *data, SGIImage *sgi_image, uint **data1,
               CRGBA **colors, int *num_colors)
 {
-  *data1      = 0;
-  *colors     = 0;
+  *data1      = nullptr;
+  *colors     = nullptr;
   *num_colors = 0;
 
   uchar *c_flags  = new uchar [256];
@@ -282,7 +282,7 @@ uchar *
 CImageSGI::
 readCompressedData(CFile *file, SGIImage *sgi_image)
 {
-  uchar *data = 0;
+  uchar *data = nullptr;
 
   uint buffer_len = 2*sgi_image->x_size + 10;
   uint table_len  = sgi_image->y_size*sgi_image->z_size;

@@ -58,7 +58,7 @@ lookupSizedFile(int width, int height, bool keep_aspect)
     if (p->match(uint(width), uint(height), keep_aspect))
       return p;
 
-  return 0;
+  return nullptr;
 }
 
 CImageSizedFile *

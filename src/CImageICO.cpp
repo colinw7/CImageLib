@@ -103,7 +103,7 @@ read(CFile *file, CImagePtr &image)
       file->read(reinterpret_cast<uchar *>(colors), size_t(num_colors)*sizeof(CImageICOColor));
     }
     else
-      colors = 0;
+      colors = nullptr;
 
     //-----
 

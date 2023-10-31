@@ -46,7 +46,7 @@ bool
 CImageIFF::
 read(CFile *file, CImagePtr &image)
 {
-  IFF_UBYTE *screen_memory = 0;
+  IFF_UBYTE *screen_memory = nullptr;
 
   try {
     IFFBitMapHeader    bitmap_header;
@@ -477,7 +477,7 @@ readBody(CFile *file, IFF_UBYTE **screen_memory, IFF_ULONG *screen_memory_size)
   *screen_memory_size = header_length;
   *screen_memory      = new IFF_UBYTE [header_length + 1];
 
-  if (*screen_memory == 0)
+  if (*screen_memory == nullptr)
     return false;
 
   if (! readStorage(file, int(header_length), *screen_memory)) {

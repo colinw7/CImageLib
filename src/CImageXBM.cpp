@@ -77,7 +77,7 @@ readHeader(CFile *file, CImagePtr &image)
 
   file->rewind();
 
-  bool flag = readBitmap(file, &width, &height, 0, &x_hot, &y_hot);
+  bool flag = readBitmap(file, &width, &height, nullptr, &x_hot, &y_hot);
 
   if (! flag)
     return false;
@@ -103,8 +103,8 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
     *x_hot  = 0;
     *y_hot  = 0;
 
-    if (data != 0)
-      *data = 0;
+    if (data != nullptr)
+      *data = nullptr;
 
     //------
 
@@ -174,7 +174,7 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
 
     //------
 
-    if (data != 0) {
+    if (data != nullptr) {
       int width1 = ((*width) + 7)/8;
 
       auto num_bytes = (*width)*(*height);
@@ -191,8 +191,8 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
         for (int k = 0; k < width1; ++k) {
           while (ptext[i] != '\0' &&
                  (ptext[i] != '0' || ptext[i + 1] != 'x' ||
-                  strchr(hex_chars, ptext[i + 2]) == 0 ||
-                  strchr(hex_chars, ptext[i + 3]) == 0))
+                  strchr(hex_chars, ptext[i + 2]) == nullptr ||
+                  strchr(hex_chars, ptext[i + 3]) == nullptr))
             ++i;
 
           if (ptext[i] == '\0') {
@@ -231,7 +231,7 @@ readBitmap(CFile *file, uint *width, uint *height, uint **data, int *x_hot, int 
     return true;
   }
   catch (...) {
-    if (data != 0)
+    if (data != nullptr)
       delete [] *data;
 
     return false;

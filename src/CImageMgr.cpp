@@ -486,3 +486,42 @@ newImage()
     return CImagePtr(image);
   }
 }
+
+//---
+
+std::string
+CImageSizedFileSrc::
+getName() const
+{
+  return "sized_file:" + getFilename() +
+         "?width="  + CStrUtil::toString(width_) +
+         "&height=" + CStrUtil::toString(height_) +
+         "&keep_aspect=" + (keep_aspect_ ? "true" : "false");
+}
+
+//---
+
+std::string
+CImageDataSrc::
+getName() const
+{
+  return "data:" + CStrUtil::toString(id_);
+}
+
+//---
+
+std::string
+CImageXPMSrc::
+getName() const
+{
+  return "xpm:" + CStrUtil::toString(id_);
+}
+
+//---
+
+std::string
+CImageXBMSrc::
+getName() const
+{
+  return "xbm:" + CStrUtil::toString(id_);
+}
