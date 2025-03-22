@@ -113,7 +113,7 @@ getImage() const
 
     CImagePtr image = file_->getImage();
 
-    if (image.isValid()) {
+    if (image) {
       if (size_.width  != int(image->getWidth ()) ||
           size_.height != int(image->getHeight())) {
         if (keep_aspect_)

@@ -47,7 +47,7 @@ CImage::
 resizeWidth(int width) const
 {
   if (size_.width <= 0)
-    return CImagePtr(this);
+    return CImagePtr(dup());
 
   int height = (width*size_.height)/size_.width;
 
@@ -59,7 +59,7 @@ CImage::
 resizeHeight(int height) const
 {
   if (size_.height <= 0)
-    return CImagePtr(this);
+    return CImagePtr(dup());
 
   int width = (height*size_.width)/size_.height;
 
@@ -108,7 +108,7 @@ CImage::
 resizeKeepAspect(int width, int height) const
 {
   if (size_.width <= 0 || size_.height <= 0)
-    return CImagePtr(this);
+    return CImagePtr(dup());
 
   double xfactor = (1.0*width )/size_.width ;
   double yfactor = (1.0*height)/size_.height;
@@ -131,7 +131,7 @@ CImage::
 resize(int width, int height) const
 {
   if (width <= 0 || height <= 0)
-    return CImagePtr(this);
+    return CImagePtr(dup());
 
   CImagePtr image = dup();
 

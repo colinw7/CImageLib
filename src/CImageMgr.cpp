@@ -210,9 +210,7 @@ createImageI(const CImage &image, int x, int y, int width, int height)
 
   image1->setDataSize(width, height);
 
-  CImagePtr ptr(&image);
-
-  *image1 = *image.subImage(x, y, width, height).cast<CImage>();
+  *image1 = *image.subImage(x, y, width, height).get();
 
   creating_ = false;
 
@@ -478,13 +476,12 @@ CImagePtr
 CImageMgr::
 newImage()
 {
-  if (prototype_.isValid())
+  if (prototype_)
     return prototype_->dup();
-  else {
-    auto *image = new CImage;
 
-    return CImagePtr(image);
-  }
+  auto *image = new CImage;
+
+  return CImagePtr(image);
 }
 
 //---

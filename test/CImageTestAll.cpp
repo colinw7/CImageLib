@@ -41,7 +41,7 @@ main(int /*argc*/, char ** /*argv*/)
 
   auto image = CImageMgrInst->createImage(src);
 
-  if (image.isValid()) {
+  if (image) {
     image->writeXPM(ofile1); ofile1->flush();
     image->writeBMP(ofile2); ofile2->flush();
     image->writeJPG(ofile3); ofile3->flush();
@@ -58,42 +58,42 @@ main(int /*argc*/, char ** /*argv*/)
 
   image = CImageMgrInst->createImage(src1);
 
-  if (image.isValid())
+  if (image)
     image->writeGIF(tfile1);
 
   CImageFileSrc src2(*ofile2);
 
   image = CImageMgrInst->createImage(src2);
 
-  if (image.isValid())
+  if (image)
     image->writeGIF(tfile2);
 
   CImageFileSrc src3(*ofile3);
 
   image = CImageMgrInst->createImage(src3);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(tfile3);
 
   CImageFileSrc src4(*ofile4);
 
   image = CImageMgrInst->createImage(src4);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(tfile4);
 
   CImageFileSrc src5(*ofile5);
 
   image = CImageMgrInst->createImage(src5);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(tfile5);
 
   CImageFileSrc src6(*ofile6);
 
   image = CImageMgrInst->createImage(src6);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(tfile6);
 
   //------
@@ -102,35 +102,35 @@ main(int /*argc*/, char ** /*argv*/)
 
   image = CImageMgrInst->createImage(src7);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(wfile1);
 
   CImageFileSrc src8(*ifile3);
 
   image = CImageMgrInst->createImage(src8);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(wfile2);
 
   CImageFileSrc src9(*ifile4);
 
   image = CImageMgrInst->createImage(src9);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(wfile3);
 
   CImageFileSrc src10(*ifile5);
 
   image = CImageMgrInst->createImage(src10);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(wfile4);
 
   CImageFileSrc src11(*ifile6);
 
   image = CImageMgrInst->createImage(src11);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(wfile5);
 
   //------
@@ -141,7 +141,7 @@ main(int /*argc*/, char ** /*argv*/)
 
   image = CImageMgrInst->createImage(src12);
 
-  if (image.isValid())
+  if (image)
     image->writeBMP(gfile1);
 
   //------

@@ -597,7 +597,7 @@ gaussianBlurExec(CImagePtr &dst, double bx, double by, int nx, int ny)
   CGaussianBlur<CImageWrapper> blur;
 
   CImageWrapper wsrc(this);
-  CImageWrapper wdst(dst.getPtr());
+  CImageWrapper wdst(dst.get());
 
   blur.blur(wsrc, wdst, bx, by, nx, ny);
 

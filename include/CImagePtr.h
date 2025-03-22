@@ -1,10 +1,10 @@
 #ifndef CIMAGE_PTR_H
 #define CIMAGE_PTR_H
 
-#include <CRefPtr.h>
+#include <memory>
 
 class CImage;
 
-using CImagePtr = CRefPtr<CImage>;
+using CImagePtr = std::shared_ptr<CImage>;
 
 #endif

@@ -8,11 +8,11 @@
 #include <CISize2D.h>
 #include <CIBBox2D.h>
 #include <CFileType.h>
-#include <COptVal.h>
 #include <CImagePtr.h>
 
 #include <cstddef>
 #include <vector>
+#include <optional>
 
 using uchar = unsigned char;
 
@@ -78,8 +78,12 @@ class CImage {
     int getTop   () const { return top_   ; }
   };
 
+  //---
+
   using ColorList    = std::vector<CRGBA>;
   using ImagePtrList = std::vector<CImagePtr>;
+  using OptReal      = std::optional<double>;
+  using OptInt       = std::optional<int>;
 
   static bool            combine_enabled_;
   static CRGBACombineDef combine_def_;
@@ -438,13 +442,13 @@ class CImage {
 
   bool isTransparentColor(uint pixel) const;
 
-  bool isTransparent(COptReal tol=COptReal(0.1)) const;
-  bool isTransparent(int x, int y, COptReal tol=COptReal(0.1)) const;
-  bool isTransparent(int pos, COptReal tol=COptReal(0.1)) const;
+  bool isTransparent(OptReal tol=OptReal(0.1)) const;
+  bool isTransparent(int x, int y, OptReal tol=OptReal(0.1)) const;
+  bool isTransparent(int pos, OptReal tol=OptReal(0.1)) const;
 
-  bool isTransparentI(COptInt tol=COptInt(5)) const;
-  bool isTransparentI(int x, int y, COptInt tol=COptInt(5)) const;
-  bool isTransparentI(int pos, COptInt tol=COptInt(5)) const;
+  bool isTransparentI(OptInt tol=OptInt(5)) const;
+  bool isTransparentI(int x, int y, OptInt tol=OptInt(5)) const;
+  bool isTransparentI(int pos, OptInt tol=OptInt(5)) const;
 
   double getAlpha(int x, int y) const;
   double getAlpha(int pos) const;

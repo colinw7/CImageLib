@@ -1027,7 +1027,7 @@ isTransparentColor(uint ind) const
 
 bool
 CImage::
-isTransparent(COptReal tol) const
+isTransparent(OptReal tol) const
 {
   int i = 0;
 
@@ -1042,21 +1042,21 @@ isTransparent(COptReal tol) const
 
 bool
 CImage::
-isTransparent(int x, int y, COptReal tol) const
+isTransparent(int x, int y, OptReal tol) const
 {
   return isTransparent(y*size_.width + x, tol);
 }
 
 bool
 CImage::
-isTransparent(int pos, COptReal tol) const
+isTransparent(int pos, OptReal tol) const
 {
   return (getAlpha(pos) <= tol);
 }
 
 bool
 CImage::
-isTransparentI(COptInt tol) const
+isTransparentI(OptInt tol) const
 {
   int i = 0;
 
@@ -1071,14 +1071,14 @@ isTransparentI(COptInt tol) const
 
 bool
 CImage::
-isTransparentI(int x, int y, COptInt tol) const
+isTransparentI(int x, int y, OptInt tol) const
 {
   return isTransparentI(y*size_.width + x, tol);
 }
 
 bool
 CImage::
-isTransparentI(int pos, COptInt tol) const
+isTransparentI(int pos, OptInt tol) const
 {
   return (int(getAlphaI(pos)) <= tol);
 }
