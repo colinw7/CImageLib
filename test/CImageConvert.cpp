@@ -52,7 +52,7 @@ main(int argc, char **argv)
 
   CImagePtr image = CImageMgrInst->createImage(src);
 
-  if (! image.isValid())
+  if (! image)
     exit(1);
 
   CFileType type = CFileUtil::getImageTypeFromName(ofilename);

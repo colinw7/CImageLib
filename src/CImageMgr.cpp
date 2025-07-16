@@ -15,6 +15,7 @@
 #include <CImageSIX.h>
 #include <CImageTGA.h>
 #include <CImageTIF.h>
+#include <CImageWebP.h>
 #include <CImageXBM.h>
 #include <CImageXPM.h>
 #include <CImageXWD.h>
@@ -65,22 +66,23 @@ release()
 CImageMgr::
 CImageMgr()
 {
-  addFmt(CFILE_TYPE_IMAGE_BMP, CImageBMPInst);
-  addFmt(CFILE_TYPE_IMAGE_GIF, CImageGIFInst);
-  addFmt(CFILE_TYPE_IMAGE_ICO, CImageICOInst);
-  addFmt(CFILE_TYPE_IMAGE_IFF, CImageIFFInst);
-  addFmt(CFILE_TYPE_IMAGE_JPG, CImageJPGInst);
-  addFmt(CFILE_TYPE_IMAGE_PCX, CImagePCXInst);
-  addFmt(CFILE_TYPE_IMAGE_PNG, CImagePNGInst);
-  addFmt(CFILE_TYPE_IMAGE_PPM, CImagePPMInst);
-  addFmt(CFILE_TYPE_IMAGE_PSP, CImagePSPInst);
-  addFmt(CFILE_TYPE_IMAGE_SGI, CImageSGIInst);
-  addFmt(CFILE_TYPE_IMAGE_SIX, CImageSIXInst);
-  addFmt(CFILE_TYPE_IMAGE_TGA, CImageTGAInst);
-  addFmt(CFILE_TYPE_IMAGE_TIF, CImageTIFInst);
-  addFmt(CFILE_TYPE_IMAGE_XBM, CImageXBMInst);
-  addFmt(CFILE_TYPE_IMAGE_XPM, CImageXPMInst);
-  addFmt(CFILE_TYPE_IMAGE_XWD, CImageXWDInst);
+  addFmt(CFILE_TYPE_IMAGE_BMP , CImageBMPInst );
+  addFmt(CFILE_TYPE_IMAGE_GIF , CImageGIFInst );
+  addFmt(CFILE_TYPE_IMAGE_ICO , CImageICOInst );
+  addFmt(CFILE_TYPE_IMAGE_IFF , CImageIFFInst );
+  addFmt(CFILE_TYPE_IMAGE_JPG , CImageJPGInst );
+  addFmt(CFILE_TYPE_IMAGE_PCX , CImagePCXInst );
+  addFmt(CFILE_TYPE_IMAGE_PNG , CImagePNGInst );
+  addFmt(CFILE_TYPE_IMAGE_PPM , CImagePPMInst );
+  addFmt(CFILE_TYPE_IMAGE_PSP , CImagePSPInst );
+  addFmt(CFILE_TYPE_IMAGE_SGI , CImageSGIInst );
+  addFmt(CFILE_TYPE_IMAGE_SIX , CImageSIXInst );
+  addFmt(CFILE_TYPE_IMAGE_TGA , CImageTGAInst );
+  addFmt(CFILE_TYPE_IMAGE_TIF , CImageTIFInst );
+  addFmt(CFILE_TYPE_IMAGE_WEBP, CImageWebPInst);
+  addFmt(CFILE_TYPE_IMAGE_XBM , CImageXBMInst );
+  addFmt(CFILE_TYPE_IMAGE_XPM , CImageXPMInst );
+  addFmt(CFILE_TYPE_IMAGE_XWD , CImageXWDInst );
 }
 
 CImageMgr::

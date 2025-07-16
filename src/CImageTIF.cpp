@@ -2,6 +2,10 @@
 #include <CImageTIF.h>
 #include <CThrow.h>
 
+extern "C" {
+#include <CLZW.h>
+}
+
 #include <cstring>
 
 #define NEW_SUBFILE_TYPE  254
@@ -199,8 +203,8 @@ read(CFile *file, CImagePtr &image)
     }
 
     if (tif_data.bits_per_sample == -1) {
-      CImage::errorMsg("Invalid Bits per Sample");
-      return false;
+      CImage::infoMsg("No Bits per Sample assuming 8");
+      tif_data.bits_per_sample = 8;
     }
 
     if (tif_data.num_strip_byte_counts != tif_data.num_strip_offsets) {
@@ -212,12 +216,12 @@ read(CFile *file, CImagePtr &image)
         tif_data.photometric != TIF_BLACK_IS_ZERO &&
         tif_data.photometric != TIF_RGB           &&
         tif_data.photometric != TIF_PALETTERGB) {
-      CImage::errorMsg("Unsupported Photometric Type");
+      CImage::errorMsg("Unsupported Photometric Type " + std::to_string(tif_data.photometric));
       return false;
     }
 
-    if (tif_data.compression != 1) {
-      CImage::errorMsg("Unsupported Compression Type");
+    if (tif_data.compression != 1 && tif_data.compression != 5) {
+      CImage::errorMsg("Unsupported Compression Type " + std::to_string(tif_data.compression));
       return false;
     }
 
@@ -228,7 +232,7 @@ read(CFile *file, CImagePtr &image)
 
     int depth = tif_data.bits_per_sample*tif_data.samples_per_pixel;
 
-    if (depth != 1 && depth != 8 && depth != 16 && depth != 24) {
+    if (depth != 1 && depth != 8 && depth != 16 && depth != 24 && depth != 32) {
       CImage::errorMsg("Unsupported Depth");
       return false;
     }
@@ -272,8 +276,10 @@ read(CFile *file, CImagePtr &image)
 
     int row_size = 0;
 
-    if      (depth == 24)
+    if      (depth == 32)
       row_size = 4*tif_data.image_width;
+    else if (depth == 24)
+      row_size = 4*tif_data.image_width; // 3 ?
     else if (depth == 16)
       row_size = 2*tif_data.image_width;
     else if (depth == 8)
@@ -300,6 +306,8 @@ read(CFile *file, CImagePtr &image)
       if (tif_data.strip_byte_counts[i] > buffer_size)
         buffer_size = tif_data.strip_byte_counts[i];
 
+    buffer_size += 2;
+
     auto *buffer1 = new uchar [size_t(buffer_size)];
 
     //------
@@ -307,28 +315,45 @@ read(CFile *file, CImagePtr &image)
     for (int i = 0; i < strips_per_image; ++i) {
       file->setPos(tif_data.strip_offsets[i]);
 
-      file->read(buffer1, size_t(tif_data.strip_byte_counts[i]));
+      auto strip_len = tif_data.strip_byte_counts[i];
+
+      file->read(buffer1, size_t(strip_len));
+
+      lzw_byte *buffer2 = nullptr;
+      lzw_byte *buffer3 = nullptr;
+
+      if (tif_data.compression == 5) {
+        buffer2 = reinterpret_cast<lzw_byte *>(lzw_new(lzw_byte, strip_len));
+        memcpy(buffer2, buffer1, strip_len);
+
+        buffer3 = lzw_decode(buffer2);
+        strip_len = int(lzw_len(buffer3));
+      }
 
       uint *p = &data[i*tif_data.rows_per_strip*tif_data.image_width];
 
-      uchar *p1 = buffer1;
+      uchar *p1 = (buffer3 ? buffer3 : buffer1);
 
-      if      (depth == 24) {
-        for (int j = 0; j < tif_data.strip_byte_counts[i]/4; ++j, ++p, p1 += 4)
+      if      (depth == 32) {
+        for (int j = 0; j < strip_len/4; ++j, ++p, p1 += 4)
+          *p = image->rgbaToPixelI(p1[0], p1[1], p1[2], p1[3]);
+      }
+      else if (depth == 24) {
+        for (int j = 0; j < strip_len/4; ++j, ++p, p1 += 4)
           *p = image->rgbaToPixelI(p1[0], p1[1], p1[2]);
       }
       else if (depth == 16) {
-        for (int j = 0; j < tif_data.strip_byte_counts[i]/2; ++j, ++p, p1 += 2)
+        for (int j = 0; j < strip_len/2; ++j, ++p, p1 += 2)
           *p = image->rgbaToPixelI(uint( p1[0] & 0xF0      ),
                                    uint((p1[0] & 0x0F) << 4),
                                    uint( p1[1] & 0xF0      ));
       }
       else if (depth == 8) {
-        for (int j = 0; j < tif_data.strip_byte_counts[i]; ++j, ++p, p1++)
+        for (int j = 0; j < strip_len; ++j, ++p, p1++)
           *p = *p1;
       }
       else {
-        for (int j = 0; j < tif_data.strip_byte_counts[i]; ++j, p += 8, p1++) {
+        for (int j = 0; j < strip_len; ++j, p += 8, p1++) {
           p[0] = (*p1 & 0x01) >> 0;
           p[1] = (*p1 & 0x02) >> 1;
           p[2] = (*p1 & 0x04) >> 2;
@@ -338,6 +363,11 @@ read(CFile *file, CImagePtr &image)
           p[6] = (*p1 & 0x40) >> 6;
           p[7] = (*p1 & 0x80) >> 7;
         }
+      }
+
+      if (buffer2) {
+        lzw_del(buffer2);
+        lzw_del(buffer3);
       }
     }
 
@@ -555,8 +585,10 @@ write(CFile *file, CImagePtr image)
   else
     depth = 24;
 
-  if      (depth == 24)
+  if      (depth == 32)
     row_size = 4*image->getWidth();
+  else if (depth == 24)
+    row_size = 4*image->getWidth(); // 3 ?
   else if (depth == 16)
     row_size = 2*image->getWidth();
   else if (depth == 8)
@@ -609,7 +641,17 @@ write(CFile *file, CImagePtr image)
   for (uint i = 0; i < image->getHeight(); ++i) {
     strip_offsets[i] = offset;
 
-    if      (depth == 24) {
+    if      (depth == 32) {
+      for (int k = 0; k < int(row_size); k += 4, ++j) {
+        image->getRGBAPixelI(j, &r, &g, &b, &a);
+
+        strip_data[k + 0] = uchar(r);
+        strip_data[k + 1] = uchar(g);
+        strip_data[k + 2] = uchar(b);
+        strip_data[k + 3] = uchar(a);
+      }
+    }
+    else if (depth == 24) {
       for (int k = 0; k < int(row_size); k += 4, ++j) {
         image->getRGBAPixelI(j, &r, &g, &b, &a);
 

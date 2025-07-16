@@ -15,7 +15,7 @@ dirs:
 	@if [ ! -e ../lib ]; then mkdir ../lib; fi
 	@if [ ! -e ../bin ]; then mkdir ../bin; fi
 
-SRC = \
+CPP_SRC = \
 CImage.cpp \
 CImageAnim.cpp \
 CImageBMP.cpp \
@@ -56,11 +56,17 @@ CImageTGA.cpp \
 CImageTIF.cpp \
 CImageTile.cpp \
 CImageUtil.cpp \
+CImageWebP.cpp \
 CImageXBM.cpp \
 CImageXPM.cpp \
 CImageXWD.cpp \
 
-OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
+C_SRC = \
+CLZW.c \
+
+CPP_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(CPP_SRC))
+
+C_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(C_SRC))
 
 CPPFLAGS = \
 $(CDEBUG) \
@@ -82,13 +88,16 @@ clean:
 	$(RM) -f $(OBJ_DIR)/*.o
 	$(RM) -f $(LIB_DIR)/libCImageLib.a
 
-$(OBJS): $(OBJ_DIR)/%.o: %.cpp
+$(CPP_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	$(CC) -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
 
-.SUFFIXES: .cpp
+$(C_OBJS): $(OBJ_DIR)/%.o: %.c
+	gcc -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
+
+.SUFFIXES: .cpp .c
 
 $(OBJ_DIR)/main.o: main.cpp
 	$(CC) -c main.cpp -o $(OBJ_DIR)/main.o -c $(CPPFLAGS)
 
-$(LIB_DIR)/libCImageLib.a: $(OBJS)
-	$(AR) crv $(LIB_DIR)/libCImageLib.a $(OBJS)
+$(LIB_DIR)/libCImageLib.a: $(CPP_OBJS) $(C_OBJS)
+	$(AR) crv $(LIB_DIR)/libCImageLib.a $(CPP_OBJS) $(C_OBJS)

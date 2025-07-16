@@ -82,7 +82,6 @@ class CImage {
 
   using ColorList    = std::vector<CRGBA>;
   using ImagePtrList = std::vector<CImagePtr>;
-  using OptReal      = std::optional<double>;
   using OptInt       = std::optional<int>;
 
   static bool            combine_enabled_;
@@ -99,6 +98,8 @@ class CImage {
   friend class CImageMgr;
 
  public:
+  using OptReal = std::optional<double>;
+
   class PixelIterator {
    public:
     using iterator_category = std::forward_iterator_tag;
