@@ -19,6 +19,8 @@
 
 #define UNUSED_CODE uint(-1)
 
+#define CIMAGE_OUT_BYTES_SIZE 2048
+
 struct CImageGIFHeader;
 struct CImageGIFColorTable;
 
@@ -84,7 +86,7 @@ struct CImageGIFCompressData {
   uchar         code_bytes[256];
   uint          color_table_bits;
 
-  uchar         out_bytes[1024];
+  uchar         out_bytes[CIMAGE_OUT_BYTES_SIZE + 1];
 };
 
 static CImageGIFCompressData compress_data;
@@ -676,18 +678,22 @@ decompressData(uchar *in_data, int in_data_size, uchar *out_data, int out_data_s
       if (code >= compress_data.free_code) {
         code1 = last_code;
 
-        compress_data.out_bytes[num_out_bytes++] = last_byte;
+        if (num_out_bytes < CIMAGE_OUT_BYTES_SIZE)
+          compress_data.out_bytes[num_out_bytes++] = last_byte;
       }
 
       while (code1 > compress_data.bit_mask) {
-        compress_data.out_bytes[num_out_bytes++] = uchar(compress_data.dictionary[code1].character);
+        if (num_out_bytes < CIMAGE_OUT_BYTES_SIZE)
+          compress_data.out_bytes[num_out_bytes++] =
+            uchar(compress_data.dictionary[code1].character);
 
         code1 = compress_data.dictionary[code1].parent_code;
       }
 
       last_byte = uchar(code1 & compress_data.bit_mask);
 
-      compress_data.out_bytes[num_out_bytes++] = last_byte;
+      if (num_out_bytes < CIMAGE_OUT_BYTES_SIZE)
+        compress_data.out_bytes[num_out_bytes++] = last_byte;
 
       if (num_out_data + num_out_bytes > out_data_size) {
         if (CImageState::getDebug())
