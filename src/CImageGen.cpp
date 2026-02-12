@@ -482,7 +482,7 @@ bool
 CImage::
 read(CFile *file)
 {
-  CFileType type = CFileUtil::getType(file);
+  auto type = CFileUtil::getType(file);
 
   if (type == CFILE_TYPE_NONE || type == CFILE_TYPE_INODE_REG)
     type = CFileUtil::getImageTypeFromName(file->getName());

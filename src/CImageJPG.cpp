@@ -44,7 +44,8 @@ read(CFile *file, CImagePtr &image)
 
   //------
 
-  file->open(CFile::Mode::READ);
+  if (! file->open(CFile::Mode::READ))
+    return false;
 
   file->rewind();
 
@@ -201,7 +202,8 @@ readHeader(CFile *file, CImagePtr &image)
 
   //------
 
-  file->open(CFile::Mode::READ);
+  if (! file->open(CFile::Mode::READ))
+    return false;
 
   file->rewind();
 
@@ -297,7 +299,8 @@ write(CFile *file, CImagePtr image)
 
   jpeg_create_compress(&cinfo);
 
-  file->open(CFile::Mode::WRITE);
+  if (! file->open(CFile::Mode::WRITE))
+    return false;
 
   jpeg_stdio_dest(&cinfo, file->getFP());
 

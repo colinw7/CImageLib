@@ -52,6 +52,8 @@ flipH()
     for (int y = bottom; p1 < p2; ++y, p1 += size_.width, p2 -= size_.width)
       std::swap(*p1, *p2);
   }
+
+  dataChanged();
 }
 
 void
@@ -73,6 +75,8 @@ flipV()
     for (int x = left; p1 < p2; ++x, ++p1, --p2)
       std::swap(*p1, *p2);
   }
+
+  dataChanged();
 }
 
 void
@@ -103,4 +107,6 @@ flipHV()
       }
     }
   }
+
+  dataChanged();
 }

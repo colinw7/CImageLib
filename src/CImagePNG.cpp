@@ -283,7 +283,8 @@ write(CFile *file, CImagePtr image)
 
   CImagePtr image1 = image;
 
-  file->open(CFile::Mode::WRITE);
+  if (! file->open(CFile::Mode::WRITE))
+    return false;
 
   if (image1->hasColormap()) {
     image1 = image1->dup();
