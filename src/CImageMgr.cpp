@@ -3,6 +3,7 @@
 
 #include <CImageLibI.h>
 #include <CImageBMP.h>
+#include <CImageDDS.h>
 #include <CImageGIF.h>
 #include <CImageICO.h>
 #include <CImageIFF.h>
@@ -67,6 +68,7 @@ CImageMgr::
 CImageMgr()
 {
   addFmt(CFILE_TYPE_IMAGE_BMP , CImageBMPInst );
+  addFmt(CFILE_TYPE_IMAGE_DDS , CImageDDSInst );
   addFmt(CFILE_TYPE_IMAGE_GIF , CImageGIFInst );
   addFmt(CFILE_TYPE_IMAGE_ICO , CImageICOInst );
   addFmt(CFILE_TYPE_IMAGE_IFF , CImageIFFInst );

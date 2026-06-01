@@ -23,6 +23,7 @@ CImageColorDef.cpp \
 CImageCombine.cpp \
 CImageConvert.cpp \
 CImageCopy.cpp \
+CImageDDS.cpp \
 CImageDiff.cpp \
 CImageDraw.cpp \
 CImageFile.cpp \
@@ -84,6 +85,21 @@ $(CDEBUG) \
 -I../../CUtil/include \
 -I. \
 
+CFLAGS = \
+$(CDEBUG) \
+-DLARGEST_RECT \
+-DIMAGE_PNG \
+-DIMAGE_JPEG \
+-I$(INC_DIR) \
+-I../../CFile/include \
+-I../../CFileUtil/include \
+-I../../CStrUtil/include \
+-I../../COS/include \
+-I../../CMath/include \
+-I../../CUtil/include \
+-I../../CUtil/include \
+-I. \
+
 clean:
 	$(RM) -f $(OBJ_DIR)/*.o
 	$(RM) -f $(LIB_DIR)/libCImageLib.a
@@ -92,7 +108,7 @@ $(CPP_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	$(CC) -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
 
 $(C_OBJS): $(OBJ_DIR)/%.o: %.c
-	gcc -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
+	gcc -c $< -o $(OBJ_DIR)/$*.o $(CFLAGS)
 
 .SUFFIXES: .cpp .c
 
